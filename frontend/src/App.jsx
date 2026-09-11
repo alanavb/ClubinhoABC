@@ -245,21 +245,24 @@ function Home({ onNavigate }) {
   );
 }
 
-const gameCards = [
-  ['🔎', 'Caça-Letras', 'Fácil', 'orange'], ['🎈', 'Sílabas Voadoras', 'Médio', 'blue'], ['🐄', 'Fazenda das Rimas', 'Fácil', 'pink'],
-  ['🧩', 'Monta-Palavra', 'Médio', 'yellow'], ['🚂', 'Trem do Alfabeto', 'Fácil', 'blue'], ['🎣', 'Pescaria de Vogais', 'Fácil', 'orange'],
-];
-
 function PlayButton({ children = 'Jogar' }) { return <button className="round-play" type="button">▶ <b>{children}</b></button>; }
 
 function Games({ onNavigate }) {
-  const [filter, setFilter] = useState('Todos');
   return <main className="app-shell"><AppHeader active="jogos" onNavigate={onNavigate} />
-    <section className="page-content games-page">
-      <div className="page-title"><img src="/images/ilustra-jogos.png" alt="" /><h1>Vamos jogar!</h1></div>
-      <div className="filter-row">{['Todos', 'Letras', 'Sílabas', 'Palavras', 'Rimas', 'Escrita'].map(item => <button className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
-      <section className="featured-game"><div><span>Jogo do dia</span><h2>Circo das Sílabas</h2><div className="syllables"><i>BA</i><i>BE</i><i>BI</i><i>BO</i><i>BU</i></div><PlayButton /></div><b className="feature-emoji">🎪</b></section>
-      <div className="game-grid">{gameCards.map(([icon, title, level, color]) => <article className="game-card" key={title}><div className={`game-art ${color}`}><em>{level}</em><span>{icon}</span><small>★★★</small></div><div><strong>{title}</strong><PlayButton /></div></article>)}</div>
+    <section className="page-content games-page games-journey-page">
+      <div className="games-heading"><img src="/images/ilustra-jogos.png" alt="" /><div><span>★ Minha trilha</span><h1>Vamos jogar!</h1></div><div className="games-stage-indicator"><b>Etapa 1</b><small>1/3</small><i><em /></i></div></div>
+      <section className="games-world-trail" aria-label="Jogos da trilha de alfabetização">
+        <article className="world-card available"><div className="world-icon">🔤</div><strong>Caça às Letras</strong><small>A · B · C</small><span>★ ☆ ☆</span></article>
+        <article className="world-card locked"><div className="world-icon">🔒</div><strong>Monte a Palavra</strong><small>???</small><span>☆ ☆ ☆</span></article>
+        <article className="world-card locked"><div className="world-icon">🔒</div><strong>Ouça e Escolha</strong><small>???</small><span>☆ ☆ ☆</span></article>
+        <article className="world-card locked"><div className="world-icon">🔒</div><strong>Leia e Descubra</strong><small>???</small><span>☆ ☆ ☆</span></article>
+      </section>
+      <section className="current-world" aria-labelledby="current-world-title"><header><div className="current-world-title"><span>🔤</span><div><small>ETAPA 1</small><h2 id="current-world-title">Caça às Letras</h2></div></div><b>✣ 1/3</b></header><div className="current-activities">
+        <article className="activity-tile done"><span className="tile-icon">🔡</span><h3>Qual é a letra?</h3><small>✓ Feito!</small></article>
+        <article className="activity-tile open"><span className="tile-icon">🍎</span><h3>Qual imagem começa com...?</h3><button type="button">▶ &nbsp; Jogar</button></article>
+        <article className="activity-tile blocked"><span className="tile-icon">🔒</span><h3>Encontre a letra</h3><small>🔒</small></article>
+      </div></section>
+      <p className="games-journey-note"><span>🔒</span> Complete as 3 estrelas para abrir o próximo!</p>
     </section>
   </main>;
 }
