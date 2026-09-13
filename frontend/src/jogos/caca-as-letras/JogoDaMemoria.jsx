@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { embaralhar, letras } from '../alfabeto';
+import { registrarResultado } from '../../utils/resultados';
 
 const totalRodadas = 3;
 
@@ -20,7 +21,9 @@ export default function JogoDaMemoria({ aoConcluir, aoFechar }) {
     setAbertas(proximasAbertas);
     if (proximasAbertas.length !== 2) return;
     const [primeira, segunda] = proximasAbertas;
-    if (cartas[primeira].par === cartas[segunda].par) {
+    const correta = cartas[primeira].par === cartas[segunda].par;
+    registrarResultado('memoria', cartas[segunda].valor, correta);
+    if (correta) {
       const proximasEncontradas = [...encontradas, primeira, segunda];
       setEncontradas(proximasEncontradas);
       setAbertas([]);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { criarAlternativas, falar, sortear, letras } from '../alfabeto';
+import { registrarResultado } from '../../utils/resultados';
 
 const totalRodadas = 3;
 
@@ -15,7 +16,9 @@ export default function OuvirEEscolher({ aoConcluir, aoFechar }) {
   function responder(letra) {
     if (retorno === 'correct') return;
     falar(letra);
-    if (letra === desafio.letra) {
+    const correta = letra === desafio.letra;
+    registrarResultado('ouvir', letra, correta);
+    if (correta) {
       setRetorno('correct');
       window.setTimeout(avancarRodada, 800);
       return;
