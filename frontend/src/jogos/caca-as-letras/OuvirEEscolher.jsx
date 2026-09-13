@@ -17,7 +17,7 @@ export default function OuvirEEscolher({ aoConcluir, aoFechar }) {
     if (retorno === 'correct') return;
     falar(letra);
     const correta = letra === desafio.letra;
-    registrarResultado('ouvir', letra, correta);
+    registrarResultado('ouvir', letra, desafio.letra);
     if (correta) {
       setRetorno('correct');
       window.setTimeout(avancarRodada, 800);

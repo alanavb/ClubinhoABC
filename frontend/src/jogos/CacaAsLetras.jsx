@@ -1,21 +1,37 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import OuvirEEscolher from './caca-as-letras/OuvirEEscolher';
 import ComQualLetraComeca from './caca-as-letras/ComQualLetraComeca';
 import JogoDaMemoria from './caca-as-letras/JogoDaMemoria';
+import { buscarAtividadesAcessiveis, buscarStatusEtapa } from '../utils/etapas';
+
+const ETAPA_ATUAL_ID = 1; // id da etapa "Caça às Letras" criado por backend/seeds.py
 
 export default function CacaAsLetras({ Cabecalho, onNavigate }) {
   const [concluidas, setConcluidas] = useState([]);
   const [atividadeAberta, setAtividadeAberta] = useState(null);
+  const [chavesAcessiveis, setChavesAcessiveis] = useState(null); // RN1
+  const [etapaConcluida, setEtapaConcluida] = useState(false); // RN3
   const quantidade = concluidas.length;
   const feita = (atividade) => concluidas.includes(atividade);
   const concluir = (atividade) => setConcluidas((atuais) => atuais.includes(atividade) ? atuais : [...atuais, atividade]);
-  const etapaConcluida = feita('memoria');
+
+  useEffect(() => {
+    buscarAtividadesAcessiveis()
+      .then((dados) => setChavesAcessiveis(dados.atividades.map((atividade) => atividade.chave)))
+      .catch((erro) => console.error('RN1: não foi possível carregar as atividades da etapa atual.', erro));
+  }, []);
+
+  useEffect(() => {
+    buscarStatusEtapa(ETAPA_ATUAL_ID)
+      .then((status) => setEtapaConcluida(status.concluida))
+      .catch((erro) => console.error('RN3: não foi possível verificar a conclusão da etapa.', erro));
+  }, [concluidas]);
 
   const atividades = [
     ['ouvir', '🎧', 'Ouça e escolha', 'ouvir', true],
     ['palavra', '⚽', 'Com qual letra começa?', 'palavra', feita('ouvir')],
     ['memoria', '🧩', 'Jogo da memória', 'memoria', feita('palavra')],
-  ];
+  ].filter(([, , , chave]) => chavesAcessiveis === null || chavesAcessiveis.includes(chave)); // RN1
 
   return <main className="app-shell"><Cabecalho active="jogos" onNavigate={onNavigate} />
     <section className="page-content games-page games-journey-page">

@@ -17,7 +17,7 @@ export default function ComQualLetraComeca({ aoConcluir, aoFechar }) {
     if (retorno === 'correct') return;
     falar(letra);
     const correta = letra === desafio.letra;
-    registrarResultado('palavra', letra, correta);
+    registrarResultado('palavra', letra, desafio.letra);
     if (correta) {
       setRetorno('correct');
       window.setTimeout(avancarRodada, 800);
