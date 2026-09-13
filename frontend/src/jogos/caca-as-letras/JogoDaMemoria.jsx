@@ -22,7 +22,7 @@ export default function JogoDaMemoria({ aoConcluir, aoFechar }) {
     if (proximasAbertas.length !== 2) return;
     const [primeira, segunda] = proximasAbertas;
     const correta = cartas[primeira].par === cartas[segunda].par;
-    registrarResultado('memoria', cartas[segunda].valor, correta);
+    registrarResultado('memoria', cartas[segunda].par, cartas[primeira].par);
     if (correta) {
       const proximasEncontradas = [...encontradas, primeira, segunda];
       setEncontradas(proximasEncontradas);
