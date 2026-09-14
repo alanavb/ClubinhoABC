@@ -5,7 +5,7 @@ export const palavrasDoAlfabeto = [
   ['M', 'Macaco', '🐒'], ['N', 'Navio', '🚢'], ['O', 'Ovo', '🥚'], ['P', 'Pato', '🦆'],
   ['Q', 'Queijo', '🧀'], ['R', 'Rato', '🐭'], ['S', 'Sol', '☀️'], ['T', 'Tatu', '🦔'],
   ['U', 'Uva', '🍇'], ['V', 'Vaca', '🐮'], ['W', 'Waffle', '🧇'], ['X', 'Xícara', '☕'],
-  ['Y', 'Yak', '🐂'], ['Z', 'Zebra', '🦓'],
+  ['Y', 'Yoga', '🧘‍♀️'], ['Z', 'Zebra', '🦓'],
 ].map(([letra, palavra, icone]) => ({ letra, palavra, icone }));
 
 export const letras = palavrasDoAlfabeto.map(({ letra }) => letra);

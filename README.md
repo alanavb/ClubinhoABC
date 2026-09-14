@@ -6,7 +6,11 @@ A alfabetização é uma etapa decisiva na formação escolar, sendo o momento e
 
 ## Tecnologia
 
-- React com Vite
+- Front-end: React + JavaScript + Vite
+- Back-end: Python + Flask
+- Banco planejado para produção: PostgreSQL + Supabase
+- Comunicação: API REST com JSON
+- Áudio: Web Speech API
 
 ## Estrutura atual
 
@@ -14,11 +18,20 @@ Por enquanto, o projeto contém somente a interface. Estão disponíveis a tela 
 
 ## Como executar
 
-No terminal, na pasta do projeto, execute:
+FRONTEND - No terminal, na pasta do projeto, execute:
 
-```powershell
+```
 npm install
 npm run dev
+```
+
+BACKEND - Em outro terminal, na pasta do projeto, execute:
+
+```
+cd backend
+py -m pip install -r requirements.txt
+py seeds.py
+py run.py
 ```
 
 A aplicação estará disponível em `http://localhost:5173`.
