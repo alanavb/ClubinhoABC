@@ -39,11 +39,8 @@ def listar_atividades_acessiveis(crianca_id):
     )
     return crianca, atividades
 
-
-def status_etapa(crianca_id, etapa_id):
-    """RN3: uma etapa só está concluída quando todas as suas atividades
-    obrigatórias tiverem ao menos um resultado correto da criança."""
-    crianca = _buscar_crianca(crianca_id)
+def status_etapa(crianca_id, etapa_id): 
+    crianca = _buscar_crianca(crianca_id) #A etapa só concluí quando todas as atividades obrigatórias tiverem ao menos um resultado correto.
 
     atividades = Atividade.query.filter_by(etapa_id=etapa_id).order_by(Atividade.ordem).all()
     if not atividades:

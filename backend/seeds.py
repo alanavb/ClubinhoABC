@@ -22,6 +22,16 @@ with app.app_context():
     else:
         print('Etapa "Caça às Letras" já existia, nada foi criado.')
 
+    bonus = Atividade.query.filter_by(chave='bonus').first() #Atividade bônus para testar o RN3
+    if not bonus:
+        bonus = Atividade(etapa_id=etapa1.id, chave='bonus', nome='Desafio bônus', ordem=4, obrigatoria=False)
+        db.session.add(bonus)
+        db.session.commit()
+        print('Atividade "Desafio bônus" (opcional) criada na etapa "Caça às Letras".')
+    else:
+        print('Atividade "Desafio bônus" já existia, nada foi criado.')
+                  
+
     etapa2 = Etapa.query.filter_by(chave='monte-a-palavra').first()
     if not etapa2:
         etapa2 = Etapa(chave='monte-a-palavra', nome='Monte a Palavra', ordem=2)

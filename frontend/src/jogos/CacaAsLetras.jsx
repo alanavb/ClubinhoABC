@@ -3,6 +3,7 @@ import OuvirEEscolher from './caca-as-letras/OuvirEEscolher';
 import ComQualLetraComeca from './caca-as-letras/ComQualLetraComeca';
 import JogoDaMemoria from './caca-as-letras/JogoDaMemoria';
 import { buscarAtividadesAcessiveis, buscarStatusEtapa } from '../utils/etapas';
+import Prova from './caca-as-letras/Prova';
 
 const ETAPA_ATUAL_ID = 1; // id da etapa "Caça às Letras" criado por backend/seeds.py
 
@@ -31,6 +32,7 @@ export default function CacaAsLetras({ Cabecalho, onNavigate }) {
     ['ouvir', '🎧', 'Ouça e escolha', 'ouvir', true],
     ['palavra', '⚽', 'Com qual letra começa?', 'palavra', feita('ouvir')],
     ['memoria', '🧩', 'Jogo da memória', 'memoria', feita('palavra')],
+    ['bonus', '💎', 'Desafio Bônus', 'bonus', true],
   ].filter(([, , , chave]) => chavesAcessiveis === null || chavesAcessiveis.includes(chave)); // RN1
 
   return <main className="app-shell"><Cabecalho active="jogos" onNavigate={onNavigate} />
@@ -41,6 +43,7 @@ export default function CacaAsLetras({ Cabecalho, onNavigate }) {
       {atividadeAberta === 'ouvir' && <OuvirEEscolher aoConcluir={() => concluir('ouvir')} aoFechar={() => setAtividadeAberta(null)} />}
       {atividadeAberta === 'palavra' && <ComQualLetraComeca aoConcluir={() => concluir('palavra')} aoFechar={() => setAtividadeAberta(null)} />}
       {atividadeAberta === 'memoria' && <JogoDaMemoria aoConcluir={() => concluir('memoria')} aoFechar={() => setAtividadeAberta(null)} />}
+      {atividadeAberta === 'bonus' && <Prova aoConcluir={() => concluir('bonus')} aoFechar={() => setAtividadeAberta(null)} />}
       <p className="games-journey-note"><span>{etapaConcluida ? '⭐' : '🔒'}</span>{etapaConcluida ? 'Etapa concluída! O próximo mundo está disponível.' : 'Complete as 3 atividades para abrir o próximo mundo!'}</p>
     </section>
   </main>;

@@ -8,7 +8,7 @@ export const API_BASE_URL = 'http://localhost:5000/api';
 export const CHILD_ID_MOCK = 1; // enquanto não há autenticação real, usamos a criança de teste do backend/seeds.py
 
 // IDs criados por backend/seeds.py, na mesma ordem das atividades do front (CacaAsLetras.jsx)
-const ATIVIDADE_IDS = { ouvir: 1, palavra: 2, memoria: 3 };
+const ATIVIDADE_IDS = { ouvir: 1, palavra: 2, memoria: 3, bonus: 4 };
 
 export async function registrarResultado(activityKey, respostaEnviada, respostaEsperada) {
   try {
