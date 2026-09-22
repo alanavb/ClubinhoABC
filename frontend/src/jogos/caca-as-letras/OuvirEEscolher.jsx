@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { criarAlternativas, falar, sortear, letras } from '../alfabeto';
 import { registrarResultado } from '../../utils/resultados';
+import FeedbackResposta from './FeedbackResposta';
 
 const totalRodadas = 3;
 
@@ -38,7 +39,6 @@ export default function OuvirEEscolher({ aoConcluir, aoFechar }) {
     <span>ATIVIDADE 1</span><small className="game-round">Rodada {rodada} de {totalRodadas}</small><h2>Ouça e escolha</h2><p>Ouça o som e escolha a letra certa.</p>
     <button className="target-letter sound-letter" type="button" onClick={() => falar(desafio.letra)} aria-label={`Ouvir o som da letra ${desafio.letra}`}>{desafio.letra}<i className="sound-badge" aria-hidden="true">🔊</i></button>
     <div className="letter-options">{desafio.alternativas.map((letra) => <button type="button" onClick={() => responder(letra)} key={letra}>{letra}</button>)}</div>
-    {retorno === 'incorrect' && <div className="game-feedback incorrect">Quase! Ouça as letras e tente novamente.</div>}
-    {retorno === 'correct' && <div className="game-feedback correct">{rodada === totalRodadas ? 'Muito bem! Você concluiu as 3 rodadas.' : 'Muito bem! Vamos para a próxima rodada.'}</div>}
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && rodada === totalRodadas} />}</div>
   </div></section>;
 }

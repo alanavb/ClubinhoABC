@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import CacaAsLetras from './jogos/CacaAsLetras';
+import TermosDeUso from './TermosDeUso';
+import PoliticaDePrivacidade from './PoliticaDePrivacidade';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const ages = ['6 anos', '7 anos'];
@@ -43,6 +45,8 @@ function Signup({ onBackToLogin, onFinish }) {
   const [age, setAge] = useState('6 anos');
   const [pet, setPet] = useState(pets[0]);
   const [message, setMessage] = useState('');
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   const previousStep = () => setStep((current) => Math.max(1, current - 1));
 
@@ -73,6 +77,11 @@ function Signup({ onBackToLogin, onFinish }) {
               <input id="guardian-email" type="email" placeholder="voce@email.com" />
               <label htmlFor="guardian-password">Criar senha</label>
               <input id="guardian-password" type="password" placeholder="mínimo 8 caracteres" />
+              <div className="terms-acceptance">
+                <input id="accept-terms" type="checkbox" required />
+                <label htmlFor="accept-terms">Sou responsável pela criança e li e aceito os</label>
+                <button type="button" onClick={() => setShowTerms(true)}>Termos e Condições de Uso</button>
+              </div>
               <button className="small-primary" type="submit">Continuar <span>→</span></button>
             </form>
           )}
@@ -116,13 +125,18 @@ function Signup({ onBackToLogin, onFinish }) {
               {message && <p className="form-message" role="status">{message}</p>}
             </div>
           )}
+          <button className="terms-link" type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>
         </section>
       </section>
+      {showTerms && <TermosDeUso onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PoliticaDePrivacidade onClose={() => setShowPrivacy(false)} />}
     </main>
   );
 }
 
 function Login({ onCreateAccount, onLogin }) {
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   function submitLogin(event) {
     event.preventDefault();
@@ -136,15 +150,15 @@ function Login({ onCreateAccount, onLogin }) {
       <div className="shape shape-right" />
       <header className="site-header">
         <Brand />
-        <button className="account-link" type="button" onClick={onCreateAccount}>Criar conta grátis</button>
       </header>
 
       <section className="content-grid">
         <section className="welcome-panel" aria-label="Apresentação do Clubinho ABC">
-          <div className="stat-card stat-activities"><span>☆</span><b>+120</b><small>atividades</small></div>
+          <div className="stat-card stat-activities"><span>☆</span><b>Atividades</b></div>
           <div className="learning-orb"><img src="/images/cena-alfabeto.png" alt="Crianças aprendendo letras de forma divertida" /></div>
-          <div className="stat-card stat-games"><span>🎮</span><b>32 jogos</b><small>para brincar</small></div>
-          <p className="about"><span>♡</span> Feito com educadores para crianças de 6 a 7 anos — trilhas de letras, sílabas e primeiras palavras.</p>
+          <div className="stat-card stat-stories"><span>📚</span><b>Histórias</b></div>
+          <div className="stat-card stat-games"><span>🎮</span><b>Jogos</b></div>
+          <p className="about"><span>♡</span> Para crianças de 6 a 7 anos, com trilhas de letras, sílabas e primeiras palavras.</p>
         </section>
 
         <section className="login-card" aria-labelledby="login-title">
@@ -166,8 +180,12 @@ function Login({ onCreateAccount, onLogin }) {
           <div className="divider"><span />ou<span /></div>
           <button className="secondary-button" type="button" onClick={onCreateAccount}>♧ &nbsp; Criar conta da família</button>
           <p className="safety-text">Ambiente seguro, sem anúncios e com controle dos responsáveis.</p>
+          <button className="terms-link" type="button" onClick={() => setShowTerms(true)}>Termos e Condições de Uso</button>
+          <button className="terms-link" type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>
         </section>
       </section>
+      {showTerms && <TermosDeUso onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PoliticaDePrivacidade onClose={() => setShowPrivacy(false)} />}
     </main>
   );
 }

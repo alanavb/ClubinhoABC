@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { criarAlternativas, falar, palavrasDoAlfabeto, sortear } from '../alfabeto';
 import { registrarResultado } from '../../utils/resultados';
+import FeedbackResposta from './FeedbackResposta';
 
 const totalRodadas = 3;
 
@@ -38,7 +39,6 @@ export default function Prova({ aoConcluir, aoFechar }) {
     <span>DESAFIO BÔNUS</span><small className="game-round">Pergunta {rodada} de {totalRodadas}</small><h2>Prova das Letras</h2><p>Toque na figura para ouvir a palavra e escolha a letra inicial.</p>
     <button className="word-picture" type="button" onClick={() => falar(desafio.palavra)} aria-label={`Ouvir a palavra ${desafio.palavra}`}><i aria-hidden="true">{desafio.icone}</i><i className="sound-badge" aria-hidden="true">🔊</i></button>
     <div className="letter-options">{desafio.alternativas.map((letra) => <button type="button" onClick={() => responder(letra)} key={letra}>{letra}</button>)}</div>
-    {retorno === 'incorrect' && <div className="game-feedback incorrect">Quase! Pense bem e tente novamente.</div>}
-    {retorno === 'correct' && <div className="game-feedback correct">{rodada === totalRodadas ? 'Mandou bem na prova!' : 'Isso! Próxima'}</div>}
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && rodada === totalRodadas} />}</div>
   </div></section>;
 }
