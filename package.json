@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/alanavb/ClubinhoABC#readme",
   "dependencies": {
+    "@supabase/supabase-js": "^2.117.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   },

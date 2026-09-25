@@ -1,7 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CacaAsLetras from './jogos/CacaAsLetras';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
+import {
+  aoMudarSessao,
+  atualizarSenha,
+  cadastrar,
+  entrar,
+  enviarRecuperacaoSenha,
+  estaAutenticado,
+  obterPerfil,
+  perfilCompleto,
+  precisaRedefinirSenha,
+  reenviarConfirmacao,
+  sair,
+} from './utils/auth';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const ages = ['6 anos', '7 anos'];
@@ -42,9 +55,14 @@ function SignupSteps({ step }) {
 
 function Signup({ onBackToLogin, onFinish }) {
   const [step, setStep] = useState(1);
+  const [guardianName, setGuardianName] = useState('');
+  const [guardianEmail, setGuardianEmail] = useState('');
+  const [guardianPassword, setGuardianPassword] = useState('');
+  const [childName, setChildName] = useState('');
   const [age, setAge] = useState('6 anos');
   const [pet, setPet] = useState(pets[0]);
   const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
@@ -52,7 +70,28 @@ function Signup({ onBackToLogin, onFinish }) {
 
   function advance(event) {
     event.preventDefault();
+    setMessage('');
     setStep((current) => Math.min(3, current + 1));
+  }
+
+  async function finalizarCadastro() {
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await cadastrar({
+        nome: guardianName,
+        email: guardianEmail,
+        senha: guardianPassword,
+        criancaNome: childName,
+        criancaIdade: Number.parseInt(age, 10),
+        criancaAvatar: pet,
+      });
+      onFinish(guardianEmail);
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -72,11 +111,11 @@ function Signup({ onBackToLogin, onFinish }) {
               <span className="step-label">Passo 1 de 3</span>
               <h2>Quem cuida da aventura?</h2>
               <label htmlFor="guardian-name">Seu nome</label>
-              <input id="guardian-name" placeholder="Ana Paula" />
+              <input id="guardian-name" placeholder="Ana Paula" value={guardianName} onChange={(event) => setGuardianName(event.target.value)} required />
               <label htmlFor="guardian-email">E-mail</label>
-              <input id="guardian-email" type="email" placeholder="voce@email.com" />
+              <input id="guardian-email" type="email" placeholder="voce@email.com" value={guardianEmail} onChange={(event) => setGuardianEmail(event.target.value)} required />
               <label htmlFor="guardian-password">Criar senha</label>
-              <input id="guardian-password" type="password" placeholder="mínimo 8 caracteres" />
+              <input id="guardian-password" type="password" placeholder="mínimo 8 caracteres" value={guardianPassword} onChange={(event) => setGuardianPassword(event.target.value)} minLength={8} required />
               <div className="terms-acceptance">
                 <input id="accept-terms" type="checkbox" required />
                 <label htmlFor="accept-terms">Sou responsável pela criança e li e aceito os</label>
@@ -91,7 +130,7 @@ function Signup({ onBackToLogin, onFinish }) {
               <span className="step-label">Passo 2 de 3</span>
               <h2>Agora, a estrelinha da casa</h2>
               <label htmlFor="child-name">Nome da criança</label>
-              <input id="child-name" placeholder="Manu" />
+              <input id="child-name" placeholder="Manu" value={childName} onChange={(event) => setChildName(event.target.value)} required />
               <fieldset>
                 <legend>Idade</legend>
                 <div className="choice-row age-choices">
@@ -119,10 +158,12 @@ function Signup({ onBackToLogin, onFinish }) {
               <p>A trilha das letras foi montada. É só entrar e começar a brincar.</p>
               <div className="trail-tags"><span>✣ Letras do nome</span><span>✣ Sílabas mágicas</span><span>✣ Primeiras palavras</span></div>
               <div className="signup-actions">
-                <button className="back-button" type="button" onClick={previousStep}>← &nbsp; Voltar</button>
-                <button className="small-primary" type="button" onClick={onFinish}>Começar a aventura <span>→</span></button>
+                <button className="back-button" type="button" onClick={previousStep} disabled={submitting}>← &nbsp; Voltar</button>
+                <button className="small-primary" type="button" onClick={finalizarCadastro} disabled={submitting}>
+                  {submitting ? 'Criando conta…' : <>Começar a aventura <span>→</span></>}
+                </button>
               </div>
-              {message && <p className="form-message" role="status">{message}</p>}
+              {message && <p className="form-message" role="alert">{message}</p>}
             </div>
           )}
           <button className="terms-link" type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>
@@ -134,13 +175,69 @@ function Signup({ onBackToLogin, onFinish }) {
   );
 }
 
+function EsqueciSenha({ emailInicial, onVoltar }) {
+  const [email, setEmail] = useState(emailInicial);
+  const [message, setMessage] = useState('');
+  const [enviado, setEnviado] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  async function enviar(event) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await enviarRecuperacaoSenha(email);
+      setEnviado(true);
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (enviado) {
+    return (
+      <div className="forgot-password-panel">
+        <p className="form-message" role="status">Enviamos um link para {email}. Abra o e-mail e siga as instruções para criar uma nova senha.</p>
+        <button className="text-link" type="button" onClick={onVoltar}>Voltar para o login</button>
+      </div>
+    );
+  }
+
+  return (
+    <form className="forgot-password-panel" onSubmit={enviar}>
+      <label htmlFor="forgot-email">Informe o e-mail da conta</label>
+      <input id="forgot-email" type="email" placeholder="voce@email.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
+      {message && <p className="form-message" role="alert">{message}</p>}
+      <div className="signup-actions">
+        <button className="back-button" type="button" onClick={onVoltar} disabled={submitting}>← &nbsp; Voltar</button>
+        <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Enviando…' : 'Enviar link'}</button>
+      </div>
+    </form>
+  );
+}
+
 function Login({ onCreateAccount, onLogin }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showForgot, setShowForgot] = useState(false);
 
-  function submitLogin(event) {
+  async function submitLogin(event) {
     event.preventDefault();
-    onLogin();
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await entrar(email, password);
+      onLogin();
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
@@ -166,17 +263,24 @@ function Login({ onCreateAccount, onLogin }) {
           <span className="welcome-label">Bem-vindo de volta!</span>
           <h1 id="login-title">Vamos <em>aprender</em> hoje?</h1>
           <p className="card-intro">Entre para continuar a aventura das letras.</p>
-          <form onSubmit={submitLogin}>
-            <label htmlFor="email">E-mail do responsável</label>
-            <input id="email" type="email" placeholder="voce@email.com" />
-            <label htmlFor="password">Senha</label>
-            <input id="password" type="password" placeholder="••••••••" />
-            <div className="form-options">
-              <label className="remember"><input type="checkbox" /> Lembrar de mim</label>
-              <button type="button" className="forgot">Esqueci a senha</button>
-            </div>
-            <button className="primary-button" type="submit">Entrar e brincar <span>→</span></button>
-          </form>
+          {showForgot ? (
+            <EsqueciSenha emailInicial={email} onVoltar={() => setShowForgot(false)} />
+          ) : (
+            <form onSubmit={submitLogin}>
+              <label htmlFor="email">E-mail do responsável</label>
+              <input id="email" type="email" placeholder="voce@email.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              <label htmlFor="password">Senha</label>
+              <input id="password" type="password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
+              <div className="form-options">
+                <label className="remember"><input type="checkbox" /> Lembrar de mim</label>
+                <button type="button" className="forgot" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
+              </div>
+              {message && <p className="form-message" role="alert">{message}</p>}
+              <button className="primary-button" type="submit" disabled={submitting}>
+                {submitting ? 'Entrando…' : <>Entrar e brincar <span>→</span></>}
+              </button>
+            </form>
+          )}
           <div className="divider"><span />ou<span /></div>
           <button className="secondary-button" type="button" onClick={onCreateAccount}>♧ &nbsp; Criar conta da família</button>
           <p className="safety-text">Ambiente seguro, sem anúncios e com controle dos responsáveis.</p>
@@ -190,6 +294,98 @@ function Login({ onCreateAccount, onLogin }) {
   );
 }
 
+function ConfirmeSeuEmail({ email, onVoltar }) {
+  const [message, setMessage] = useState('');
+  const [enviando, setEnviando] = useState(false);
+
+  async function reenviar() {
+    setEnviando(true);
+    setMessage('');
+    try {
+      await reenviarConfirmacao(email);
+      setMessage('Reenviamos o link de confirmação.');
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <main className="page-shell" id="inicio">
+      <div className="shape shape-top-left" />
+      <div className="shape shape-bottom-left" />
+      <header className="site-header compact-header">
+        <Brand />
+      </header>
+      <section className="content-grid">
+        <section className="login-card" aria-labelledby="confirm-title">
+          <img src="/images/mascote.png" alt="" className="login-mascot" />
+          <h1 id="confirm-title">Confirme seu <em>e-mail</em></h1>
+          <p className="card-intro">Mandamos um link de confirmação para {email || 'o seu e-mail'}. Abra a mensagem e clique no link para ativar a conta da família — só depois disso dá pra entrar.</p>
+          {message && <p className="form-message" role="status">{message}</p>}
+          <button className="secondary-button" type="button" onClick={onVoltar}>Já confirmei, ir para o login</button>
+          {email && (
+            <button className="text-link" type="button" onClick={reenviar} disabled={enviando}>
+              {enviando ? 'Reenviando…' : 'Não chegou? Reenviar e-mail'}
+            </button>
+          )}
+        </section>
+      </section>
+    </main>
+  );
+}
+
+function RedefinirSenha() {
+  const [senha, setSenha] = useState('');
+  const [confirmacao, setConfirmacao] = useState('');
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function salvar(event) {
+    event.preventDefault();
+    if (senha !== confirmacao) {
+      setMessage('As senhas não são iguais.');
+      return;
+    }
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await atualizarSenha(senha);
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <main className="page-shell" id="inicio">
+      <div className="shape shape-top-left" />
+      <div className="shape shape-bottom-left" />
+      <header className="site-header compact-header">
+        <Brand />
+      </header>
+      <section className="content-grid">
+        <section className="login-card" aria-labelledby="reset-title">
+          <img src="/images/mascote.png" alt="" className="login-mascot" />
+          <h1 id="reset-title">Crie uma <em>nova senha</em></h1>
+          <form onSubmit={salvar}>
+            <label htmlFor="new-password">Nova senha</label>
+            <input id="new-password" type="password" placeholder="mínimo 8 caracteres" value={senha} onChange={(event) => setSenha(event.target.value)} minLength={8} required />
+            <label htmlFor="new-password-confirm">Confirme a nova senha</label>
+            <input id="new-password-confirm" type="password" placeholder="digite de novo" value={confirmacao} onChange={(event) => setConfirmacao(event.target.value)} minLength={8} required />
+            {message && <p className="form-message" role="alert">{message}</p>}
+            <button className="primary-button" type="submit" disabled={submitting}>
+              {submitting ? 'Salvando…' : 'Salvar nova senha'}
+            </button>
+          </form>
+        </section>
+      </section>
+    </main>
+  );
+}
+
 const navItems = [
   ['início', '⛱️', 'Início'],
   ['jogos', '🎮', 'Jogos'],
@@ -199,6 +395,14 @@ const navItems = [
 ];
 
 function AppHeader({ active, onNavigate }) {
+  const perfil = obterPerfil();
+  const nomeCrianca = perfil?.criancas?.[0]?.nome || 'Manu';
+
+  async function sairDaConta() {
+    await sair();
+    onNavigate('login');
+  }
+
   return (
     <header className="app-header">
       <Brand />
@@ -212,7 +416,8 @@ function AppHeader({ active, onNavigate }) {
       <div className="profile-summary">
         <span className="streak">♨ <b>7 dias</b></span>
         <span className="stars">✣ <b>1.240 estrelas</b></span>
-        <button className="child-profile" type="button"><img src="/images/mascote.png" alt="" />Manu</button>
+        <button className="child-profile" type="button"><img src="/images/mascote.png" alt="" />{nomeCrianca}</button>
+        <button className="text-link" type="button" onClick={sairDaConta}>Sair</button>
       </div>
     </header>
   );
@@ -298,11 +503,51 @@ function Progress({ onNavigate }) {
   </main>;
 }
 
+const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso'];
+const VIEWS_PRE_LOGIN = ['login', 'signup', 'confirmar-email'];
+
 function App() {
   const [view, setView] = useState('login');
+  const [authTick, setAuthTick] = useState(0);
+  const [emailCadastrado, setEmailCadastrado] = useState('');
+
+  useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
+
+  // Cobre dois casos: sessão já existia (F5) e clique no link do e-mail
+  // (o Supabase autentica sozinho e cai aqui com a conta já confirmada).
+  useEffect(() => {
+    if (estaAutenticado() && perfilCompleto() && VIEWS_PRE_LOGIN.includes(view)) {
+      setView('home');
+    }
+  }, [authTick, view]);
+
   const navigate = (page) => setView(page === 'início' || page === 'inicio' ? 'home' : page);
 
-  if (view === 'signup') return <Signup onBackToLogin={() => setView('login')} onFinish={() => setView('home')} />;
+  if (precisaRedefinirSenha()) return <RedefinirSenha />;
+
+  if (VIEWS_PROTEGIDAS.includes(view)) {
+    if (!estaAutenticado()) return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
+    if (!perfilCompleto()) {
+      return (
+        <main className="page-shell" id="inicio">
+          <p className="form-message" role="status">Carregando sua conta…</p>
+        </main>
+      );
+    }
+  }
+
+  if (view === 'signup') {
+    return (
+      <Signup
+        onBackToLogin={() => setView('login')}
+        onFinish={(email) => {
+          setEmailCadastrado(email);
+          setView('confirmar-email');
+        }}
+      />
+    );
+  }
+  if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
   if (view === 'home') return <Home onNavigate={navigate} />;
   if (view === 'jogos') return <CacaAsLetras Cabecalho={AppHeader} onNavigate={navigate} />;
   if (view === 'historias') return <Stories onNavigate={navigate} />;

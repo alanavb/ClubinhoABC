@@ -1,5 +1,5 @@
 from app import create_app, db
-from app.models import Atividade, Crianca, Etapa, Responsavel
+from app.models import Atividade, Etapa
 
 app = create_app()
 
@@ -30,7 +30,6 @@ with app.app_context():
         print('Atividade "Desafio bônus" (opcional) criada na etapa "Caça às Letras".')
     else:
         print('Atividade "Desafio bônus" já existia, nada foi criado.')
-                  
 
     etapa2 = Etapa.query.filter_by(chave='monte-a-palavra').first()
     if not etapa2:
@@ -46,21 +45,11 @@ with app.app_context():
     else:
         print('Etapa "Monte a Palavra" já existia, nada foi criado.')
 
-    responsavel = Responsavel.query.filter_by(email='teste@clubinho.abc').first()
-    if not responsavel:
-        responsavel = Responsavel(nome='Responsável de Teste', email='teste@clubinho.abc')
-        db.session.add(responsavel)
-        db.session.commit()
-
-        crianca = Crianca(
-            responsavel_id=responsavel.id, nome='Manu', idade=6, avatar='🦊', etapa_atual_id=etapa1.id
-        )
-        db.session.add(crianca)
-        db.session.commit()
-        print(f'Responsável e criança de teste criados (crianca_id={crianca.id}, etapa_atual={etapa1.chave}).')
-    else:
-        crianca = responsavel.criancas[0] if responsavel.criancas else None
-        print(f'Responsável de teste já existia (crianca_id={crianca.id if crianca else "?"}).')
+    # Responsável e criança não são mais fabricados aqui: a conta agora nasce
+    # no Supabase Auth (cadastro real, com confirmação por e-mail) e o perfil
+    # local (responsável + criança) é criado automaticamente pelo back-end
+    # assim que a pessoa confirma o e-mail e entra pela primeira vez.
+    print('\nPara testar de ponta a ponta, crie uma conta pela tela de cadastro do front-end.')
 
     print('\nIDs para testar:')
     for etapa in Etapa.query.order_by(Etapa.ordem).all():

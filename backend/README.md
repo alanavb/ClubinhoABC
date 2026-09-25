@@ -1,6 +1,10 @@
 # Back-end — Clubinho ABC
 
 Flask + MVC + SQLAlchemy. Implementa por enquanto:
+- **Login e controle de acesso** — autenticação fica por conta do Supabase Auth
+  (cadastro, confirmação por e-mail, login e recuperação de senha); este
+  back-end só valida o token JWT que o Supabase emite (via JWKS) e guarda o
+  perfil (responsável + criança).
 - **RN1** — atividade pertence a uma etapa (controle de acesso)
 - **RN2** — registro do resultado da atividade
 - **RN3** — atividade obrigatória (conclusão da etapa)
@@ -13,38 +17,44 @@ As demais regras de negócio serão adicionadas conforme forem alinhadas.
 backend/
   app/
     models/         -> Model: Responsavel, Crianca, Etapa, Atividade, Resultado
-    controllers/    -> Controller: regras de negócio (resultados_controller, etapas_controller)
+    controllers/    -> Controller: regras de negócio (auth_controller, resultados_controller, etapas_controller)
     routes/         -> mapeia a API REST para os controllers
+    auth_utils.py   -> verifica o token JWT do Supabase (JWKS) nas rotas protegidas
     __init__.py     -> app factory
     config.py
-  seeds.py          -> cria as tabelas e dados mínimos de teste
+  seeds.py          -> cria as tabelas e as etapas/atividades mínimas
   run.py            -> ponto de entrada
 ```
 
 ## Banco de dados
 
-Por padrão usa **SQLite local** (`instance/clubinho.db`), sem precisar configurar nada.
-Quando o projeto Supabase/Postgres estiver pronto, copie `.env.example` para
-`.env` e defina `DATABASE_URL` com a connection string do Postgres — nenhum
-código precisa mudar.
+Usa o **Postgres do Supabase** do projeto. Copie `.env.example` para `.env` e
+preencha `DATABASE_URL` com a senha real do banco (Supabase > Project
+Settings > Database > Database password) e `SUPABASE_JWKS_URL` (Project
+Settings > API > JWT Keys). Sem `.env`, cai de volta para SQLite local
+(`instance/clubinho.db`) — útil só para testar a API sem depender de rede,
+mas login não funciona sem o `SUPABASE_JWKS_URL` configurado.
 
 ## Como rodar
 
 ### Windows (PowerShell)
 
-No seu Windows, o comando `python` pode estar mapeado pro atalho da Microsoft
-Store em vez do Python de verdade — use o launcher `py`, que resolve certo:
+Em alguns Windows o comando `python` está mapeado pro atalho da Microsoft
+Store em vez do Python de verdade — nesse caso use o launcher `py` no lugar
+de `python` nos comandos abaixo (teste `python --version` primeiro; se der
+erro ou abrir a Store, use `py`).
 
 ```powershell
 cd backend
-py -m pip install -r requirements.txt
-py seeds.py    # cria as tabelas e dados de teste, imprime os IDs
-py run.py      # sobe a API em http://localhost:5000
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python seeds.py    # cria etapas/atividades (dados do jogo, não é dado de teste), imprime os IDs
+python run.py      # sobe a API em http://localhost:5000
 ```
 
-(Se quiser usar um venv isolado: `py -m venv .venv` e depois
-`.venv\Scripts\Activate.ps1` — não `activate` sem extensão, que é sintaxe de
-bash/Linux e não funciona no PowerShell.)
+(`Activate.ps1`, não `activate` sem extensão — isso é sintaxe de bash/Linux
+e não funciona no PowerShell.)
 
 ### macOS / Linux
 
@@ -65,27 +75,46 @@ back-end não estiver rodando, toda chamada do front à API dá erro
 
 ## Endpoints
 
+Todas as rotas abaixo (exceto o cadastro/login em si, que é direto no
+Supabase pelo front) exigem `Authorization: Bearer <token>` com um token
+emitido pelo Supabase — o jeito mais fácil de obter um é logar pela tela do
+front-end e copiar o token do `localStorage`/DevTools.
+
+**Login — perfil do responsável autenticado:**
+```bash
+curl http://localhost:5000/api/auth/me -H "Authorization: Bearer TOKEN"
+```
+
+**Login — concluir cadastro (chamado automaticamente pelo front após confirmar o e-mail):**
+```bash
+curl -X POST http://localhost:5000/api/auth/completar-cadastro ^
+  -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" ^
+  -d "{\"nome\": \"Ana\", \"crianca_nome\": \"Manu\", \"crianca_idade\": 6, \"crianca_avatar\": \"🦊\"}"
+```
+
 **RN2 — registrar/listar resultados:**
 ```bash
 curl -X POST http://localhost:5000/api/resultados ^
-  -H "Content-Type: application/json" ^
+  -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" ^
   -d "{\"crianca_id\": 1, \"atividade_id\": 2, \"resposta_enviada\": \"B\", \"resposta_esperada\": \"A\"}"
 # { "child_id": 1, "activity_id": 2, "answer": "B", "correct": false }
 
-curl http://localhost:5000/api/resultados?crianca_id=1
+curl http://localhost:5000/api/resultados?crianca_id=1 -H "Authorization: Bearer TOKEN"
 ```
 
 **RN1 — atividades acessíveis pela criança (etapa atual):**
 ```bash
-curl http://localhost:5000/api/criancas/1/atividades
+curl http://localhost:5000/api/criancas/1/atividades -H "Authorization: Bearer TOKEN"
 ```
-Registrar um resultado numa atividade fora da etapa atual retorna `403`.
+Registrar um resultado numa atividade fora da etapa atual, ou tentar acessar
+a criança de outro responsável, retorna `403`.
 
 **RN3 — status de conclusão de uma etapa:**
 ```bash
-curl http://localhost:5000/api/criancas/1/etapas/1/status
+curl http://localhost:5000/api/criancas/1/etapas/1/status -H "Authorization: Bearer TOKEN"
 # { "etapa_id": 1, "child_id": 1, "concluida": true/false, "atividades": [...] }
 ```
 
-Depois do `seeds.py`, ele imprime os IDs de cada etapa/atividade e o
-`crianca_id` de teste (normalmente `1`) para usar nesses exemplos.
+Depois do `seeds.py`, ele imprime os IDs de cada etapa/atividade para usar
+nesses exemplos. O `crianca_id` só existe depois que alguém se cadastra pelo
+front (cadastro real, com confirmação por e-mail via Supabase).
