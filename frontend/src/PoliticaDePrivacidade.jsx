@@ -15,72 +15,98 @@ function PoliticaDePrivacidade({ onClose }) {
     }}>
       <section className="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
         <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar política de privacidade">×</button>
-        <h1 id="privacy-title">Política de Privacidade — Clubinho ABC</h1>
-        <p><strong>Última revisão: 22 de setembro de 2026</strong></p>
-        <p>O Clubinho ABC é uma plataforma de apoio à alfabetização voltada principalmente a crianças de 6 a 7 anos, para uso com acompanhamento de seus pais ou responsáveis legais.</p>
-        <p>Esta Política explica quais dados pessoais são tratados pela plataforma, para quais finalidades, como o responsável pode fazer solicitações e quais cuidados são adotados para proteger os dados da criança.</p>
+        <h1 id="privacy-title">Política de Privacidade - Clubinho ABC</h1>
+        <p><strong>Versão 2.0 - última revisão: 25 de setembro de 2026</strong></p>
+        <p>O Clubinho ABC é um projeto acadêmico de apoio à alfabetização voltado principalmente a crianças de 6 a 7 anos, para uso acompanhado por seus pais ou responsáveis legais.</p>
+        <p>Esta Política descreve o tratamento efetivamente realizado na versão atual da plataforma, incluindo cadastro, autenticação, recuperação de senha, perfil da criança, atividades, progresso e registros de segurança.</p>
 
-        <h2>1. Responsável pela plataforma e contato</h2>
-        <p><strong>Responsável pela plataforma:</strong> Clubinho ABC<br />
-          <strong>E-mail para assuntos de privacidade:</strong> clubinhoabc@gmail.com</p>
-        <p>Pais e responsáveis podem utilizar esse e-mail para esclarecer dúvidas e fazer solicitações relativas aos seus dados ou aos dados da criança.</p>
+        <h2>1. Responsável pelo tratamento e canal de privacidade</h2>
+        <p>Durante a fase acadêmica, a equipe do <strong>Clubinho ABC</strong> determina as finalidades e os meios do tratamento realizado pela plataforma e atua como responsável pelo projeto. Em uma implantação real por escola, empresa ou outra organização, a entidade que oferecer o serviço e tomar essas decisões deverá ser identificada como controladora.</p>
+        <p><strong>Canal para privacidade e direitos dos titulares:</strong> clubinhoabc@gmail.com</p>
+        <p>O projeto não possui encarregado formalmente designado nesta etapa acadêmica. O canal acima recebe dúvidas, solicitações e comunicações relacionadas aos dados do responsável e da criança.</p>
 
-        <h2>2. Quais dados são tratados</h2>
-        <p>Para a conta da família, o Clubinho ABC poderá tratar o nome e o e-mail do responsável, além dos dados necessários para autenticar seu acesso.</p>
-        <p>Para configurar a trilha de aprendizagem, poderão ser tratados o nome informado para a criança, sua idade, o avatar escolhido e a etapa de aprendizagem. Durante o uso da plataforma, poderão ser registradas respostas, resultados das atividades e informações sobre o progresso da criança.</p>
-        <p>Registros técnicos necessários ao funcionamento e à segurança da plataforma, como data de acesso e endereço IP, poderão ser tratados conforme os serviços utilizados para disponibilizar o site.</p>
-        <p>O Clubinho ABC não solicita CPF, endereço residencial, dados de saúde, fotografia ou localização precisa da criança para as funcionalidades descritas nesta Política.</p>
-
-        <h2>3. Para que os dados são usados</h2>
-        <p>Os dados pessoais são utilizados para:</p>
+        <h2>2. Dados pessoais tratados</h2>
+        <p>A plataforma trata somente os dados necessários às funcionalidades atuais:</p>
         <ul>
-          <li>permitir que o responsável crie e administre a conta da família;</li>
-          <li>configurar o perfil e a trilha de aprendizagem da criança;</li>
-          <li>registrar atividades realizadas e apresentar o progresso;</li>
-          <li>disponibilizar atividades correspondentes à etapa de aprendizagem;</li>
-          <li>responder a dúvidas e solicitações do responsável;</li>
-          <li>manter o funcionamento e a segurança da plataforma.</li>
+          <li><strong>responsável:</strong> nome, e-mail, identificador da conta no Supabase e informações de autenticação e sessão;</li>
+          <li><strong>criança:</strong> nome informado, idade, avatar escolhido e etapa atual de aprendizagem;</li>
+          <li><strong>aprendizagem:</strong> atividade realizada, resposta enviada, indicação de acerto ou erro, progresso e data do registro;</li>
+          <li><strong>auditoria e segurança:</strong> tipo de ação, identificadores relacionados, data e detalhes necessários para rastrear cadastros, acessos e atividades;</li>
+          <li><strong>dados técnicos:</strong> tokens de sessão e, conforme os serviços de infraestrutura utilizados, endereço IP, dispositivo, navegador, data, horário e registros de acesso.</li>
         </ul>
-        <p>As respostas e os resultados das atividades têm finalidade de acompanhamento educacional. Eles não constituem diagnóstico pedagógico, psicológico ou médico.</p>
-        <p>O Clubinho ABC não utiliza dados da criança para publicidade comportamental.</p>
+        <p>A senha é enviada diretamente ao Supabase Auth. O Clubinho ABC não recebe nem armazena a senha em texto legível em sua tabela de responsáveis. Durante o cadastro ainda não confirmado, nome do responsável e dados do perfil da criança podem permanecer temporariamente nos metadados da conta do Supabase para permitir a conclusão do cadastro após a confirmação do e-mail.</p>
+        <p>Para as funcionalidades descritas nesta Política, não são solicitados CPF, endereço residencial, fotografia, localização precisa, contatos da criança, dados de saúde ou documentos pessoais.</p>
 
-        <h2>4. Dados de crianças e acompanhamento do responsável</h2>
-        <p>A conta da família deve ser criada e administrada por pai, mãe ou responsável legal. O tratamento dos dados da criança deve observar seu melhor interesse e ser limitado às finalidades informadas nesta Política.</p>
-        <p>Quando o consentimento for necessário para uma finalidade específica, ele será solicitado ao responsável de forma clara e destacada. O aceite dos Termos e Condições de Uso não substitui essa solicitação.</p>
-        <p>O responsável deve acompanhar o uso da plataforma pela criança. As informações sobre o tratamento de dados serão apresentadas de forma clara, considerando também a compreensão do público infantil.</p>
+        <h2>3. Finalidades e hipóteses legais</h2>
+        <ul>
+          <li><strong>Criar e autenticar a conta, confirmar o e-mail e recuperar a senha:</strong> execução dos procedimentos solicitados pelo responsável para utilização do serviço.</li>
+          <li><strong>Criar o perfil e a trilha da criança, registrar respostas, progresso e liberar atividades da etapa correspondente:</strong> execução do serviço educacional solicitado pelo responsável, sempre com avaliação e prevalência do melhor interesse da criança.</li>
+          <li><strong>Proteger contas, verificar permissões, prevenir acessos indevidos e manter registros de auditoria:</strong> legítimo interesse na segurança e na prevenção a fraudes, limitado ao necessário e acompanhado de salvaguardas.</li>
+          <li><strong>Atender solicitações, exercer direitos e responder a autoridades:</strong> cumprimento de obrigação legal ou regulatória, exercício regular de direitos e atendimento ao titular.</li>
+          <li><strong>Finalidades opcionais futuras:</strong> quando dependerem de consentimento, será solicitado consentimento específico, informado e destacado ao responsável antes do tratamento.</li>
+        </ul>
+        <p>O aceite dos Termos de Uso registra concordância com as regras da plataforma e não é utilizado como autorização genérica para qualquer tratamento futuro.</p>
 
-        <h2>5. Armazenamento e compartilhamento</h2>
-        <p>Os dados poderão ser tratados por prestadores de serviços necessários ao funcionamento do Clubinho ABC, como serviços de hospedagem do site e armazenamento do banco de dados. Esses prestadores deverão utilizar os dados para prestar os serviços contratados, de acordo com as instruções aplicáveis.</p>
-        <p>O acesso aos dados será limitado às pessoas que precisem deles para administrar, manter ou oferecer suporte à plataforma. Os dados pessoais da criança não serão publicados para outros usuários.</p>
-        <p>Informações também poderão ser fornecidas quando houver obrigação legal ou determinação válida de autoridade competente. O Clubinho ABC não vende dados pessoais de responsáveis ou crianças.</p>
+        <h2>4. Proteção especial dos dados da criança</h2>
+        <p>A conta deve ser criada e administrada pelo pai, mãe ou responsável legal. O tratamento dos dados da criança é limitado às funcionalidades informadas, deve ser compatível com sua faixa etária e deve preservar seu melhor interesse em todas as decisões.</p>
+        <p>São adotadas configurações protetivas por padrão: não há publicidade comportamental, venda de dados, perfil público, publicação de conteúdo pelo usuário, ranking público de desempenho ou coleta de localização, imagem e voz da criança.</p>
+        <p>Os resultados servem somente ao acompanhamento da atividade e à progressão educacional. Eles não constituem diagnóstico e não produzem decisões com efeitos jurídicos ou equivalentes sobre a criança.</p>
 
-        <h2>6. Conservação e exclusão dos dados</h2>
-        <p>Os dados da conta e do progresso serão mantidos enquanto forem necessários para oferecer as funcionalidades descritas nesta Política e enquanto a conta permanecer ativa.</p>
-        <p>Após o encerramento da conta ou um pedido de exclusão, os dados serão eliminados ou anonimizados, ressalvadas situações em que sua conservação seja permitida ou exigida pela legislação, inclusive para cumprir obrigações legais ou resguardar direitos. Cópias de segurança poderão permanecer temporariamente até sua substituição nas rotinas técnicas de armazenamento.</p>
-        <p>O responsável poderá solicitar informações sobre a conservação ou a exclusão dos dados pelo e-mail indicado na seção 1.</p>
+        <h2>5. Como os dados são coletados e utilizados</h2>
+        <p>Os dados do responsável e da criança são informados na tela de cadastro. O Supabase Auth cria a conta e envia o e-mail de confirmação. Depois da confirmação, o backend do Clubinho ABC cria o perfil do responsável e vincula a criança no banco PostgreSQL.</p>
+        <p>Durante o uso, o frontend envia ao backend o token de autenticação, os identificadores necessários e os resultados das atividades. O backend valida o token, confirma o vínculo entre responsável e criança e somente então consulta ou registra as informações.</p>
+        <p>Na recuperação de senha, o e-mail informado é enviado ao Supabase Auth, que gera e encaminha um link temporário para permitir a definição de uma nova senha.</p>
 
-        <h2>7. Direitos do responsável e da criança</h2>
-        <p>O pai, a mãe ou o responsável legal poderá solicitar, em nome da criança e conforme a legislação aplicável:</p>
+        <h2>6. Compartilhamento, operadores e transferência internacional</h2>
+        <p>O Clubinho ABC utiliza o <strong>Supabase</strong> como prestador de autenticação, envio dos e-mails transacionais de confirmação e recuperação, banco PostgreSQL e infraestrutura relacionada. São enviados a esse prestador os dados necessários à criação da conta, autenticação, sessão, perfil, atividades, progresso e segurança.</p>
+        <p>Quando o responsável utiliza o e-mail de contato, a mensagem também é tratada pelo provedor de e-mail utilizado pelo Clubinho ABC para que a equipe possa responder à solicitação.</p>
+        <p>O desenvolvimento atual utiliza frontend e backend executados localmente. Antes da publicação, esta Política deverá ser atualizada para identificar os provedores de hospedagem efetivamente contratados e os dados tratados por eles.</p>
+        <p>Os prestadores podem processar ou armazenar informações em infraestrutura localizada fora do Brasil. Nesses casos, o tratamento deverá observar as regras de transferência internacional da LGPD e as salvaguardas contratuais e de segurança aplicáveis.</p>
+        <p>Os dados não são vendidos nem divulgados publicamente. Poderão ser compartilhados com autoridades somente quando houver obrigação legal, ordem válida ou necessidade de exercício regular de direitos.</p>
+
+        <h2>7. Sessão, armazenamento no navegador e cookies</h2>
+        <p>A autenticação utiliza tokens de acesso e de renovação gerenciados pelo Supabase. Na configuração atual, a sessão pode ser mantida no armazenamento local do navegador para conservar o login e é removida ou invalidada conforme o fluxo de saída, alteração de senha ou regras do serviço de autenticação.</p>
+        <p>A versão atual não utiliza cookies opcionais de publicidade ou análise comportamental. Se futuramente forem adotados cookies ou tecnologias opcionais, esta Política será atualizada e será oferecida escolha quando exigido.</p>
+
+        <h2>8. Conservação e descarte</h2>
+        <ul>
+          <li><strong>Conta, perfil e progresso:</strong> permanecem enquanto a conta estiver ativa e forem necessários para oferecer a plataforma. Em caso de encerramento do projeto acadêmico sem continuidade do serviço, serão eliminados ou anonimizados.</li>
+          <li><strong>Dados de cadastro ainda não confirmado:</strong> permanecem vinculados à conta pendente no Supabase até sua confirmação, remoção pelo responsável ou descarte conforme as rotinas do prestador.</li>
+          <li><strong>Registros de auditoria e segurança:</strong> são conservados enquanto necessários para investigar incidentes, demonstrar controles e resguardar direitos, com revisão ao final do projeto acadêmico.</li>
+          <li><strong>Solicitações enviadas por e-mail:</strong> são mantidas durante o atendimento e pelo período necessário para demonstrar a resposta e resguardar direitos.</li>
+          <li><strong>Cópias de segurança:</strong> podem permanecer até sua substituição pelas rotinas técnicas do prestador, com acesso restrito.</li>
+        </ul>
+        <p>A versão atual ainda não possui exclusão automática pela interface. O responsável pode solicitar o encerramento, a eliminação ou a anonimização pelo canal da seção 1. Após a confirmação da legitimidade do pedido, a equipe realizará o procedimento nos ambientes de autenticação e banco de dados, ressalvada a conservação permitida ou exigida por lei.</p>
+
+        <h2>9. Direitos do responsável e da criança</h2>
+        <p>O responsável pode exercer, em nome próprio ou da criança e conforme a LGPD:</p>
         <ul>
           <li>confirmação da existência de tratamento e acesso aos dados;</li>
-          <li>correção de dados incompletos, incorretos ou desatualizados;</li>
-          <li>informações sobre a finalidade do tratamento e eventual compartilhamento;</li>
-          <li>eliminação ou anonimização de dados, quando cabível;</li>
-          <li>revogação do consentimento, quando essa for a base utilizada.</li>
+          <li>correção de dados incompletos, inexatos ou desatualizados;</li>
+          <li>informação sobre finalidades, uso compartilhado e consequências da revogação do consentimento;</li>
+          <li>anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade;</li>
+          <li>portabilidade, quando aplicável e observada a regulamentação;</li>
+          <li>eliminação dos dados tratados com consentimento e revogação do consentimento, quando essa for a hipótese utilizada;</li>
+          <li>oposição ao tratamento realizado em desconformidade com a LGPD;</li>
+          <li>explicação e revisão de decisões tomadas unicamente por tratamento automatizado que afetem seus interesses, quando aplicável.</li>
         </ul>
-        <p>As solicitações devem ser enviadas para <strong>clubinhoabc@gmail.com</strong>. Para proteger os dados da criança, o Clubinho ABC poderá solicitar informações necessárias para confirmar que o pedido foi feito por pessoa autorizada.</p>
+        <p>As solicitações devem ser enviadas para <strong>clubinhoabc@gmail.com</strong>. Para impedir acesso indevido, poderão ser solicitadas informações estritamente necessárias para confirmar a identidade e a representação da criança. Se algum pedido não puder ser atendido integralmente, o motivo será informado.</p>
 
-        <h2>8. Proteção e segurança das informações</h2>
-        <p>O Clubinho ABC adotará medidas técnicas e organizacionais adequadas para proteger os dados pessoais tratados na plataforma contra acesso não autorizado, perda, alteração ou divulgação indevida. Essas medidas serão compatíveis com os serviços e recursos efetivamente utilizados pelo projeto.</p>
-        <p>Apesar dos cuidados adotados, nenhum sistema conectado à internet está completamente livre de riscos. Caso seja identificado um incidente de segurança, o Clubinho ABC avaliará seus efeitos, adotará medidas para reduzir possíveis danos e comunicará os responsáveis afetados e a Autoridade Nacional de Proteção de Dados quando a legislação exigir.</p>
-        <p>O responsável também deve proteger suas credenciais de acesso e comunicar ao Clubinho ABC qualquer suspeita de uso não autorizado da conta. Esta disposição não afasta as responsabilidades legais do Clubinho ABC.</p>
+        <h2>10. Segurança das informações</h2>
+        <p>Entre as medidas adotadas na versão atual estão: senha armazenada pelo Supabase Auth com função de hash e salt; confirmação de e-mail; recuperação de senha por link temporário; tokens de sessão; validação do token no backend; restrição dos dados à criança vinculada ao responsável; uso de ORM; credenciais fora do código-fonte; e registros de ações relevantes.</p>
+        <p>Em produção, a comunicação deverá utilizar HTTPS e os ambientes de desenvolvimento, testes e produção deverão permanecer separados. O acesso administrativo deve ser limitado às pessoas que necessitem das informações para manter ou dar suporte ao sistema.</p>
+        <p>Nenhum sistema conectado à internet é completamente livre de riscos. O responsável deve proteger suas credenciais e comunicar suspeitas de acesso indevido, sem que isso afaste as responsabilidades legais do Clubinho ABC.</p>
 
-        <h2>9. Alterações desta Política</h2>
-        <p>Esta Política poderá ser atualizada para acompanhar mudanças na plataforma, no tratamento de dados ou na legislação. A versão vigente ficará disponível no site com a data da última revisão.</p>
-        <p>Quando uma mudança afetar de maneira relevante o uso dos dados, o responsável será informado pelos meios de contato disponíveis, conforme o caso.</p>
+        <h2>11. Incidentes de segurança</h2>
+        <p>Em caso de incidente, a equipe deverá confirmar e conter o evento, preservar evidências, identificar os dados e titulares afetados, avaliar o risco ou dano, corrigir a causa e registrar as providências adotadas.</p>
+        <p>Quando o incidente puder acarretar risco ou dano relevante, os responsáveis afetados e a Autoridade Nacional de Proteção de Dados serão comunicados conforme a legislação aplicável.</p>
 
-        <h2>10. Legislação aplicável</h2>
-        <p>Esta Política observa as leis da República Federativa do Brasil, especialmente a Lei Geral de Proteção de Dados Pessoais, o Estatuto da Criança e do Adolescente e o Estatuto Digital da Criança e do Adolescente.</p>
+        <h2>12. Alterações e versões</h2>
+        <p>Esta Política vigorará a partir da data indicada no início e poderá ser atualizada quando houver mudanças nas funcionalidades, nos dados tratados, nos prestadores ou na legislação.</p>
+        <p>A versão vigente permanecerá disponível na plataforma. Mudanças relevantes serão comunicadas ao responsável pelos meios disponíveis e, quando necessário, será solicitada nova manifestação.</p>
+
+        <h2>13. Legislação aplicável</h2>
+        <p>Esta Política observa as leis da República Federativa do Brasil, especialmente a Lei Geral de Proteção de Dados Pessoais, o Estatuto da Criança e do Adolescente, o Estatuto Digital da Criança e do Adolescente e as orientações da Autoridade Nacional de Proteção de Dados.</p>
       </section>
     </div>
   );

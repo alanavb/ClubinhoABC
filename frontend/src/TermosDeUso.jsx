@@ -15,58 +15,68 @@ function TermosDeUso({ onClose }) {
     }}>
       <section className="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="terms-title">
         <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar termos de uso">×</button>
-        <h1 id="terms-title">Termos e Condições de Uso — Clubinho ABC</h1>
-        <p><strong>Última revisão: 22 de setembro de 2026</strong></p>
-        <p>Bem-vindo(a) ao Clubinho ABC. Estes Termos e Condições explicam as regras de uso da plataforma disponível em <strong>[URL DO SITE]</strong>.</p>
-        <p>O Clubinho ABC é uma plataforma de apoio à alfabetização, voltada principalmente a crianças de 6 a 7 anos. Seu uso por crianças deve ocorrer com o acompanhamento de seus pais ou responsáveis legais. Leia também a <strong>Política de Privacidade</strong>, que explicará como os dados pessoais são tratados.</p>
+        <h1 id="terms-title">Termos e Condições de Uso - Clubinho ABC</h1>
+        <p><strong>Versão 2.0 - última revisão: 25 de setembro de 2026</strong></p>
+        <p>Bem-vindo(a) ao Clubinho ABC. Estes Termos regulam o acesso e o uso da plataforma educacional Clubinho ABC.</p>
+        <p>O Clubinho ABC é um projeto acadêmico de apoio à alfabetização, voltado principalmente a crianças de 6 a 7 anos e destinado ao uso com acompanhamento de seus pais ou responsáveis legais. Leia também a <strong>Política de Privacidade</strong>, que explica como os dados pessoais são tratados.</p>
 
-        <h2>1. Conta e acompanhamento do responsável</h2>
-        <p>A conta da família deve ser criada e administrada por pai, mãe ou responsável legal. Cabe a essa pessoa acompanhar o uso da plataforma pela criança e manter os dados da conta atualizados.</p>
-        <p>Ao criar a conta, o responsável declara que leu e concorda com estes Termos. A concordância com os Termos não substitui uma solicitação específica de consentimento para o tratamento de dados da criança, quando essa for a base legal utilizada.</p>
+        <h2>1. Quem pode utilizar a plataforma</h2>
+        <p>A conta da família deve ser criada e administrada por pai, mãe ou responsável legal com capacidade para aceitar estes Termos. A criança não deve criar a própria conta nem administrar as credenciais de acesso.</p>
+        <p>Cabe ao responsável acompanhar o uso da plataforma pela criança, manter os dados da conta atualizados e avaliar se as atividades são adequadas às suas necessidades.</p>
 
-        <h2>2. Finalidade e conteúdo</h2>
-        <p>O Clubinho ABC oferece jogos, histórias e atividades de apoio ao aprendizado inicial de letras, sílabas, palavras e leitura. Os materiais têm finalidade educacional complementar e não substituem a escola ou a orientação individual de profissionais da educação.</p>
-        <p>As atividades e os demais conteúdos oferecidos ao público são disponibilizados pela equipe responsável pelo Clubinho ABC. Usuários e terceiros não podem publicar atividades, comentários, mensagens, imagens ou outros conteúdos na plataforma.</p>
+        <h2>2. Criação, confirmação e proteção da conta</h2>
+        <p>No cadastro, o responsável informa seu nome, e-mail e senha, além do nome, idade e avatar escolhido para a criança. A plataforma utiliza o Supabase Auth para criar a identidade de acesso, confirmar o e-mail, autenticar a conta e realizar a recuperação de senha.</p>
+        <p>O cadastro somente é concluído após a confirmação do e-mail. O responsável deve fornecer informações verdadeiras, utilizar senha segura, não compartilhar suas credenciais e comunicar qualquer suspeita de acesso não autorizado.</p>
+        <p>A interface de cadastro exige que o responsável declare que leu e aceitou estes Termos. Esse aceite não substitui eventual consentimento específico para uma finalidade de tratamento de dados pessoais quando o consentimento for a hipótese legal aplicável.</p>
 
-        <h2>3. Dados necessários para a trilha de aprendizagem</h2>
-        <p>Para criar e administrar a conta da família, o responsável poderá informar seu nome, e-mail e senha. Para configurar a trilha da criança, poderão ser informados seu nome, idade e avatar.</p>
-        <p>A plataforma poderá registrar as respostas e os resultados das atividades para apresentar o progresso da criança e disponibilizar as atividades correspondentes à sua etapa de aprendizagem. A disponibilização de atividades de etapas posteriores dependerá das regras de progressão adotadas na plataforma.</p>
-        <p>Os dados efetivamente coletados, suas finalidades, o período de armazenamento e eventuais compartilhamentos deverão ser descritos na Política de Privacidade. O Clubinho ABC solicitará apenas os dados necessários para as finalidades informadas.</p>
+        <h2>3. Finalidade, funcionalidades e limitações</h2>
+        <p>O Clubinho ABC oferece jogos, histórias e atividades de apoio ao aprendizado inicial de letras, sílabas, palavras e leitura. A plataforma registra tentativas e resultados para apresentar o progresso e controlar o acesso às atividades da etapa de aprendizagem da criança.</p>
+        <p>Os materiais têm finalidade educacional complementar. Eles não substituem a escola, a avaliação pedagógica ou a orientação individual de profissionais da educação, nem constituem diagnóstico pedagógico, psicológico ou médico.</p>
+        <p>As atividades e os demais conteúdos são disponibilizados pela equipe do Clubinho ABC. Usuários e terceiros não podem publicar atividades, comentários, mensagens, imagens ou outros conteúdos na plataforma.</p>
 
-        <h2>4. Proteção dos dados da criança</h2>
-        <p>O tratamento de dados pessoais da criança deve respeitar seu melhor interesse e a legislação brasileira de proteção de dados.</p>
-        <p>Quando o consentimento for necessário para uma finalidade específica, ele será solicitado de maneira clara e destacada ao pai, à mãe ou ao responsável legal. O responsável poderá exercer os direitos previstos na legislação, inclusive solicitar informações, correção ou exclusão de dados, conforme o caso, pelo contato indicado ao final destes Termos.</p>
-        <p>O Clubinho ABC adotará medidas de segurança adequadas para proteger os dados pessoais tratados na plataforma. As práticas de privacidade e segurança serão explicadas com mais detalhes na Política de Privacidade.</p>
+        <h2>4. Privacidade e dados da criança</h2>
+        <p>O tratamento de dados pessoais deve observar a Lei Geral de Proteção de Dados Pessoais, o melhor interesse da criança e os princípios de necessidade, transparência, segurança e prevenção.</p>
+        <p>A Política de Privacidade informa os dados tratados, suas finalidades e hipóteses legais, os prestadores de serviço envolvidos, os critérios de conservação e os meios para exercer direitos. O Clubinho ABC não utiliza os dados da criança para publicidade comportamental e não vende dados pessoais.</p>
 
-        <h2>5. Uso permitido</h2>
+        <h2>5. Papéis, permissões e controle de acesso</h2>
+        <p>O responsável autenticado pode acessar somente o perfil e os resultados das crianças vinculadas à sua conta. As rotas protegidas da plataforma verificam o token de autenticação e o vínculo entre responsável e criança antes de liberar dados ou registrar resultados.</p>
+        <p>As atividades disponíveis são limitadas à etapa atual da criança, conforme as regras de progressão da plataforma. Tentar alterar identificadores, tokens ou requisições para acessar dados de outra conta constitui uso indevido.</p>
+
+        <h2>6. Uso permitido e condutas proibidas</h2>
         <p>A plataforma e seus conteúdos podem ser utilizados para fins pessoais, familiares e educacionais, respeitadas as funcionalidades oferecidas e os direitos de propriedade intelectual.</p>
         <p>Não é permitido:</p>
         <ul>
-          <li>usar a plataforma para atividades ilícitas;</li>
+          <li>usar a plataforma para atividades ilícitas ou contrárias aos direitos de crianças e adolescentes;</li>
           <li>tentar acessar contas, dados ou áreas restritas sem autorização;</li>
-          <li>interferir no funcionamento ou na segurança da plataforma;</li>
-          <li>vender ou explorar comercialmente os conteúdos sem autorização;</li>
-          <li>copiar ou distribuir os materiais fora dos usos expressamente permitidos pela plataforma ou pela legislação.</li>
+          <li>contornar controles de autenticação, autorização ou progressão;</li>
+          <li>interferir no funcionamento ou na segurança da plataforma, disseminar código malicioso ou realizar testes não autorizados;</li>
+          <li>vender, copiar, modificar ou distribuir os conteúdos fora dos usos permitidos pela plataforma ou pela legislação;</li>
+          <li>utilizar a plataforma ou seus dados para constranger, discriminar ou expor indevidamente o desempenho de uma criança.</li>
         </ul>
+        <p>O uso indevido poderá resultar no bloqueio ou encerramento da conta, preservados o direito de esclarecimento do responsável e os direitos garantidos pela legislação.</p>
 
-        <h2>6. Propriedade intelectual</h2>
-        <p>Textos, atividades, jogos, ilustrações, marcas, logotipos e demais conteúdos do Clubinho ABC pertencem aos seus respectivos titulares. O acesso à plataforma não transfere esses direitos ao usuário.</p>
-        <p>Materiais oferecidos para download ou impressão poderão ser usados para fins pessoais e educacionais, de acordo com as orientações apresentadas junto a cada material. Outros usos dependem de autorização do titular dos direitos, salvo quando permitidos por lei.</p>
+        <h2>7. Propriedade intelectual</h2>
+        <p>Textos, atividades, jogos, ilustrações, marcas, logotipos, código e demais conteúdos do Clubinho ABC pertencem aos seus respectivos titulares. O acesso à plataforma não transfere esses direitos ao usuário.</p>
+        <p>Materiais eventualmente oferecidos para download ou impressão poderão ser usados para fins pessoais e educacionais, conforme as orientações apresentadas. Outros usos dependem de autorização do titular, salvo quando permitidos por lei.</p>
 
-        <h2>7. Disponibilidade e funcionamento</h2>
-        <p>O Clubinho ABC poderá passar por atualizações, manutenção ou interrupções temporárias. A equipe buscará corrigir falhas e manter a plataforma funcionando de forma adequada.</p>
-        <p>Nenhuma disposição destes Termos exclui direitos garantidos por lei nem afasta responsabilidades que não possam ser limitadas legalmente.</p>
+        <h2>8. Disponibilidade, manutenção e suporte</h2>
+        <p>Por se tratar de projeto acadêmico em desenvolvimento, funcionalidades podem ser ajustadas, temporariamente interrompidas ou descontinuadas. A plataforma também poderá ficar indisponível durante manutenção, falhas de conexão ou indisponibilidade de prestadores externos.</p>
+        <p>Dúvidas, relatos de falhas e solicitações de suporte podem ser enviados ao e-mail informado na seção 11. Nenhuma disposição destes Termos exclui direitos garantidos por lei nem afasta responsabilidades que não possam ser legalmente limitadas.</p>
 
-        <h2>8. Alterações nos Termos</h2>
-        <p>Estes Termos poderão ser atualizados para refletir mudanças na plataforma ou na legislação. A versão vigente ficará disponível no site com a data da última revisão.</p>
-        <p>Quando uma mudança afetar de maneira relevante o uso da conta ou o tratamento de dados, o responsável será informado pelos meios de contato disponíveis, conforme o caso.</p>
+        <h2>9. Encerramento da conta</h2>
+        <p>O responsável pode solicitar o encerramento da conta pelo canal de contato indicado nestes Termos. Como a versão atual ainda não possui exclusão automática pela interface, a solicitação será tratada pela equipe, com confirmação da identidade e da legitimidade do solicitante.</p>
+        <p>O encerramento poderá tornar indisponíveis o perfil, o histórico e o progresso da criança. A eliminação, anonimização ou conservação temporária dos dados seguirá os critérios descritos na Política de Privacidade e as obrigações legais aplicáveis.</p>
 
-        <h2>9. Contato</h2>
-        <p>Dúvidas sobre a plataforma, solicitações relacionadas à conta, relatos de problemas e pedidos referentes a dados pessoais podem ser enviados para:</p>
+        <h2>10. Alterações e vigência</h2>
+        <p>Estes Termos vigoram a partir da data indicada no início do documento e poderão ser atualizados para refletir mudanças na plataforma, nos prestadores utilizados ou na legislação.</p>
+        <p>A versão vigente permanecerá disponível na plataforma. Mudanças relevantes serão comunicadas ao responsável pelos meios de contato disponíveis e, quando necessário, será solicitado novo aceite.</p>
+
+        <h2>11. Responsável e contato</h2>
+        <p>O Clubinho ABC é o projeto acadêmico responsável pela administração da plataforma nesta etapa de desenvolvimento. Em uma implantação por escola, empresa ou outra organização, a entidade que determinar as finalidades e os meios do tratamento deverá ser identificada como controladora.</p>
         <p><strong>Responsável pela plataforma:</strong> Clubinho ABC<br />
-          <strong>E-mail de contato:</strong> clubinhoabc@gmail.com</p>
+          <strong>E-mail de contato e suporte:</strong> clubinhoabc@gmail.com</p>
 
-        <h2>10. Legislação aplicável</h2>
+        <h2>12. Legislação aplicável</h2>
         <p>Estes Termos são regidos pelas leis da República Federativa do Brasil, especialmente pela Lei Geral de Proteção de Dados Pessoais (LGPD), pelo Estatuto da Criança e do Adolescente (ECA), pelo Estatuto Digital da Criança e do Adolescente e, quando aplicável, pelo Código de Defesa do Consumidor.</p>
       </section>
     </div>
