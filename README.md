@@ -6,19 +6,47 @@ A alfabetização é uma etapa decisiva na formação escolar, sendo o momento e
 
 ## Tecnologia
 
-- React com Vite
+- Front-end: React + JavaScript + Vite
+- Back-end: Python + Flask
+- Banco: PostgreSQL no Supabase (já conectado, não é mais só planejado)
+- Autenticação: Supabase Auth (cadastro, confirmação por e-mail, login e recuperação de senha)
+- Comunicação: API REST com JSON
+- Áudio: Web Speech API
 
 ## Estrutura atual
 
-Por enquanto, o projeto contém somente a interface. Estão disponíveis a tela de login e o fluxo visual de cadastro da família em três passos. Os componentes ficam em `frontend/src/App.jsx`, os estilos em `frontend/src/styles.css` e os assets locais em `frontend/public/images`.
+O front-end (`frontend/src/App.jsx`, estilos em `frontend/src/styles.css`, assets em `frontend/public/images`) e o back-end (`backend/`, Flask MVC) já se comunicam de verdade. Login está implementado: cadastro, confirmação por e-mail, login e recuperação de senha são feitos pelo Supabase Auth; o back-end valida o token e guarda o perfil (responsável + criança), e as rotas de jogos/resultados exigem esse token e só liberam os dados da própria criança do responsável logado.
+
+## Configuração de ambiente
+
+Login não funciona sem isso configurado (peça as chaves reais do Supabase pra
+equipe, não vão pro Git):
+
+1. Copie `.env.example` (raiz) para `.env` e preencha `VITE_SUPABASE_URL` e
+   `VITE_SUPABASE_ANON_KEY`.
+2. Copie `backend/.env.example` para `backend/.env` e preencha `DATABASE_URL`
+   (com a senha real do banco) e `SUPABASE_JWKS_URL`.
 
 ## Como executar
 
-No terminal, na pasta do projeto, execute:
+FRONTEND - No terminal, na pasta do projeto, execute:
 
-```powershell
+```
 npm install
 npm run dev
+```
+
+BACKEND - Em outro terminal, na pasta do projeto, execute (troque `python`
+por `py` se for esse o comando que funciona na sua máquina — ver detalhes em
+`backend/README.md`):
+
+```
+cd backend
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python seeds.py
+python run.py
 ```
 
 A aplicação estará disponível em `http://localhost:5173`.

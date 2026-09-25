@@ -6,10 +6,12 @@ from app.controllers.etapas_controller import AcessoNegadoError
 from app.models import Atividade, Crianca, Resultado
 
 
-def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada):
+def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada, responsavel_id=None):
     crianca = Crianca.query.get(crianca_id)
     if not crianca:
         raise ValueError('Criança não encontrada')
+    if responsavel_id is not None and crianca.responsavel_id != responsavel_id:
+        raise AcessoNegadoError('Esta criança não pertence ao responsável autenticado')
 
     atividade = Atividade.query.get(atividade_id)
     if not atividade:
@@ -31,7 +33,12 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     return resultado
 
 
-def listar_resultados(crianca_id=None, atividade_id=None):
+def listar_resultados(crianca_id=None, atividade_id=None, responsavel_id=None):
+    if crianca_id is not None and responsavel_id is not None:
+        crianca = Crianca.query.get(crianca_id)
+        if crianca and crianca.responsavel_id != responsavel_id:
+            raise AcessoNegadoError('Esta criança não pertence ao responsável autenticado')
+
     query = Resultado.query
     if crianca_id is not None:
         query = query.filter_by(crianca_id=crianca_id)

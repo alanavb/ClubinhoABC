@@ -3,20 +3,26 @@
 // resposta enviada bate com a esperada e persiste o resultado associado à
 // criança e à atividade.
 
-export const API_BASE_URL = 'http://localhost:5000/api';
+import { API_BASE_URL } from './api';
+import { obterCriancaId, obterToken } from './auth';
 
-export const CHILD_ID_MOCK = 1; // enquanto não há autenticação real, usamos a criança de teste do backend/seeds.py
+export { API_BASE_URL };
 
 // IDs criados por backend/seeds.py, na mesma ordem das atividades do front (CacaAsLetras.jsx)
 const ATIVIDADE_IDS = { ouvir: 1, palavra: 2, memoria: 3, bonus: 4 };
+
+function cabecalhosAutenticados(extras = {}) {
+  const token = obterToken();
+  return token ? { ...extras, Authorization: `Bearer ${token}` } : extras;
+}
 
 export async function registrarResultado(activityKey, respostaEnviada, respostaEsperada) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/resultados`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: cabecalhosAutenticados({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
-        crianca_id: CHILD_ID_MOCK,
+        crianca_id: obterCriancaId(),
         atividade_id: ATIVIDADE_IDS[activityKey],
         resposta_enviada: respostaEnviada,
         resposta_esperada: respostaEsperada,
@@ -31,7 +37,9 @@ export async function registrarResultado(activityKey, respostaEnviada, respostaE
 }
 
 export async function listarResultados() {
-  const resposta = await fetch(`${API_BASE_URL}/resultados?crianca_id=${CHILD_ID_MOCK}`);
+  const resposta = await fetch(`${API_BASE_URL}/resultados?crianca_id=${obterCriancaId()}`, {
+    headers: cabecalhosAutenticados(),
+  });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
   return resposta.json();
 }
