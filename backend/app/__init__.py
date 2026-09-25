@@ -20,8 +20,11 @@ def create_app():
     from .routes.auth_routes import auth_bp
     from .routes.resultados_routes import resultados_bp
     from .routes.etapas_routes import etapas_bp
+    from .routes.auditoria_routes import auditoria_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(resultados_bp, url_prefix='/api')
     app.register_blueprint(etapas_bp, url_prefix='/api')
+    app.register_blueprint(auditoria_bp, url_prefix='/api')
+
 
     return app

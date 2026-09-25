@@ -2,6 +2,7 @@ from flask import Blueprint, g, jsonify, request
 
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller
+from app.controllers.auditoria_controller import registrar_log
 from app.controllers.auth_controller import DadosInvalidosError
 
 auth_bp = Blueprint('auth', __name__)
@@ -32,6 +33,7 @@ def me():
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
+    registrar_log(acao='acesso_responsavel', responsavel_id=responsavel.id)
     return jsonify(_responsavel_para_json(responsavel))
 
 

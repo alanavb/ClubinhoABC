@@ -2,6 +2,7 @@
 """
 
 from app import db
+from app.controllers.auditoria_controller import registrar_log
 from app.controllers.etapas_controller import AcessoNegadoError
 from app.models import Atividade, Crianca, Resultado
 
@@ -30,6 +31,15 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     )
     db.session.add(resultado)
     db.session.commit()
+
+    registrar_log(
+        acao='atividade_realizada' if correta else 'atividade_tentativa',
+        responsavel_id=responsavel_id,
+        crianca_id=crianca_id,
+        detalhes=f'atividade={atividade.chave} resposta_enviada={resposta_enviada}'
+                    f'resposta_esperada={resposta_esperada} correta={correta}',
+    )
+
     return resultado
 
 

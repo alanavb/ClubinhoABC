@@ -1,6 +1,7 @@
 """RN — Login e controle de acesso: perfil do responsável (autenticação em si é do Supabase Auth)."""
 
 from app import db
+from app.controllers.auditoria_controller import registrar_log
 from app.models import Crianca, Etapa, Responsavel
 
 
@@ -44,5 +45,11 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_idad
     )
     db.session.add(crianca)
     db.session.commit()
+
+    registrar_log(
+        acao='cadastro_responsavel',
+        responsavel_id=responsavel.id,
+        detalhes=f'responsavel={responsavel.email} crianca={crianca.nome}',
+)
 
     return responsavel
