@@ -18,4 +18,4 @@ def listar_logs(responsavel_id=None, crianca_id=None):
         query = query.filter_by(responsavel_id=responsavel_id)
     if crianca_id:
         query = query.filter_by(crianca_id=crianca_id)
-    return query.order_by(LogAuditoria.criando_desc()).all()
+    return query.order_by(LogAuditoria.criando_em.desc()).all()

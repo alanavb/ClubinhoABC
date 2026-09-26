@@ -61,6 +61,9 @@ button, input { font: inherit; } button { cursor: pointer; }
 .game-round { display: block; margin-top: 10px; color: #8b6654; font-size: 13px; font-weight: 900; }
 
 /* Termos de uso no login e no cadastro. */
+.legal-links { display: inline-flex; align-items: center; gap: 2px; padding: 0 !important; border: 1px solid #f0d9c4; border-radius: 20px; background: #fffaf0; overflow: hidden; }
+.legal-links button { min-height: 34px; padding: 0 9px; border: 0; color: #a44262; background: transparent; font-size: 11px; font-weight: 900; text-decoration: underline; }
+.legal-links button:hover, .legal-links button:focus-visible { color: #86183e; background: #ffe8f0; outline: 0; }
 .terms-link { display: block; margin: 12px auto 0; padding: 4px; border: 0; color: #b91857; background: transparent; font-size: 13px; font-weight: 900; text-decoration: underline; }
 .terms-acceptance { display: flex; align-items: flex-start; flex-wrap: wrap; gap: 4px; margin-top: 12px; font-size: 13px; }
 .signup-card .terms-acceptance input { width: 18px; height: 18px; flex: 0 0 18px; margin: 1px 5px 0 0; padding: 0; accent-color: #ef1d69; }

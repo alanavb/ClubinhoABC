@@ -49,7 +49,8 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_idad
     registrar_log(
         acao='cadastro_responsavel',
         responsavel_id=responsavel.id,
+        crianca_id=crianca.id,
         detalhes=f'responsavel={responsavel.email} crianca={crianca.nome}',
-)
+    )
 
     return responsavel

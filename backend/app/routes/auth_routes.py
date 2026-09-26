@@ -33,7 +33,13 @@ def me():
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
-    registrar_log(acao='acesso_responsavel', responsavel_id=responsavel.id)
+    # O cadastro atual possui uma criança por responsável; associar o acesso
+    # a ela mantém o registro completo conforme o modelo de auditoria.
+    registrar_log(
+        acao='acesso_responsavel',
+        responsavel_id=responsavel.id,
+        crianca_id=responsavel.criancas[0].id,
+    )
     return jsonify(_responsavel_para_json(responsavel))
 
 

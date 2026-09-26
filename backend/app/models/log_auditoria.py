@@ -17,12 +17,12 @@ class LogAuditoria(db.Model):
     detalhes = db.Column(db.Text, nullable=True)
     criando_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
-def to_dict(self):
-    return {
+    def to_dict(self):
+        return {
             'id': self.id,
             'acao': self.acao,
             'responsavel_id': self.responsavel_id,
             'crianca_id': self.crianca_id,
             'detalhes': self.detalhes,
             'criando_em': self.criando_em.isoformat(),
-    }
+        }

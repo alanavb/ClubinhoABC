@@ -397,6 +397,8 @@ const navItems = [
 function AppHeader({ active, onNavigate }) {
   const perfil = obterPerfil();
   const nomeCrianca = perfil?.criancas?.[0]?.nome || 'Manu';
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
 
   async function sairDaConta() {
     await sair();
@@ -417,8 +419,14 @@ function AppHeader({ active, onNavigate }) {
         <span className="streak">♨ <b>7 dias</b></span>
         <span className="stars">✣ <b>1.240 estrelas</b></span>
         <button className="child-profile" type="button"><img src="/images/mascote.png" alt="" />{nomeCrianca}</button>
+        <span className="legal-links" aria-label="Documentos legais">
+          <button type="button" onClick={() => setShowTerms(true)}>Termos</button>
+          <button type="button" onClick={() => setShowPrivacy(true)}>Privacidade</button>
+        </span>
         <button className="text-link" type="button" onClick={sairDaConta}>Sair</button>
       </div>
+      {showTerms && <TermosDeUso onClose={() => setShowTerms(false)} />}
+      {showPrivacy && <PoliticaDePrivacidade onClose={() => setShowPrivacy(false)} />}
     </header>
   );
 }
