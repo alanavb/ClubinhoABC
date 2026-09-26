@@ -77,6 +77,29 @@ button, input { font: inherit; } button { cursor: pointer; }
 .terms-dialog ul { padding-left: 23px; }
 .terms-close { position: sticky; top: 0; float: right; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; color: #4b2c1f; background: #fff0d9; font-size: 28px; line-height: 1; }
 
+/* Navegação e rodapé da área autenticada. */
+.app-shell { padding: 0 0 42px; }
+.app-header { position: sticky; top: 0; z-index: 5; width: 100%; max-width: none; min-height: 82px; margin: 0; padding: 10px clamp(18px, 3.2vw, 52px); align-items: center; gap: clamp(12px, 2vw, 30px); border-width: 0 0 2px; border-radius: 0; }
+.app-header .brand { margin: 0; font-size: 22px; }
+.app-header .brand-mark { width: 44px; height: 44px; }
+.app-nav { flex: 1; margin: 0; }
+.profile-summary { margin: 0 0 0 auto; }
+.profile-summary > span { padding: 8px 12px; }
+.child-profile { height: 43px; }
+.child-profile img { width: 33px; height: 33px; }
+.profile-summary .text-link { padding: 7px 3px; font-size: 13px; }
+.app-footer { display: flex; align-items: center; justify-content: space-between; max-width: 1280px; margin: 38px auto 0; padding: 18px 8px 0; border-top: 1px solid #eadfd3; color: #987d6e; font-size: 12px; font-weight: 800; }
+.app-footer div { display: flex; gap: 16px; }
+.app-footer button { padding: 0; border: 0; color: #987d6e; background: transparent; font-size: 12px; font-weight: 800; text-decoration: underline; }
+.app-footer button:hover, .app-footer button:focus-visible { color: #b91857; outline: 0; }
+.stat-icon.yellow { background: #ffe27a; }
+.stat-icon.orange { background: linear-gradient(145deg, #ffe08a, #ffa85c); }
+.stat-icon.blue { background: linear-gradient(145deg, #b3eaf0, #7d96d0); }
+.stat-icon.pink { background: linear-gradient(145deg, #f9c3dc, #f17fb3); }
+.stat-icon.pink { font-family: 'Baloo 2', Nunito, sans-serif; font-weight: 800; }
+@media (max-width: 1080px) { .app-header { flex-wrap: wrap; }.app-nav { order: 3; flex-basis: 100%; justify-content: center; }.profile-summary { margin-left: auto; } }
+@media (max-width: 620px) { .app-header { padding-inline: 12px; gap: 8px; }.app-header .brand { font-size: 18px; }.app-header .brand-mark { width: 40px; height: 40px; }.profile-summary { gap: 5px; }.profile-summary > span { padding: 7px 8px; }.app-footer { flex-direction: column; gap: 10px; margin: 28px 14px 0; text-align: center; }.app-footer div { justify-content: center; flex-wrap: wrap; gap: 12px; } }
+
 /* Ajustes visuais da apresentação no login. */
 .page-shell:not(.signup-page) .content-grid { margin-top: 12px; }
 .welcome-panel .stat-card { display: flex; width: auto; min-width: 145px; gap: 9px; }

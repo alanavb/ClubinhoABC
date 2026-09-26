@@ -397,8 +397,6 @@ const navItems = [
 function AppHeader({ active, onNavigate }) {
   const perfil = obterPerfil();
   const nomeCrianca = perfil?.criancas?.[0]?.nome || 'Manu';
-  const [showTerms, setShowTerms] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
 
   async function sairDaConta() {
     await sair();
@@ -416,18 +414,29 @@ function AppHeader({ active, onNavigate }) {
         ))}
       </nav>
       <div className="profile-summary">
-        <span className="streak">♨ <b>7 dias</b></span>
-        <span className="stars">✣ <b>1.240 estrelas</b></span>
+        <span className="streak">🔥 <b>7 dias</b></span>
+        <span className="stars">⭐ <b>1.240 estrelas</b></span>
         <button className="child-profile" type="button"><img src="/images/mascote.png" alt="" />{nomeCrianca}</button>
-        <span className="legal-links" aria-label="Documentos legais">
-          <button type="button" onClick={() => setShowTerms(true)}>Termos</button>
-          <button type="button" onClick={() => setShowPrivacy(true)}>Privacidade</button>
-        </span>
         <button className="text-link" type="button" onClick={sairDaConta}>Sair</button>
+      </div>
+    </header>
+  );
+}
+
+function AppFooter() {
+  const [showTerms, setShowTerms] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
+
+  return (
+    <footer className="app-footer">
+      <span>Clubinho ABC</span>
+      <div>
+        <button type="button" onClick={() => setShowTerms(true)}>Termos de Uso</button>
+        <button type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>
       </div>
       {showTerms && <TermosDeUso onClose={() => setShowTerms(false)} />}
       {showPrivacy && <PoliticaDePrivacidade onClose={() => setShowPrivacy(false)} />}
-    </header>
+    </footer>
   );
 }
 
@@ -450,10 +459,10 @@ function Home({ onNavigate }) {
       <section className="home-content">
         <div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada da Manu</h1></div></div>
         <div className="journey-stats">
-          <Stat icon="☆" value="1.240" label="estrelas ganhas" tone="yellow" />
-          <Stat icon="♨" value="7" label="dias seguidos" tone="orange" />
+          <Stat icon="⭐" value="1.240" label="estrelas ganhas" tone="yellow" />
+          <Stat icon="🔥" value="7" label="dias seguidos" tone="orange" />
           <Stat icon="◷" value="18 min" label="por dia" tone="blue" />
-          <Stat icon="▢" value="34" label="palavras lidas" tone="pink" />
+          <Stat icon="A" value="34" label="palavras lidas" tone="pink" />
         </div>
         <section className="adventure-map" aria-labelledby="map-title">
           <div className="map-banner"><div><h2 id="map-title">Mapa da aventura</h2><p>Manu está atravessando a Ponte das Sílabas.</p></div><img src="/images/mascote.png" alt="Manu, a mascote" /></div>
@@ -473,6 +482,7 @@ function Home({ onNavigate }) {
           {cards.map(([title, image, badge, id]) => <button className="shortcut-card" type="button" onClick={() => onNavigate(id)} key={title}>{badge && <em>{badge}</em>}<img src={`/images/${image}`} alt="" /><strong>{title}</strong></button>)}
         </section>
       </section>
+      <AppFooter />
     </main>
   );
 }
@@ -485,6 +495,7 @@ function Stories({ onNavigate }) {
     <section className="page-content stories-page"><section className="story-hero"><div><span>◔ Hora da história</span><h1>O Soninho da Lua</h1><div className="story-tags"><i>🌙</i><i>🦊</i><i>⭐</i></div><PlayButton children="Ouvir" /><small>♧ &nbsp; 8 min</small></div><img src="/images/ilustra-historias.png" alt="Ilustração da história" /></section>
       <h2 className="section-title">✣ Escolha uma história</h2><div className="story-grid">{stories.map(([icon, title, tag, time]) => <article className="story-card" key={title}><span>{tag}</span><i>{icon}</i><strong>{title}</strong><small>♧ {time}</small></article>)}</div><p className="parent-note">Para os responsáveis: todas as histórias têm narração em áudio e usam as letras e sílabas da fase atual da trilha.</p>
     </section>
+    <AppFooter />
   </main>;
 }
 
@@ -497,6 +508,7 @@ function Activities({ onNavigate }) {
       <div className="filter-row">{['Todas', 'Para imprimir', 'Colorir', 'Recortar', 'Concluídas'].map(item => <button className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
       <div className="activity-grid">{activities.map(([icon, title, desc, tone]) => <article className="activity-card" key={title}><span className={`activity-icon ${tone}`}>{icon}</span><em>✓ Feita</em><h2>{title}</h2><p>{desc}</p><button>⇩ &nbsp; Baixar</button><button className="print">▣</button></article>)}</div>
     </section>
+    <AppFooter />
   </main>;
 }
 
@@ -504,10 +516,11 @@ function Progress({ onNavigate }) {
   const mastery = [['Reconhecer vogais', '100%'], ['Letras do alfabeto', '82%'], ['Sílabas simples', '60%'], ['Leitura de palavras', '35%'], ['Escrita espontânea', '18%']];
   const medals = [['🏅', 'Mestre das vogais'], ['⭐', '7 dias seguidos'], ['📖', 'Primeira leitura'], ['🚀', '50 palavras'], ['♛', 'Rei das sílabas'], ['🌈', 'Trilha completa']];
   return <main className="app-shell"><AppHeader active="progresso" onNavigate={onNavigate} />
-    <section className="page-content progress-page"><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada da Manu</h1></div></div><div className="journey-stats"><Stat icon="☆" value="1.240" label="estrelas ganhas" tone="yellow" /><Stat icon="♨" value="7" label="dias seguidos" tone="orange" /><Stat icon="◷" value="18 min" label="por dia" tone="blue" /><Stat icon="▢" value="34" label="palavras lidas" tone="pink" /></div>
+    <section className="page-content progress-page"><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada da Manu</h1></div></div><div className="journey-stats"><Stat icon="⭐" value="1.240" label="estrelas ganhas" tone="yellow" /><Stat icon="🔥" value="7" label="dias seguidos" tone="orange" /><Stat icon="◷" value="18 min" label="por dia" tone="blue" /><Stat icon="A" value="34" label="palavras lidas" tone="pink" /></div>
       <section className="adventure-map"><div className="map-banner"><div><h2>Mapa da aventura</h2><p>Manu está atravessando a Ponte das Sílabas.</p></div><img src="/images/mascote.png" alt="" /></div><ol className="trail"><li className="finished"><span>✓</span><b>Ilha das Vogais</b><small>100%</small></li><li className="finished"><span>✓</span><b>Vale do Alfabeto</b><small>100%</small></li><li className="current"><span>3</span><b>Ponte das Sílabas</b><small>60%</small></li><li className="locked"><span>♧</span><b>Floresta das Palavras</b><small>a descobrir</small></li><li className="locked"><span>♧</span><b>Castelo das Frases</b><small>a descobrir</small></li></ol></section>
       <div className="progress-bottom"><section className="mastery"><h2>O que a Manu já domina</h2>{mastery.map(([name, value]) => <div className="mastery-row" key={name}><strong>{name}</strong><em>{value}</em><span><i style={{ width: value }} /></span></div>)}</section><section className="medals"><h2>Medalhas <span>3 de 6 conquistadas</span></h2><div>{medals.map(([icon, title], index) => <article className={index > 2 ? 'locked-medal' : ''} key={title}><i>{icon}</i><small>{title}</small></article>)}</div></section></div>
     </section>
+    <AppFooter />
   </main>;
 }
 
@@ -557,7 +570,7 @@ function App() {
   }
   if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
   if (view === 'home') return <Home onNavigate={navigate} />;
-  if (view === 'jogos') return <CacaAsLetras Cabecalho={AppHeader} onNavigate={navigate} />;
+  if (view === 'jogos') return <CacaAsLetras Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
   if (view === 'historias') return <Stories onNavigate={navigate} />;
   if (view === 'atividades') return <Activities onNavigate={navigate} />;
   if (view === 'progresso') return <Progress onNavigate={navigate} />;

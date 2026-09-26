@@ -7,7 +7,7 @@ import Prova from './caca-as-letras/Prova';
 
 const ETAPA_ATUAL_ID = 1; // id da etapa "Caça às Letras" criado por backend/seeds.py
 
-export default function CacaAsLetras({ Cabecalho, onNavigate }) {
+export default function CacaAsLetras({ Cabecalho, Rodape, onNavigate }) {
   const [concluidas, setConcluidas] = useState([]);
   const [atividadeAberta, setAtividadeAberta] = useState(null);
   const [chavesAcessiveis, setChavesAcessiveis] = useState(null); // RN1
@@ -46,5 +46,6 @@ export default function CacaAsLetras({ Cabecalho, onNavigate }) {
       {atividadeAberta === 'bonus' && <Prova aoConcluir={() => concluir('bonus')} aoFechar={() => setAtividadeAberta(null)} />}
       <p className="games-journey-note"><span>{etapaConcluida ? '⭐' : '🔒'}</span>{etapaConcluida ? 'Etapa concluída! O próximo mundo está disponível.' : 'Complete as 3 atividades para abrir o próximo mundo!'}</p>
     </section>
+    <Rodape />
   </main>;
 }
