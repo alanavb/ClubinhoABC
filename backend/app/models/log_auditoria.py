@@ -1,4 +1,5 @@
 import datetime
+from zoneinfo import ZoneInfo
 
 from app import db
 
@@ -17,6 +18,10 @@ class LogAuditoria(db.Model):
     detalhes = db.Column(db.Text, nullable=True)
     criando_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+    def criado_em_brasilia(self):
+        data_utc = self.criando_em.replace(tzinfo=datetime.timezone.utc)
+        return data_utc.astimezone(ZoneInfo('America/Sao_Paulo')).strftime('%d/%m/%Y %H:%M:%S')
+
     def to_dict(self):
         return {
             'id': self.id,
@@ -25,4 +30,5 @@ class LogAuditoria(db.Model):
             'crianca_id': self.crianca_id,
             'detalhes': self.detalhes,
             'criando_em': self.criando_em.isoformat(),
+            'criado_em_brasilia': self.criado_em_brasilia(),
         }
