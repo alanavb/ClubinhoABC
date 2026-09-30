@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn2:definitions xmlns:bpmn2="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" id="ClubinhoABC_Definitions" targetNamespace="https://github.com/alanavb/ClubinhoABC">
+  <bpmn2:process id="ClubinhoABC_Process" name="Clubinho ABC — Alfabetização e acompanhamento" isExecutable="false">
+    <bpmn2:startEvent id="StartEvent" name="Criança ou família acessa a plataforma">
+      <bpmn2:outgoing>Flow_Start_Auth</bpmn2:outgoing>
+    </bpmn2:startEvent>
+    <bpmn2:task id="Task_Auth" name="Autenticar usuário e aplicar controles LGPD">
+      <bpmn2:incoming>Flow_Start_Auth</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Auth_Menu</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:exclusiveGateway id="Gateway_Atendimento" name="Selecionar funcionalidade" gatewayDirection="Diverging">
+      <bpmn2:incoming>Flow_Auth_Menu</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Menu_Atividade</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Menu_Gamificacao</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Menu_Relatorio</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:task id="Task_Atividade" name="Realizar atividade interativa de alfabetização">
+      <bpmn2:incoming>Flow_Menu_Atividade</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Atividade_Avaliacao</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_Avaliacao" name="Avaliar resposta e registrar resultado">
+      <bpmn2:incoming>Flow_Atividade_Avaliacao</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Avaliacao_Progresso</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_Gamificacao" name="Consultar ou atualizar pontos e conquistas">
+      <bpmn2:incoming>Flow_Menu_Gamificacao</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Gamificacao_Progresso</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_Relatorio" name="Consultar acompanhamento familiar">
+      <bpmn2:incoming>Flow_Menu_Relatorio</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Relatorio_Progresso</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:task id="Task_Progresso" name="Persistir e sincronizar progresso no backend Python">
+      <bpmn2:incoming>Flow_Avaliacao_Progresso</bpmn2:incoming>
+      <bpmn2:incoming>Flow_Gamificacao_Progresso</bpmn2:incoming>
+      <bpmn2:incoming>Flow_Relatorio_Progresso</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Progresso_Continuar</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:exclusiveGateway id="Gateway_Continuar" name="Continuar usando a plataforma?" gatewayDirection="Diverging">
+      <bpmn2:incoming>Flow_Progresso_Continuar</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Continuar_Sim</bpmn2:outgoing>
+      <bpmn2:outgoing>Flow_Continuar_Nao</bpmn2:outgoing>
+    </bpmn2:exclusiveGateway>
+    <bpmn2:task id="Task_Menu" name="Retornar ao menu principal">
+      <bpmn2:incoming>Flow_Continuar_Sim</bpmn2:incoming>
+      <bpmn2:outgoing>Flow_Menu_Loop</bpmn2:outgoing>
+    </bpmn2:task>
+    <bpmn2:endEvent id="EndEvent" name="Sessão encerrada">
+      <bpmn2:incoming>Flow_Continuar_Nao</bpmn2:incoming>
+    </bpmn2:endEvent>
+
+    <bpmn2:sequenceFlow id="Flow_Start_Auth" sourceRef="StartEvent" targetRef="Task_Auth"/>
+    <bpmn2:sequenceFlow id="Flow_Auth_Menu" sourceRef="Task_Auth" targetRef="Gateway_Atendimento"/>
+    <bpmn2:sequenceFlow id="Flow_Menu_Atividade" name="Atividade" sourceRef="Gateway_Atendimento" targetRef="Task_Atividade"/>
+    <bpmn2:sequenceFlow id="Flow_Menu_Gamificacao" name="Gamificação" sourceRef="Gateway_Atendimento" targetRef="Task_Gamificacao"/>
+    <bpmn2:sequenceFlow id="Flow_Menu_Relatorio" name="Acompanhamento familiar" sourceRef="Gateway_Atendimento" targetRef="Task_Relatorio"/>
+    <bpmn2:sequenceFlow id="Flow_Atividade_Avaliacao" sourceRef="Task_Atividade" targetRef="Task_Avaliacao"/>
+    <bpmn2:sequenceFlow id="Flow_Avaliacao_Progresso" sourceRef="Task_Avaliacao" targetRef="Task_Progresso"/>
+    <bpmn2:sequenceFlow id="Flow_Gamificacao_Progresso" sourceRef="Task_Gamificacao" targetRef="Task_Progresso"/>
+    <bpmn2:sequenceFlow id="Flow_Relatorio_Progresso" sourceRef="Task_Relatorio" targetRef="Task_Progresso"/>
+    <bpmn2:sequenceFlow id="Flow_Progresso_Continuar" sourceRef="Task_Progresso" targetRef="Gateway_Continuar"/>
+    <bpmn2:sequenceFlow id="Flow_Continuar_Sim" name="Sim" sourceRef="Gateway_Continuar" targetRef="Task_Menu"/>
+    <bpmn2:sequenceFlow id="Flow_Menu_Loop" sourceRef="Task_Menu" targetRef="Gateway_Atendimento"/>
+    <bpmn2:sequenceFlow id="Flow_Continuar_Nao" name="Não" sourceRef="Gateway_Continuar" targetRef="EndEvent"/>
+  </bpmn2:process>
+
+  <bpmndi:BPMNDiagram id="BPMNDiagram_ClubinhoABC">
+    <bpmndi:BPMNPlane id="BPMNPlane_ClubinhoABC" bpmnElement="ClubinhoABC_Process">
+      <dc:Bounds x="0" y="0" width="1500" height="650"/>
+      <bpmndi:BPMNShape id="Shape_StartEvent" bpmnElement="StartEvent"><dc:Bounds x="40" y="280" width="36" height="36"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Auth" bpmnElement="Task_Auth"><dc:Bounds x="110" y="258" width="180" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Atendimento" bpmnElement="Gateway_Atendimento"><dc:Bounds x="350" y="273" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Atividade" bpmnElement="Task_Atividade"><dc:Bounds x="470" y="100" width="210" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Avaliacao" bpmnElement="Task_Avaliacao"><dc:Bounds x="750" y="100" width="210" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Gamificacao" bpmnElement="Task_Gamificacao"><dc:Bounds x="470" y="240" width="210" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Relatorio" bpmnElement="Task_Relatorio"><dc:Bounds x="470" y="380" width="210" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Progresso" bpmnElement="Task_Progresso"><dc:Bounds x="1030" y="240" width="230" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Gateway_Continuar" bpmnElement="Gateway_Continuar"><dc:Bounds x="1320" y="255" width="50" height="50"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_Task_Menu" bpmnElement="Task_Menu"><dc:Bounds x="1210" y="420" width="180" height="80"/></bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Shape_EndEvent" bpmnElement="EndEvent"><dc:Bounds x="1430" y="262" width="36" height="36"/></bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn2:definitions>
