@@ -7,9 +7,12 @@ from .config import Config
 db = SQLAlchemy()
 
 
-def create_app():
+def create_app(test_config=None):
+    """Cria a aplicação e aceita configuração descartável para testes."""
     app = Flask(__name__)
     app.config.from_object(Config)
+    if test_config:
+        app.config.update(test_config)
 
     db.init_app(app)
     # Front-end (Vite, porta 5173) e back-end (porta 5000) rodam em origens
@@ -20,8 +23,11 @@ def create_app():
     from .routes.auth_routes import auth_bp
     from .routes.resultados_routes import resultados_bp
     from .routes.etapas_routes import etapas_bp
+    from .routes.auditoria_routes import auditoria_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(resultados_bp, url_prefix='/api')
     app.register_blueprint(etapas_bp, url_prefix='/api')
+    app.register_blueprint(auditoria_bp, url_prefix='/api')
+
 
     return app

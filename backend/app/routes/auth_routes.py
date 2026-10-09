@@ -2,6 +2,7 @@ from flask import Blueprint, g, jsonify, request
 
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller
+from app.controllers.auditoria_controller import registrar_log
 from app.controllers.auth_controller import DadosInvalidosError
 
 auth_bp = Blueprint('auth', __name__)
@@ -32,6 +33,13 @@ def me():
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
+    # O cadastro atual possui uma criança por responsável; associar o acesso
+    # a ela mantém o registro completo conforme o modelo de auditoria.
+    registrar_log(
+        acao='acesso_responsavel',
+        responsavel_id=responsavel.id,
+        crianca_id=responsavel.criancas[0].id,
+    )
     return jsonify(_responsavel_para_json(responsavel))
 
 
