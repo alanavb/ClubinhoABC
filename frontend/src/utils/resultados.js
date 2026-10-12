@@ -17,13 +17,17 @@ function cabecalhosAutenticados(extras = {}) {
 }
 
 export async function registrarResultado(activityKey, respostaEnviada, respostaEsperada) {
+  return registrarResultadoPorId(ATIVIDADE_IDS[activityKey], respostaEnviada, respostaEsperada);
+}
+
+export async function registrarResultadoPorId(atividadeId, respostaEnviada, respostaEsperada) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/resultados`, {
       method: 'POST',
       headers: cabecalhosAutenticados({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         crianca_id: obterCriancaId(),
-        atividade_id: ATIVIDADE_IDS[activityKey],
+        atividade_id: atividadeId,
         resposta_enviada: respostaEnviada,
         resposta_esperada: respostaEsperada,
       }),

@@ -2,7 +2,7 @@
 RN3 — Atividade obrigatória (conclusão da etapa)
 """
 
-from app.models import Atividade, Crianca, Resultado
+from app.models import Atividade, Crianca, Etapa, Resultado
 
 
 class AcessoNegadoError(Exception):
@@ -20,7 +20,7 @@ def _buscar_crianca(crianca_id, responsavel_id=None):
 
 
 def pode_acessar_atividade(crianca_id, atividade_id):
-    """RN1: a criança só pode acessar atividades da etapa em que se encontra."""
+    # RN1: a criança só pode acessar atividades da etapa em que se encontra
     crianca = _buscar_crianca(crianca_id)
 
     atividade = Atividade.query.get(atividade_id)
@@ -31,7 +31,7 @@ def pode_acessar_atividade(crianca_id, atividade_id):
 
 
 def listar_atividades_acessiveis(crianca_id, responsavel_id=None):
-    """RN1: lista só as atividades da etapa atual da criança."""
+    #RN1: lista só as atividades da etapa atual da criança
     crianca = _buscar_crianca(crianca_id, responsavel_id)
 
     atividades = (
@@ -41,6 +41,15 @@ def listar_atividades_acessiveis(crianca_id, responsavel_id=None):
         .all()
     )
     return crianca, atividades
+
+
+def listar_atividades_por_etapa(chave_etapa):
+    etapa = Etapa.query.filter_by(chave=chave_etapa).first()
+    if not etapa:
+        raise ValueError('Etapa não encontrada')
+
+    atividades = Atividade.query.filter_by(etapa_id=etapa.id).order_by(Atividade.ordem).all()
+    return etapa, atividades
 
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id) #A etapa só concluí quando todas as atividades obrigatórias tiverem ao menos um resultado correto.

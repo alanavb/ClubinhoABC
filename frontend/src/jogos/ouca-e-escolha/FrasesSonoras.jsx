@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
+import { registrarResultadoPorId } from '../../utils/resultados';
 
 const desafios = [
   { nivel: 'Nível 1 · frase curta', resposta: 'A bola vermelha rola na grama.', opcoes: [{ frase: 'A bola vermelha rola na grama.' }, { frase: 'A bola azul rola na grama.' }, { frase: 'A bola vermelha cai na grama.' }] },
@@ -8,11 +9,11 @@ const desafios = [
   { nivel: 'Nível 3 · frase maior', resposta: 'Depois da chuva, a menina encontrou uma borboleta azul no jardim.', opcoes: [{ frase: 'Depois da chuva, a menina encontrou uma borboleta azul no jardim.' }, { frase: 'Depois da chuva, a menina encontrou uma borboleta rosa no jardim.' }, { frase: 'Depois da chuva, a menina encontrou uma borboleta azul no parque.' }] },
 ];
 
-export default function FrasesSonoras({ aoConcluir, aoFechar }) {
+export default function FrasesSonoras({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
-  const responder = (frase) => { if (retorno !== 'correct') { falar(frase); setRetorno(frase === desafio.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (frase) => { if (retorno !== 'correct') { falar(frase); registrarResultadoPorId(atividadeId, frase, desafio.resposta); setRetorno(frase === desafio.resposta ? 'correct' : 'incorrect'); } };
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frases-sonoras" aria-live="polite"><div className="game-session-card sound-session">

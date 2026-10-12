@@ -26,3 +26,11 @@ export async function buscarStatusEtapa(etapaId) {
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
   return resposta.json(); // { etapa_id, child_id, concluida, atividades: [...] }
 }
+
+export async function buscarAtividadesDaEtapa(chaveEtapa) {
+  const resposta = await fetch(`${API_BASE_URL}/etapas/${chaveEtapa}/atividades`, {
+    headers: cabecalhosAutenticados(),
+  });
+  if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+  return resposta.json();
+}

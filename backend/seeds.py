@@ -3,6 +3,30 @@ from app.models import Atividade, Etapa
 
 app = create_app()
 
+
+def garantir_atividades(etapa, atividades):
+    """Cria apenas as atividades que ainda não existem, sem alterar dados já cadastrados."""
+    criadas = []
+    for chave, nome, ordem, obrigatoria in atividades:
+        atividade = Atividade.query.filter_by(chave=chave).first()
+        if atividade:
+            print(f'Atividade "{atividade.nome}" já existia, nada foi alterado.')
+            continue
+
+        db.session.add(Atividade(
+            etapa_id=etapa.id,
+            chave=chave,
+            nome=nome,
+            ordem=ordem,
+            obrigatoria=obrigatoria,
+        ))
+        criadas.append(nome)
+
+    if criadas:
+        db.session.commit()
+        print(f'Atividades criadas na etapa "{etapa.nome}": {", ".join(criadas)}.')
+
+
 with app.app_context():
     db.create_all()
 
@@ -11,39 +35,45 @@ with app.app_context():
         etapa1 = Etapa(chave='caca-as-letras', nome='Caça às Letras', ordem=1)
         db.session.add(etapa1)
         db.session.commit()
-
-        db.session.add_all([
-            Atividade(etapa_id=etapa1.id, chave='ouvir', nome='Ouça e escolha', ordem=1, obrigatoria=True),
-            Atividade(etapa_id=etapa1.id, chave='palavra', nome='Com qual letra começa?', ordem=2, obrigatoria=True),
-            Atividade(etapa_id=etapa1.id, chave='memoria', nome='Jogo da memória', ordem=3, obrigatoria=True),
-        ])
-        db.session.commit()
-        print('Etapa "Caça às Letras" e suas 3 atividades criadas.')
+        print('Etapa "Caça às Letras" criada.')
     else:
         print('Etapa "Caça às Letras" já existia, nada foi criado.')
 
-    bonus = Atividade.query.filter_by(chave='bonus').first() #Atividade bônus para testar o RN3
-    if not bonus:
-        bonus = Atividade(etapa_id=etapa1.id, chave='bonus', nome='Desafio bônus', ordem=4, obrigatoria=False)
-        db.session.add(bonus)
-        db.session.commit()
-        print('Atividade "Desafio bônus" (opcional) criada na etapa "Caça às Letras".')
-    else:
-        print('Atividade "Desafio bônus" já existia, nada foi criado.')
+    garantir_atividades(etapa1, [
+        ('ouvir', 'Qual é a letra?', 1, True),
+        ('palavra', 'Com qual letra começa?', 2, True),
+        ('memoria', 'Jogo da memória', 3, True),
+        ('bonus', 'Desafio bônus', 4, False),
+    ])
 
     etapa2 = Etapa.query.filter_by(chave='monte-a-palavra').first()
     if not etapa2:
         etapa2 = Etapa(chave='monte-a-palavra', nome='Monte a Palavra', ordem=2)
         db.session.add(etapa2)
         db.session.commit()
-
-        db.session.add(
-            Atividade(etapa_id=etapa2.id, chave='formar-palavra', nome='Forme a palavra', ordem=1, obrigatoria=True)
-        )
-        db.session.commit()
         print('Etapa "Monte a Palavra" criada (placeholder, para testar o RN1).')
     else:
         print('Etapa "Monte a Palavra" já existia, nada foi criado.')
+
+    garantir_atividades(etapa2, [
+        ('formar-palavra', 'Forme a palavra', 1, True),
+    ])
+
+    etapa3 = Etapa.query.filter_by(chave='ouca-e-escolha').first()
+    if not etapa3:
+        etapa3 = Etapa(chave='ouca-e-escolha', nome='Ouça e Escolha', ordem=3)
+        db.session.add(etapa3)
+        db.session.commit()
+        print('Etapa "Ouça e Escolha" criada.')
+    else:
+        print('Etapa "Ouça e Escolha" já existia, nada foi criado.')
+
+    garantir_atividades(etapa3, [
+        ('frase-cena', 'Rádio das Histórias', 1, True),
+        ('complete-frase', 'Balões de Palavras', 2, True),
+        ('frases-sonoras', 'Frases Sonoras', 3, True),
+        ('bonus-ouca', 'Detetive de Histórias', 4, False),
+    ])
 
     # Responsável e criança não são mais fabricados aqui: a conta agora nasce
     # no Supabase Auth (cadastro real, com confirmação por e-mail) e o perfil

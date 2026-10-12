@@ -17,7 +17,7 @@ def _responsavel_atual():
 @etapas_bp.route('/criancas/<int:crianca_id>/atividades', methods=['GET'])
 @requer_autenticacao
 def atividades_acessiveis(crianca_id):
-    """RN1 — só devolve as atividades da etapa atual da criança."""
+    #RN1 — só devolve as atividades da etapa atual da criança
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
         return erro_resposta
@@ -46,10 +46,34 @@ def atividades_acessiveis(crianca_id):
     })
 
 
+@etapas_bp.route('/etapas/<string:chave_etapa>/atividades', methods=['GET'])
+@requer_autenticacao
+def atividades_da_etapa(chave_etapa):
+    #Devolve os IDs das atividades cadastradas para uma etapa do jogo
+    try:
+        etapa, atividades = etapas_controller.listar_atividades_por_etapa(chave_etapa)
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+
+    return jsonify({
+        'etapa_id': etapa.id,
+        'chave': etapa.chave,
+        'atividades': [
+            {
+                'activity_id': atividade.id,
+                'chave': atividade.chave,
+                'nome': atividade.nome,
+                'obrigatoria': atividade.obrigatoria,
+            }
+            for atividade in atividades
+        ],
+    })
+
+
 @etapas_bp.route('/criancas/<int:crianca_id>/etapas/<int:etapa_id>/status', methods=['GET'])
 @requer_autenticacao
 def etapa_status(crianca_id, etapa_id):
-    """RN3 — diz se a etapa está concluída (todas as obrigatórias feitas)."""
+    #RN3 — diz se a etapa está concluída (todas as obrigatórias feitas)
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
         return erro_resposta

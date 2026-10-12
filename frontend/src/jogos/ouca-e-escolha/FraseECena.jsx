@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
+import { registrarResultadoPorId } from '../../utils/resultados';
 
 const rodadas = [
   { frase: 'O gato dorme no tapete.', resposta: 'gato', opcoes: [{ id: 'gato', icone: '🐱', texto: 'O gato dorme no tapete.' }, { id: 'pato', icone: '🦆', texto: 'O pato nada no lago.' }, { id: 'bola', icone: '⚽', texto: 'A bola rola no chão.' }] },
@@ -8,11 +9,11 @@ const rodadas = [
   { frase: 'O menino come uva no lanche.', resposta: 'uva', opcoes: [{ id: 'uva', icone: '🍇', texto: 'O menino come uva no lanche.' }, { id: 'lua', icone: '🌙', texto: 'A lua aparece à noite.' }, { id: 'foca', icone: '🦭', texto: 'A foca nada no mar.' }] },
 ];
 
-export default function FraseECena({ aoConcluir, aoFechar }) {
+export default function FraseECena({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const rodada = rodadas[indice];
-  const responder = (id, texto) => { if (retorno !== 'correct') { falar(texto); setRetorno(id === rodada.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (id, texto) => { if (retorno !== 'correct') { falar(texto); registrarResultadoPorId(atividadeId, texto, rodada.frase); setRetorno(id === rodada.resposta ? 'correct' : 'incorrect'); } };
   const avancar = () => { if (indice === rodadas.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frase-cena" aria-live="polite"><div className="game-session-card sound-session">

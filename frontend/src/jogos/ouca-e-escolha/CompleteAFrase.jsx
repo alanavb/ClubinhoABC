@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
+import { registrarResultadoPorId } from '../../utils/resultados';
 
 const desafios = [
   { completa: 'A bola rola.', partes: ['A bola', '.'], resposta: 'rola', opcoes: ['rola', 'mia', 'voa'], icone: '⚽' },
@@ -8,11 +9,11 @@ const desafios = [
   { completa: 'A menina rega a flor.', partes: ['A menina', 'a flor.'], resposta: 'rega', opcoes: ['rega', 'come', 'lê'], icone: '🌷' },
 ];
 
-export default function CompleteAFrase({ aoConcluir, aoFechar }) {
+export default function CompleteAFrase({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
-  const responder = (palavra) => { if (retorno !== 'correct') { falar(palavra); setRetorno(palavra === desafio.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (palavra) => { if (retorno !== 'correct') { falar(palavra); registrarResultadoPorId(atividadeId, palavra, desafio.resposta); setRetorno(palavra === desafio.resposta ? 'correct' : 'incorrect'); } };
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage complete-frase" aria-live="polite"><div className="game-session-card sound-session">
