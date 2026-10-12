@@ -9,6 +9,7 @@ import {
   entrar,
   enviarRecuperacaoSenha,
   estaAutenticado,
+  obterCriancaId,
   obterPerfil,
   perfilCompleto,
   precisaRedefinirSenha,
@@ -398,7 +399,7 @@ const navItems = [
 function AppHeader({ active, onNavigate }) {
   const perfil = obterPerfil();
   const nomeCrianca = perfil?.criancas?.[0]?.nome || 'Manu';
-  const estrelas = useEstrelas();
+  const estrelas = useEstrelas(obterCriancaId());
 
   async function sairDaConta() {
     await sair();
@@ -446,27 +447,34 @@ function Stat({ icon, value, label, tone }) {
   return <article className="journey-stat"><span className={`stat-icon ${tone}`}>{icon}</span><div><strong>{value}</strong><small>{label}</small></div></article>;
 }
 
-function useEstrelas() {
+function useEstrelas(criancaId) {
   const [estrelas, setEstrelas] = useState(0);
 
   useEffect(() => {
     const atualizarEstrelas = () => {
-      buscarResumoProgresso()
-        .then((resumo) => setEstrelas(resumo.estrelas))
+      if (!criancaId) {
+        setEstrelas(0);
+        return;
+      }
+
+      buscarResumoProgresso(criancaId)
+        .then((resumo) => {
+          if (resumo.child_id === criancaId) setEstrelas(resumo.estrelas);
+        })
         .catch(() => setEstrelas(0));
     };
 
     atualizarEstrelas();
     window.addEventListener('progresso-atualizado', atualizarEstrelas);
     return () => window.removeEventListener('progresso-atualizado', atualizarEstrelas);
-  }, []);
+  }, [criancaId]);
 
   return estrelas;
 }
 
 function Home({ onNavigate }) {
   const nomeCrianca = obterPerfil()?.criancas?.[0]?.nome || 'criança';
-  const estrelas = useEstrelas();
+  const estrelas = useEstrelas(obterCriancaId());
   const cards = [
     ['Jogar', 'ilustra-jogos.png', '32', 'jogos'],
     ['Histórias', 'ilustra-historias.png', '', 'historias'],
@@ -536,7 +544,7 @@ function Activities({ onNavigate }) {
 
 function Progress({ onNavigate }) {
   const nomeCrianca = obterPerfil()?.criancas?.[0]?.nome || 'criança';
-  const estrelas = useEstrelas();
+  const estrelas = useEstrelas(obterCriancaId());
   const mastery = [['Reconhecer vogais', '100%'], ['Letras do alfabeto', '82%'], ['Sílabas simples', '60%'], ['Leitura de palavras', '35%'], ['Escrita espontânea', '18%']];
   const medals = [['🏅', 'Mestre das vogais'], ['⭐', '7 dias seguidos'], ['📖', 'Primeira leitura'], ['🚀', '50 palavras'], ['♛', 'Rei das sílabas'], ['🌈', 'Trilha completa']];
   return <main className="app-shell"><AppHeader active="progresso" onNavigate={onNavigate} />
@@ -594,7 +602,7 @@ function App() {
   }
   if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
   if (view === 'home') return <Home onNavigate={navigate} />;
-  if (view === 'jogos') return <CacaAsLetras Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
+  if (view === 'jogos') return <CacaAsLetras key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
   if (view === 'historias') return <Stories onNavigate={navigate} />;
   if (view === 'atividades') return <Activities onNavigate={navigate} />;
   if (view === 'progresso') return <Progress onNavigate={navigate} />;

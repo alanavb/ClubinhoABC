@@ -19,8 +19,8 @@ export async function buscarAtividadesAcessiveis() {
   return resposta.json();
 }
 
-export async function buscarResumoProgresso() {
-  const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/progresso`, {
+export async function buscarResumoProgresso(criancaId = obterCriancaId()) {
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}/progresso`, {
     headers: cabecalhosAutenticados(),
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);

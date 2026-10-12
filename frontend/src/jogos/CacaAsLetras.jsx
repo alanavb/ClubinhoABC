@@ -25,6 +25,28 @@ export default function CacaAsLetras({ Cabecalho, Rodape, onNavigate }) {
   }, []);
 
   useEffect(() => {
+    let telaAtiva = true;
+
+    buscarStatusEtapa(ETAPA_ATUAL_ID)
+      .then((status) => {
+        if (!telaAtiva) return;
+
+        setEtapaConcluida(status.concluida);
+        setConcluidas(
+          status.atividades
+            .filter((atividade) => atividade.realizada)
+            .map((atividade) => atividade.chave)
+            .filter(Boolean)
+        );
+      })
+      .catch((erro) => console.error('RN3: não foi possível carregar o progresso da Etapa 1.', erro));
+
+    return () => {
+      telaAtiva = false;
+    };
+  }, []);
+
+  useEffect(() => {
     buscarStatusEtapa(ETAPA_ATUAL_ID)
       .then((status) => setEtapaConcluida(status.concluida))
       .catch((erro) => console.error('RN3: não foi possível verificar a conclusão da etapa.', erro));
