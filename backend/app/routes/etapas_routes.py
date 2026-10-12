@@ -46,6 +46,23 @@ def atividades_acessiveis(crianca_id):
     })
 
 
+@etapas_bp.route('/criancas/<int:crianca_id>/progresso', methods=['GET'])
+@requer_autenticacao
+def progresso_da_crianca(crianca_id):
+    responsavel_id, erro_resposta = _responsavel_atual()
+    if erro_resposta:
+        return erro_resposta
+
+    try:
+        resumo = etapas_controller.resumo_progresso(crianca_id, responsavel_id=responsavel_id)
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+    except AcessoNegadoError as erro:
+        return jsonify({'erro': str(erro)}), 403
+
+    return jsonify(resumo)
+
+
 @etapas_bp.route('/etapas/<string:chave_etapa>/atividades', methods=['GET'])
 @requer_autenticacao
 def atividades_da_etapa(chave_etapa):

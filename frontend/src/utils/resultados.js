@@ -33,7 +33,9 @@ export async function registrarResultadoPorId(atividadeId, respostaEnviada, resp
       }),
     });
     if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-    return await resposta.json();
+    const resultado = await resposta.json();
+    if (resultado.correct) window.dispatchEvent(new Event('progresso-atualizado'));
+    return resultado;
   } catch (erro) {
     console.error('RN2: não foi possível registrar o resultado no back-end.', erro);
     return null;

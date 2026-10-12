@@ -49,6 +49,29 @@ def listar_atividades_por_etapa(chave_etapa):
     atividades = Atividade.query.filter_by(etapa_id=etapa.id).order_by(Atividade.ordem).all()
     return etapa, atividades
 
+
+def resumo_progresso(crianca_id, responsavel_id=None):
+    crianca = _buscar_crianca(crianca_id, responsavel_id)
+    estrelas = 0
+    atividades_concluidas = 0
+
+    for atividade in Atividade.query.order_by(Atividade.ordem).all():
+        foi_concluida = (
+            Resultado.query
+            .filter_by(crianca_id=crianca.id, atividade_id=atividade.id, correta=True)
+            .first()
+            is not None
+        )
+        if foi_concluida:
+            atividades_concluidas += 1
+            estrelas += 1 if atividade.obrigatoria else 2
+
+    return {
+        'child_id': crianca.id,
+        'estrelas': estrelas,
+        'atividades_concluidas': atividades_concluidas,
+    }
+
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id) #A etapa só concluí quando todas as atividades obrigatórias tiverem ao menos um resultado correto.
 
@@ -66,6 +89,7 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
         )
         detalhes.append({
             'activity_id': atividade.id,
+            'chave': getattr(atividade, 'chave', None),
             'nome': atividade.nome,
             'obrigatoria': atividade.obrigatoria,
             'realizada': realizada,

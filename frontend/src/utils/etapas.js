@@ -19,6 +19,14 @@ export async function buscarAtividadesAcessiveis() {
   return resposta.json();
 }
 
+export async function buscarResumoProgresso() {
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/progresso`, {
+    headers: cabecalhosAutenticados(),
+  });
+  if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+  return resposta.json(); // { child_id, estrelas, atividades_concluidas }
+}
+
 export async function buscarStatusEtapa(etapaId) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/etapas/${etapaId}/status`, {
     headers: cabecalhosAutenticados(),
