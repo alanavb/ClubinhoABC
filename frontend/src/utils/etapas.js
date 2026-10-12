@@ -16,7 +16,7 @@ export async function buscarAtividadesAcessiveis() {
     headers: cabecalhosAutenticados(),
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-  return resposta.json(); // { child_id, etapa_atual_id, atividades: [{ activity_id, chave, nome, obrigatoria }] }
+  return resposta.json();
 }
 
 export async function buscarStatusEtapa(etapaId) {
@@ -24,11 +24,20 @@ export async function buscarStatusEtapa(etapaId) {
     headers: cabecalhosAutenticados(),
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
-  return resposta.json(); // { etapa_id, child_id, concluida, atividades: [...] }
+  return resposta.json();
 }
 
 export async function buscarAtividadesDaEtapa(chaveEtapa) {
   const resposta = await fetch(`${API_BASE_URL}/etapas/${chaveEtapa}/atividades`, {
+    headers: cabecalhosAutenticados(),
+  });
+  if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+  return resposta.json();
+}
+
+export async function concluirEtapa(etapaId) {
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/etapas/${etapaId}/concluir`, {
+    method: 'POST',
     headers: cabecalhosAutenticados(),
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);

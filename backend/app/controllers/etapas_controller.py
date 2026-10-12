@@ -1,7 +1,5 @@
-"""RN1 — Atividade pertence a uma etapa (controle de acesso)
-RN3 — Atividade obrigatória (conclusão da etapa)
-"""
 
+from app import db
 from app.models import Atividade, Crianca, Etapa, Resultado
 
 
@@ -81,4 +79,36 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
         'child_id': crianca.id,
         'concluida': concluida,
         'atividades': detalhes,
+    }
+
+
+def avancar_etapa_se_concluida(crianca_id, etapa_id, responsavel_id=None):
+    crianca = _buscar_crianca(crianca_id, responsavel_id)
+    if crianca.etapa_atual_id != etapa_id:
+        raise AcessoNegadoError('Esta não é a etapa atual da criança')
+
+    status = status_etapa(crianca_id, etapa_id, responsavel_id)
+    if not status['concluida']:
+        return {**status, 'avancou': False, 'proxima_etapa': None}
+
+    etapa_atual = Etapa.query.get(etapa_id)
+    proxima_etapa = (
+        Etapa.query
+        .filter(Etapa.ordem > etapa_atual.ordem)
+        .order_by(Etapa.ordem)
+        .first()
+    )
+    if not proxima_etapa:
+        return {**status, 'avancou': False, 'proxima_etapa': None}
+
+    crianca.etapa_atual_id = proxima_etapa.id
+    db.session.commit()
+    return {
+        **status,
+        'avancou': True,
+        'proxima_etapa': {
+            'id': proxima_etapa.id,
+            'chave': proxima_etapa.chave,
+            'nome': proxima_etapa.nome,
+        },
     }

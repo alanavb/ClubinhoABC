@@ -86,3 +86,22 @@ def etapa_status(crianca_id, etapa_id):
         return jsonify({'erro': str(erro)}), 403
 
     return jsonify(status)
+
+
+@etapas_bp.route('/criancas/<int:crianca_id>/etapas/<int:etapa_id>/concluir', methods=['POST'])
+@requer_autenticacao
+def concluir_etapa(crianca_id, etapa_id):
+    responsavel_id, erro_resposta = _responsavel_atual()
+    if erro_resposta:
+        return erro_resposta
+
+    try:
+        resultado = etapas_controller.avancar_etapa_se_concluida(
+            crianca_id, etapa_id, responsavel_id=responsavel_id
+        )
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+    except AcessoNegadoError as erro:
+        return jsonify({'erro': str(erro)}), 403
+
+    return jsonify(resultado)
