@@ -8,10 +8,10 @@ import { buscarAtividadesDaEtapa, buscarStatusEtapa, concluirEtapa } from '../ut
 const ETAPA_ID = 3;
 
 const fases = [
-  { id: 'cena', chave: 'frase-cena', numero: 1, icone: '📻', titulo: 'Rádio das Histórias', texto: 'Ouça uma frase curta e escolha a cena certa.', obrigatoria: true },
-  { id: 'completar', chave: 'complete-frase', numero: 2, icone: '🎈', titulo: 'Balões de Palavras', texto: 'Ouça a frase e escolha a palavra que falta.', obrigatoria: true },
-  { id: 'frases', chave: 'frases-sonoras', numero: 3, icone: '🚂', titulo: 'Frases Sonoras', texto: 'Ouça, leia e encontre a frase correspondente.', obrigatoria: true },
-  { id: 'bonus', chave: 'bonus-ouca', numero: 'BÔNUS', icone: '🔎', titulo: 'Detetive de Histórias', texto: 'Ouça uma história maior e encontre a pista certa.', obrigatoria: false },
+  { id: 'cena', chave: 'frase-cena', numero: 1, icone: '📻', titulo: 'Rádio das Histórias', obrigatoria: true },
+  { id: 'completar', chave: 'complete-frase', numero: 2, icone: '🎈', titulo: 'Balões de Palavras', obrigatoria: true },
+  { id: 'frases', chave: 'frases-sonoras', numero: 3, icone: '🚂', titulo: 'Frases Sonoras', obrigatoria: true },
+  { id: 'bonus', chave: 'bonus-ouca', numero: 'BÔNUS', icone: '💎', titulo: 'Desafio Bônus', obrigatoria: false },
 ];
 
 export default function OucaEEscolha() {
@@ -26,9 +26,10 @@ export default function OucaEEscolha() {
         const idsConcluidos = status.atividades
           .filter((atividade) => atividade.realizada)
           .map((atividade) => atividade.activity_id);
-        setConcluidas(fases
+        const fasesSalvas = fases
           .filter((fase) => idsConcluidos.includes(dados.atividades.find((atividade) => atividade.chave === fase.chave)?.activity_id))
-          .map((fase) => fase.id));
+          .map((fase) => fase.id);
+        setConcluidas((atuais) => [...new Set([...atuais, ...fasesSalvas])]);
       })
       .catch((erro) => console.error('Não foi possível carregar as atividades da Etapa 3.', erro));
   }, []);
@@ -59,10 +60,10 @@ export default function OucaEEscolha() {
   const concluidasObrigatorias = concluidas.filter((id) => fases.find((fase) => fase.id === id)?.obrigatoria).length;
 
   return <section className="current-world sentence-world" aria-labelledby="ouca-escolha-title">
-    <header className="sentence-world-header"><div><span>👂</span><section><small>ETAPA 3</small><h2 id="ouca-escolha-title">Ouça e Escolha</h2><p>Frases, escuta e leitura ativa.</p></section></div><b>✦ {concluidasObrigatorias}/3</b></header>
-    <div className="sentence-world-activities">{fases.map(({ id, chave, numero, icone, titulo, texto, obrigatoria }, indice) => <article className={`sentence-phase-card ${obrigatoria ? '' : 'bonus-phase'}`} key={id}>
-      <span className="sentence-phase-icon">{icone}</span><small>FASE {numero}</small><h3>{titulo}</h3><p>{texto}</p>
-      {concluidas.includes(id) ? <b className="phase-done">✓ Concluída</b> : faseDisponivel(indice) && atividadeId(chave) ? <button type="button" onClick={() => setFaseAberta(id)}>▶ &nbsp; Jogar</button> : <small className="phase-locked">{atividadeId(chave) ? '🔒' : 'Carregando...'}</small>}
+    <header className="sentence-world-header"><div><span>🎧</span><section><small>ETAPA 3</small><h2 id="ouca-escolha-title">Ouça e Escolha</h2><p>Frases, escuta e leitura ativa.</p></section></div><b>⭐ {concluidasObrigatorias}/3</b></header>
+    <div className="sentence-world-activities">{fases.map(({ id, chave, numero, icone, titulo, obrigatoria }, indice) => <article className={`sentence-phase-card ${obrigatoria ? '' : 'bonus-phase'} ${!faseDisponivel(indice) ? 'locked-phase' : ''}`} key={id}>
+      <span className="sentence-phase-icon">{icone}</span><small>{numero === 'BÔNUS' ? numero : `FASE ${numero}`}</small><h3>{titulo}</h3>
+      {concluidas.includes(id) ? <b className="phase-done">⭐ Feito!</b> : faseDisponivel(indice) && atividadeId(chave) ? <button type="button" onClick={() => setFaseAberta(id)}>▶ &nbsp; Jogar</button> : <small className="phase-locked">{atividadeId(chave) ? '🔒' : 'Carregando...'}</small>}
     </article>)}</div>
     <p className="sentence-world-note">Conclua as fases na ordem para liberar a próxima. O bônus é opcional.</p>
   </section>;
