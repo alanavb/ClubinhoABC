@@ -29,7 +29,7 @@ function PoliticaDePrivacidade({ onClose }) {
         <p>A plataforma trata somente os dados necessários às funcionalidades atuais:</p>
         <ul>
           <li><strong>responsável:</strong> nome, e-mail, identificador da conta no Supabase e informações de autenticação e sessão;</li>
-          <li><strong>criança:</strong> nome informado, idade, avatar escolhido e etapa atual de aprendizagem;</li>
+          <li><strong>criança (uma ou mais por conta):</strong> nome informado, data de nascimento (usada para calcular a idade e avisar o responsável quando a criança sair da faixa de 6 a 7 anos), avatar escolhido e etapa atual de aprendizagem;</li>
           <li><strong>aprendizagem:</strong> atividade realizada, resposta enviada, indicação de acerto ou erro, progresso e data do registro;</li>
           <li><strong>auditoria e segurança:</strong> tipo de ação, identificadores relacionados, data e detalhes necessários para rastrear cadastros, acessos e atividades;</li>
           <li><strong>dados técnicos:</strong> tokens de sessão e, conforme os serviços de infraestrutura utilizados, endereço IP, dispositivo, navegador, data, horário e registros de acesso.</li>

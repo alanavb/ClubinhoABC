@@ -174,3 +174,24 @@ button, input { font: inherit; } button { cursor: pointer; }
 /* Bônus da Etapa 3: ponte entre escuta de frases e compreensão de texto. */
 .detective-step, .detective-question, .detective-answers { max-width: 650px; margin: 22px auto; }.detective-step > small, .detective-question > small, .detective-answers > small { display: block; margin-bottom: 8px; color: #a77d22; font-weight: 900; letter-spacing: .3px; text-align: left; }.detective-story { display: flex; align-items: center; justify-content: center; padding: 6px 0; }.detective-story button { border: 0; border-radius: 999px; padding: 13px 22px; background: #9c6b25; color: #fff; cursor: pointer; font: 800 17px 'Baloo 2', sans-serif; }.detective-question { margin-top: 34px; padding: 22px 24px; border-left: 7px solid #e3b647; border-radius: 15px; background: #fffaf0; color: #5c4826; text-align: left; }.detective-question > small { margin-bottom: 4px; }.detective-question h3 { margin: 0; font: 800 23px/1.35 'Baloo 2', sans-serif; }.detective-answers { margin-bottom: 0; }.clue-options { display: grid; grid-template-columns: 1fr; gap: 12px; }.clue-options button { min-height: 68px; border: 3px solid #ead092; border-radius: 16px; padding: 14px 20px; background: #fff; color: #5c4826; cursor: pointer; font: 700 18px/1.25 'Baloo 2', sans-serif; text-align: left; }.clue-options button:hover { transform: translateX(4px); border-color: #b78229; background: #fff8df; }
 @media (max-width: 560px) { .detective-question { padding: 17px; }.detective-question h3 { font-size: 19px; }.clue-options button { font-size: 16px; } }
+
+/* Crianças da família: trocar e adicionar criança, aviso de faixa etária. */
+.child-avatar { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 50%; background: #f7bdd3; font-size: 19px; }
+.field-hint { margin: 6px 0 0; color: #855f4f; font-size: 13px; }
+.age-warning { margin: 0 0 18px; padding: 13px 18px; border: 2px solid #ffd27a; border-radius: 22px; color: #5b3a1f; background: #fff3d6; font-size: 14px; line-height: 1.45; }
+.family-dialog { width: min(100%, 560px); }
+.family-dialog form { display: grid; gap: 9px; }
+.family-dialog label, .family-dialog legend { color: #4b2c1f; font-size: 14px; font-weight: 900; }
+.family-dialog input { width: 100%; padding: 13px 18px; border: 2px solid #efd0a5; outline: 0; border-radius: 27px; color: #795a4b; background: #fff3df; font-size: 15px; }
+.family-dialog input:focus { border-color: #f28b45; box-shadow: 0 0 0 3px rgb(242 139 69 / 15%); }
+.family-dialog fieldset { margin: 4px 0 0; padding: 0; border: 0; }
+.family-dialog legend { margin-bottom: 10px; }
+.family-dialog .small-primary { justify-self: start; margin-top: 10px; }
+.family-list { display: grid; gap: 10px; margin: 14px 0 0; padding: 0 !important; list-style: none; }
+.family-list button { display: grid; grid-template-columns: 48px 1fr; align-items: center; column-gap: 12px; width: 100%; min-height: 64px; padding: 8px 16px 8px 8px; border: 2px solid #f1e7d5; border-radius: 26px; color: #4b2c1f; background: #fffaf0; text-align: left; }
+.family-list button.selected { border-color: #ef1d69; background: #fde3ed; }
+.family-list button:hover, .family-list button:focus-visible { border-color: #f28b45; outline: 0; }
+.family-pet { grid-row: span 2; display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; background: #f7bdd3; font-size: 26px; }
+.family-list strong { font: 800 18px/1.1 'Baloo 2', sans-serif; }
+.family-list small { color: #855f4f; font-size: 13px; }
+.progress-bottom.progress-bottom-single { grid-template-columns: 1fr; }

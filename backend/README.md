@@ -89,7 +89,14 @@ curl http://localhost:5000/api/auth/me -H "Authorization: Bearer TOKEN"
 ```bash
 curl -X POST http://localhost:5000/api/auth/completar-cadastro ^
   -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" ^
-  -d "{\"nome\": \"Ana\", \"crianca_nome\": \"Manu\", \"crianca_idade\": 6, \"crianca_avatar\": \"🦊\"}"
+  -d "{\"nome\": \"Ana\", \"crianca_nome\": \"Manu\", \"crianca_data_nascimento\": \"2019-05-10\", \"crianca_avatar\": \"🦊\"}"
+```
+
+**Cadastrar mais uma criança na conta do responsável logado:**
+```bash
+curl -X POST http://localhost:5000/api/criancas ^
+  -H "Authorization: Bearer TOKEN" -H "Content-Type: application/json" ^
+  -d "{\"nome\": \"Leo\", \"data_nascimento\": \"2020-02-01\", \"avatar\": \"🐨\"}"
 ```
 
 **RN2 — registrar/listar resultados:**
