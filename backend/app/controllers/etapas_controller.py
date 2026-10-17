@@ -82,7 +82,10 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             feitas = sum(1 for atividade_id in obrigatorias if atividade_id in concluidas_ids)
             situacao = 'atual'
             percentual = round(100 * feitas / len(obrigatorias)) if obrigatorias else 0
-        etapas.append({'etapa_id': etapa.id, 'nome': etapa.nome, 'situacao': situacao, 'percentual': percentual})
+        etapas.append({
+            'etapa_id': etapa.id, 'chave': etapa.chave, 'nome': etapa.nome,
+            'situacao': situacao, 'percentual': percentual,
+        })
 
     return {
         'child_id': crianca.id,

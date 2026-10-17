@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { criarAlternativas, falar, palavrasDoAlfabeto, sortear } from '../alfabeto';
-import { registrarResultado } from '../../utils/resultados';
+import { registrarResultadoPorId } from '../../utils/resultados';
 import FeedbackResposta from './FeedbackResposta';
 
 const totalRodadas = 3;
 
-export default function ComQualLetraComeca({ aoConcluir, aoFechar }) {
+export default function ComQualLetraComeca({ atividadeId, aoConcluir, aoFechar }) {
   const criarRodada = () => {
     const desafio = sortear(palavrasDoAlfabeto);
     return { ...desafio, alternativas: criarAlternativas(desafio.letra) };
@@ -18,7 +18,7 @@ export default function ComQualLetraComeca({ aoConcluir, aoFechar }) {
     if (retorno === 'correct') return;
     falar(letra);
     const correta = letra === desafio.letra;
-    registrarResultado('palavra', letra, desafio.letra);
+    registrarResultadoPorId(atividadeId, letra, desafio.letra);
     if (correta) {
       setRetorno('correct');
       window.setTimeout(avancarRodada, 800);
