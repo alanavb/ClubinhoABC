@@ -1,5 +1,6 @@
 from app import create_app, db
 from app.models import Atividade, Etapa
+from migrar_data_nascimento import migrar
 
 app = create_app()
 
@@ -29,6 +30,7 @@ def garantir_atividades(etapa, atividades):
 
 with app.app_context():
     db.create_all()
+    migrar()  # create_all só cria tabelas novas; colunas novas em tabelas existentes vêm daqui
 
     etapa1 = Etapa.query.filter_by(chave='caca-as-letras').first()
     if not etapa1:
