@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import CacaAsLetras from './jogos/CacaAsLetras';
+import AreaDeJogos from './jogos/AreaDeJogos';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
 import {
@@ -19,7 +19,7 @@ import {
   sair,
   selecionarCrianca,
 } from './utils/auth';
-import { buscarResumoProgresso } from './utils/etapas';
+import { useResumoProgresso } from './utils/etapas';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
@@ -534,28 +534,8 @@ function Stat({ icon, value, label, tone }) {
   return <article className="journey-stat"><span className={`stat-icon ${tone}`}>{icon}</span><div><strong>{value}</strong><small>{label}</small></div></article>;
 }
 
-function useResumoProgresso(criancaId) {
-  const [resumo, setResumo] = useState(null);
-
-  useEffect(() => {
-    setResumo(null); // ao trocar de criança, não mostra o progresso da anterior
-    const atualizar = () => {
-      if (!criancaId) return;
-      buscarResumoProgresso(criancaId)
-        .then((dados) => { if (dados.child_id === criancaId) setResumo(dados); })
-        .catch(() => setResumo(null));
-    };
-
-    atualizar();
-    window.addEventListener('progresso-atualizado', atualizar);
-    return () => window.removeEventListener('progresso-atualizado', atualizar);
-  }, [criancaId]);
-
-  return resumo;
-}
-
 function useEstrelas(criancaId) {
-  return useResumoProgresso(criancaId)?.estrelas ?? 0;
+  return useResumoProgresso(criancaId).resumo?.estrelas ?? 0;
 }
 
 function IndicadoresProgresso({ resumo }) {
@@ -595,7 +575,7 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
 function Home({ onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'criança';
-  const resumo = useResumoProgresso(obterCriancaId());
+  const { resumo } = useResumoProgresso(obterCriancaId());
   const cards = [
     ['Jogar', 'ilustra-jogos.png', '', 'jogos'],
     ['Histórias', 'ilustra-historias.png', '', 'historias'],
@@ -653,7 +633,7 @@ function Activities({ onNavigate }) {
 function Progress({ onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'criança';
-  const resumo = useResumoProgresso(obterCriancaId());
+  const { resumo } = useResumoProgresso(obterCriancaId());
   return <main className="app-shell"><AppHeader active="progresso" onNavigate={onNavigate} />
     <section className="page-content progress-page"><AvisoFaixaEtaria crianca={crianca} /><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
       <IndicadoresProgresso resumo={resumo} />
@@ -710,7 +690,7 @@ function App() {
   }
   if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
   if (view === 'home') return <Home onNavigate={navigate} />;
-  if (view === 'jogos') return <CacaAsLetras key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
+  if (view === 'jogos') return <AreaDeJogos key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
   if (view === 'historias') return <Stories onNavigate={navigate} />;
   if (view === 'atividades') return <Activities onNavigate={navigate} />;
   if (view === 'progresso') return <Progress onNavigate={navigate} />;

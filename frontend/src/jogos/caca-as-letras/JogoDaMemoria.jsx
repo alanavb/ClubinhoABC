@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { embaralhar, letras } from '../alfabeto';
-import { registrarResultado } from '../../utils/resultados';
+import { registrarResultadoPorId } from '../../utils/resultados';
 import FeedbackResposta from './FeedbackResposta';
 
 const totalRodadas = 3;
@@ -10,7 +10,7 @@ function criarRodada() {
   return embaralhar(escolhidas.flatMap((letra) => [{ par: letra, valor: letra }, { par: letra, valor: letra.toLowerCase() }]));
 }
 
-export default function JogoDaMemoria({ aoConcluir, aoFechar }) {
+export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
   const [rodada, setRodada] = useState(1);
   const [cartas, setCartas] = useState(criarRodada);
   const [abertas, setAbertas] = useState([]);
@@ -24,7 +24,7 @@ export default function JogoDaMemoria({ aoConcluir, aoFechar }) {
     if (proximasAbertas.length !== 2) { setRetorno(''); return; }
     const [primeira, segunda] = proximasAbertas;
     const correta = cartas[primeira].par === cartas[segunda].par;
-    registrarResultado('memoria', cartas[segunda].par, cartas[primeira].par);
+    registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par);
     if (correta) {
       setRetorno('correct');
       const proximasEncontradas = [...encontradas, primeira, segunda];
