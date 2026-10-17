@@ -25,7 +25,7 @@ function TermosDeUso({ onClose }) {
         <p>Cabe ao responsável acompanhar o uso da plataforma pela criança, manter os dados da conta atualizados e avaliar se as atividades são adequadas às suas necessidades.</p>
 
         <h2>2. Criação, confirmação e proteção da conta</h2>
-        <p>No cadastro, o responsável informa seu nome, e-mail e senha, além do nome, idade e avatar escolhido para a criança. A plataforma utiliza o Supabase Auth para criar a identidade de acesso, confirmar o e-mail, autenticar a conta e realizar a recuperação de senha.</p>
+        <p>No cadastro, o responsável informa seu nome, e-mail e senha, além do nome, data de nascimento e avatar escolhido para a criança. Depois de entrar, o responsável pode cadastrar outras crianças na mesma conta. A plataforma utiliza o Supabase Auth para criar a identidade de acesso, confirmar o e-mail, autenticar a conta e realizar a recuperação de senha.</p>
         <p>O cadastro somente é concluído após a confirmação do e-mail. O responsável deve fornecer informações verdadeiras, utilizar senha segura, não compartilhar suas credenciais e comunicar qualquer suspeita de acesso não autorizado.</p>
         <p>A interface de cadastro exige que o responsável declare que leu e aceitou estes Termos. Esse aceite não substitui eventual consentimento específico para uma finalidade de tratamento de dados pessoais quando o consentimento for a hipótese legal aplicável.</p>
 

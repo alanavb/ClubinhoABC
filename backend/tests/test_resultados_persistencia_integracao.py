@@ -1,3 +1,4 @@
+import datetime
 import unittest
 
 from app import create_app, db
@@ -22,7 +23,7 @@ class ResultadosPersistenciaIntegracaoTest(unittest.TestCase):
         responsavel = Responsavel(supabase_user_id='user-test', nome='Ana', email='ana@gmail.com')
         db.session.add_all([etapa, responsavel])
         db.session.flush()
-        crianca = Crianca(responsavel_id=responsavel.id, nome='Joana', idade=7, etapa_atual_id=etapa.id)
+        crianca = Crianca(responsavel_id=responsavel.id, nome='Joana', data_nascimento=datetime.date(2019, 5, 10), etapa_atual_id=etapa.id)
         atividade = Atividade(etapa_id=etapa.id, chave='ouvir', nome='Ouça e escolha', ordem=1)
         db.session.add_all([crianca, atividade])
         db.session.commit()

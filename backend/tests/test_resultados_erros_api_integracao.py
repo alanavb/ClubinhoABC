@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -23,7 +24,7 @@ class ResultadosErroApiIntegracaoTest(unittest.TestCase):
         responsavel = Responsavel(supabase_user_id='user-test', nome='Ana', email='ana@gmail.com')
         db.session.add_all([etapa, responsavel])
         db.session.flush()
-        self.crianca = Crianca(responsavel_id=responsavel.id, nome='Bia', idade=6, etapa_atual_id=etapa.id)
+        self.crianca = Crianca(responsavel_id=responsavel.id, nome='Bia', data_nascimento=datetime.date(2019, 5, 10), etapa_atual_id=etapa.id)
         self.atividade = Atividade(etapa_id=etapa.id, chave='ouvir', nome='Ouça e escolha', ordem=1)
         db.session.add_all([self.crianca, self.atividade])
         db.session.commit()

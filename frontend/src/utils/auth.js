@@ -55,7 +55,7 @@ async function completarCadastroSePendente() {
     body: JSON.stringify({
       nome: metadata.nome,
       crianca_nome: metadata.crianca_nome,
-      crianca_idade: metadata.crianca_idade,
+      crianca_data_nascimento: metadata.crianca_data_nascimento,
       crianca_avatar: metadata.crianca_avatar,
     }),
   });
@@ -106,8 +106,51 @@ export function obterToken() {
   return sessaoSupabase?.access_token ?? null;
 }
 
+const CHAVE_CRIANCA_SELECIONADA = 'clubinho-crianca-selecionada';
+
+function lerCriancaSelecionada() {
+  try {
+    return Number(localStorage.getItem(CHAVE_CRIANCA_SELECIONADA)) || null;
+  } catch {
+    return null;
+  }
+}
+
+// A família pode ter várias crianças; jogos, estrelas e progresso usam a que estiver selecionada.
+export function obterCriancaSelecionada() {
+  const criancas = perfil?.criancas ?? [];
+  const id = lerCriancaSelecionada();
+  return criancas.find((crianca) => crianca.crianca_id === id) ?? criancas[0] ?? null;
+}
+
 export function obterCriancaId() {
-  return perfil?.criancas?.[0]?.crianca_id ?? null;
+  return obterCriancaSelecionada()?.crianca_id ?? null;
+}
+
+export function selecionarCrianca(criancaId) {
+  try {
+    localStorage.setItem(CHAVE_CRIANCA_SELECIONADA, String(criancaId));
+  } catch {
+    // sem armazenamento local a escolha só não sobrevive ao recarregar a página
+  }
+  avisarOuvintes();
+}
+
+export async function adicionarCrianca({ nome, dataNascimento, avatar }) {
+  const resposta = await fetch(`${API_BASE_URL}/criancas`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessaoSupabase?.access_token}`,
+    },
+    body: JSON.stringify({ nome, data_nascimento: dataNascimento, avatar }),
+  });
+  const dados = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível cadastrar a criança.');
+
+  perfil = { ...perfil, criancas: [...perfil.criancas, dados] };
+  selecionarCrianca(dados.crianca_id);
+  return dados;
 }
 
 export function obterPerfil() {
@@ -126,7 +169,7 @@ export async function entrar(email, senha) {
   if (error) throw new Error(mensagemAmigavel(error));
 }
 
-export async function cadastrar({ nome, email, senha, criancaNome, criancaIdade, criancaAvatar }) {
+export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNascimento, criancaAvatar }) {
   const { error } = await supabase.auth.signUp({
     email,
     password: senha,
@@ -134,7 +177,7 @@ export async function cadastrar({ nome, email, senha, criancaNome, criancaIdade,
       data: {
         nome,
         crianca_nome: criancaNome,
-        crianca_idade: criancaIdade,
+        crianca_data_nascimento: criancaDataNascimento,
         crianca_avatar: criancaAvatar,
       },
     },

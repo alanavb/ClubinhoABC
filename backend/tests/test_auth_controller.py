@@ -1,4 +1,5 @@
 import unittest
+from datetime import date
 from types import SimpleNamespace
 from unittest.mock import MagicMock, patch
 
@@ -28,7 +29,7 @@ class AuthControllerTest(unittest.TestCase):
         crianca_model.return_value = crianca
 
         retorno = auth_controller.completar_cadastro(
-            'user-1', 'ana@gmail.com', ' Ana ', ' Bia ', 6, '🦊'
+            'user-1', 'ana@gmail.com', ' Ana ', ' Bia ', '2019-05-10', '🦊'
         )
 
         self.assertIs(retorno, responsavel)
@@ -36,7 +37,7 @@ class AuthControllerTest(unittest.TestCase):
             supabase_user_id='user-1', nome='Ana', email='ana@gmail.com'
         )
         crianca_model.assert_called_once_with(
-            responsavel_id=10, nome='Bia', idade=6, avatar='🦊', etapa_atual_id=7
+            responsavel_id=10, nome='Bia', data_nascimento=date(2019, 5, 10), avatar='🦊', etapa_atual_id=7
         )
         db_mock.session.add.assert_any_call(responsavel)
         db_mock.session.add.assert_any_call(crianca)
@@ -49,7 +50,7 @@ class AuthControllerTest(unittest.TestCase):
     @patch.object(auth_controller, 'buscar_por_supabase_id', return_value=None)
 
     def test_deve_lancar_excecao_quando_faltam_dados_obrigatorios(self, _, etapa_model):
-        with self.assertRaisesRegex(DadosInvalidosError, 'nome e idade da criança'):
+        with self.assertRaisesRegex(DadosInvalidosError, 'nome e a data de nascimento da criança'):
             auth_controller.completar_cadastro('user-1', 'ana@gmail.com', 'Ana', '', None)
         etapa_model.query.order_by.assert_not_called()
 
@@ -61,7 +62,7 @@ class AuthControllerTest(unittest.TestCase):
         existente = SimpleNamespace(id=1, nome='Ana')
         buscar_perfil.return_value = existente
 
-        retorno = auth_controller.completar_cadastro('user-1', 'ana@gmail.com', 'Ana', 'Bia', 6)
+        retorno = auth_controller.completar_cadastro('user-1', 'ana@gmail.com', 'Ana', 'Bia', '2019-05-10')
 
         self.assertIs(retorno, existente)
         buscar_perfil.assert_called_once_with('user-1')

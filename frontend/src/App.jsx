@@ -3,6 +3,7 @@ import CacaAsLetras from './jogos/CacaAsLetras';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
 import {
+  adicionarCrianca,
   aoMudarSessao,
   atualizarSenha,
   cadastrar,
@@ -10,16 +11,35 @@ import {
   enviarRecuperacaoSenha,
   estaAutenticado,
   obterCriancaId,
+  obterCriancaSelecionada,
   obterPerfil,
   perfilCompleto,
   precisaRedefinirSenha,
   reenviarConfirmacao,
   sair,
+  selecionarCrianca,
 } from './utils/auth';
 import { buscarResumoProgresso } from './utils/etapas';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
-const ages = ['6 anos', '7 anos'];
+const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
+
+function CamposCrianca({ nome, setNome, dataNascimento, setDataNascimento, pet, setPet, idPrefixo = 'child' }) {
+  return (
+    <>
+      <label htmlFor={`${idPrefixo}-name`}>Nome da criança</label>
+      <input id={`${idPrefixo}-name`} placeholder="Manu" value={nome} onChange={(event) => setNome(event.target.value)} required />
+      <label htmlFor={`${idPrefixo}-birth`}>Data de nascimento</label>
+      <input id={`${idPrefixo}-birth`} type="date" max={hojeLocal()} value={dataNascimento} onChange={(event) => setDataNascimento(event.target.value)} required />
+      <fieldset>
+        <legend>Escolha um bichinho</legend>
+        <div className="choice-row pet-choices">
+          {pets.map((item) => <button className={pet === item ? 'selected' : ''} onClick={() => setPet(item)} type="button" aria-label={`Escolher ${item}`} key={item}>{item}</button>)}
+        </div>
+      </fieldset>
+    </>
+  );
+}
 
 function Brand() {
   return (
@@ -37,7 +57,7 @@ function SignupSteps({ step }) {
     <aside className="signup-aside">
       <div>
         <h1>Três passinhos e a aventura começa</h1>
-        <p>A gente monta a trilha de letras certinha para a idade da sua criança.</p>
+        <p>A gente monta a trilha de letras para crianças de 6 a 7 anos.</p>
       </div>
       <ol className="step-list">
         {labels.map((label, index) => {
@@ -61,7 +81,7 @@ function Signup({ onBackToLogin, onFinish }) {
   const [guardianEmail, setGuardianEmail] = useState('');
   const [guardianPassword, setGuardianPassword] = useState('');
   const [childName, setChildName] = useState('');
-  const [age, setAge] = useState('6 anos');
+  const [birthDate, setBirthDate] = useState('');
   const [pet, setPet] = useState(pets[0]);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -85,7 +105,7 @@ function Signup({ onBackToLogin, onFinish }) {
         email: guardianEmail,
         senha: guardianPassword,
         criancaNome: childName,
-        criancaIdade: Number.parseInt(age, 10),
+        criancaDataNascimento: birthDate,
         criancaAvatar: pet,
       });
       onFinish(guardianEmail);
@@ -131,20 +151,8 @@ function Signup({ onBackToLogin, onFinish }) {
             <form onSubmit={advance}>
               <span className="step-label">Passo 2 de 3</span>
               <h2>Agora, a estrelinha da casa</h2>
-              <label htmlFor="child-name">Nome da criança</label>
-              <input id="child-name" placeholder="Manu" value={childName} onChange={(event) => setChildName(event.target.value)} required />
-              <fieldset>
-                <legend>Idade</legend>
-                <div className="choice-row age-choices">
-                  {ages.map((item) => <button className={age === item ? 'selected' : ''} onClick={() => setAge(item)} type="button" key={item}>🗓 &nbsp;{item}</button>)}
-                </div>
-              </fieldset>
-              <fieldset>
-                <legend>Escolha um bichinho</legend>
-                <div className="choice-row pet-choices">
-                  {pets.map((item) => <button className={pet === item ? 'selected' : ''} onClick={() => setPet(item)} type="button" aria-label={`Escolher ${item}`} key={item}>{item}</button>)}
-                </div>
-              </fieldset>
+              <CamposCrianca nome={childName} setNome={setChildName} dataNascimento={birthDate} setDataNascimento={setBirthDate} pet={pet} setPet={setPet} />
+              <p className="field-hint">Você poderá cadastrar outras crianças depois de entrar.</p>
               <div className="signup-actions">
                 <button className="back-button" type="button" onClick={previousStep}>← &nbsp; Voltar</button>
                 <button className="small-primary" type="submit">Continuar <span>→</span></button>
@@ -396,10 +404,87 @@ const navItems = [
   ['progresso', '🛝', 'Progresso'],
 ];
 
+function textoIdade(crianca) {
+  return crianca.idade == null ? 'idade não informada' : `${crianca.idade} ${crianca.idade === 1 ? 'ano' : 'anos'}`;
+}
+
+function AvisoFaixaEtaria({ crianca }) {
+  if (!crianca?.fora_da_faixa_etaria) return null;
+  return (
+    <p className="age-warning" role="status">
+      <strong>Para o responsável:</strong> {crianca.nome} tem {textoIdade(crianca)}, e o Clubinho ABC é indicado para crianças de 6 a 7 anos.
+      Avalie se as atividades ainda fazem sentido para ela. Você pode continuar usando normalmente.
+    </p>
+  );
+}
+
+function FamiliaDialog({ onClose }) {
+  const criancas = obterPerfil()?.criancas ?? [];
+  const selecionadaId = obterCriancaId();
+  const [nome, setNome] = useState('');
+  const [dataNascimento, setDataNascimento] = useState('');
+  const [pet, setPet] = useState(pets[0]);
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const fecharComEsc = (event) => { if (event.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', fecharComEsc);
+    return () => window.removeEventListener('keydown', fecharComEsc);
+  }, [onClose]);
+
+  async function salvar(event) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await adicionarCrianca({ nome, dataNascimento, avatar: pet });
+      onClose();
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="terms-dialog family-dialog" role="dialog" aria-modal="true" aria-labelledby="family-title">
+        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar">×</button>
+        <h1 id="family-title">Crianças da família</h1>
+        <p>Escolha quem vai brincar agora.</p>
+        <ul className="family-list">
+          {criancas.map((crianca) => (
+            <li key={crianca.crianca_id}>
+              <button
+                type="button"
+                className={crianca.crianca_id === selecionadaId ? 'selected' : ''}
+                aria-pressed={crianca.crianca_id === selecionadaId}
+                onClick={() => { selecionarCrianca(crianca.crianca_id); onClose(); }}
+              >
+                <span className="family-pet" aria-hidden="true">{crianca.avatar || '🙂'}</span>
+                <strong>{crianca.nome}</strong>
+                <small>{textoIdade(crianca)}{crianca.fora_da_faixa_etaria ? ' · fora da faixa de 6 a 7 anos' : ''}</small>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <h2>Adicionar criança</h2>
+        <form onSubmit={salvar}>
+          <CamposCrianca idPrefixo="new-child" nome={nome} setNome={setNome} dataNascimento={dataNascimento} setDataNascimento={setDataNascimento} pet={pet} setPet={setPet} />
+          {message && <p className="form-message" role="alert">{message}</p>}
+          <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Salvando…' : 'Adicionar criança'}</button>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 function AppHeader({ active, onNavigate }) {
-  const perfil = obterPerfil();
-  const nomeCrianca = perfil?.criancas?.[0]?.nome || 'Manu';
+  const crianca = obterCriancaSelecionada();
+  const nomeCrianca = crianca?.nome || 'Manu';
   const estrelas = useEstrelas(obterCriancaId());
+  const [showFamilia, setShowFamilia] = useState(false);
 
   async function sairDaConta() {
     await sair();
@@ -417,11 +502,13 @@ function AppHeader({ active, onNavigate }) {
         ))}
       </nav>
       <div className="profile-summary">
-        <span className="streak">🔥 <b>7 dias</b></span>
         <span className="stars">⭐ <b>{estrelas} estrelas</b></span>
-        <button className="child-profile" type="button"><img src="/images/mascote.png" alt="" />{nomeCrianca}</button>
+        <button className="child-profile" type="button" onClick={() => setShowFamilia(true)} aria-label={`${nomeCrianca}: trocar ou adicionar criança`}>
+          <span className="child-avatar" aria-hidden="true">{crianca?.avatar || '🙂'}</span>{nomeCrianca}
+        </button>
         <button className="text-link" type="button" onClick={sairDaConta}>Sair</button>
       </div>
+      {showFamilia && <FamiliaDialog onClose={() => setShowFamilia(false)} />}
     </header>
   );
 }
@@ -447,66 +534,87 @@ function Stat({ icon, value, label, tone }) {
   return <article className="journey-stat"><span className={`stat-icon ${tone}`}>{icon}</span><div><strong>{value}</strong><small>{label}</small></div></article>;
 }
 
-function useEstrelas(criancaId) {
-  const [estrelas, setEstrelas] = useState(0);
+function useResumoProgresso(criancaId) {
+  const [resumo, setResumo] = useState(null);
 
   useEffect(() => {
-    const atualizarEstrelas = () => {
-      if (!criancaId) {
-        setEstrelas(0);
-        return;
-      }
-
+    setResumo(null); // ao trocar de criança, não mostra o progresso da anterior
+    const atualizar = () => {
+      if (!criancaId) return;
       buscarResumoProgresso(criancaId)
-        .then((resumo) => {
-          if (resumo.child_id === criancaId) setEstrelas(resumo.estrelas);
-        })
-        .catch(() => setEstrelas(0));
+        .then((dados) => { if (dados.child_id === criancaId) setResumo(dados); })
+        .catch(() => setResumo(null));
     };
 
-    atualizarEstrelas();
-    window.addEventListener('progresso-atualizado', atualizarEstrelas);
-    return () => window.removeEventListener('progresso-atualizado', atualizarEstrelas);
+    atualizar();
+    window.addEventListener('progresso-atualizado', atualizar);
+    return () => window.removeEventListener('progresso-atualizado', atualizar);
   }, [criancaId]);
 
-  return estrelas;
+  return resumo;
+}
+
+function useEstrelas(criancaId) {
+  return useResumoProgresso(criancaId)?.estrelas ?? 0;
+}
+
+function IndicadoresProgresso({ resumo }) {
+  const etapas = resumo?.etapas ?? [];
+  const etapasConcluidas = etapas.filter((etapa) => etapa.situacao === 'concluida').length;
+  return (
+    <div className="journey-stats">
+      <Stat icon="⭐" value={resumo?.estrelas ?? 0} label="estrelas ganhas" tone="yellow" />
+      <Stat icon="✓" value={resumo?.atividades_concluidas ?? 0} label="atividades concluídas" tone="orange" />
+      <Stat icon="🏁" value={`${etapasConcluidas} de ${etapas.length}`} label="etapas concluídas" tone="blue" />
+      <Stat icon="A" value={resumo?.tentativas ?? 0} label="tentativas nos jogos" tone="pink" />
+    </div>
+  );
+}
+
+function MapaAventura({ nomeCrianca, etapas, tituloId }) {
+  const atual = etapas?.find((etapa) => etapa.situacao === 'atual');
+  const texto = !etapas
+    ? 'Carregando a trilha…'
+    : atual ? `${nomeCrianca} está na etapa ${atual.nome}.` : `${nomeCrianca} completou a trilha!`;
+
+  return (
+    <section className="adventure-map" aria-labelledby={tituloId}>
+      <div className="map-banner"><div><h2 id={tituloId}>Mapa da aventura</h2><p>{texto}</p></div><img src="/images/mascote.png" alt="" /></div>
+      <ol className="trail">
+        {(etapas ?? []).map((etapa, indice) => {
+          const classe = { concluida: 'finished', atual: 'current', bloqueada: 'locked' }[etapa.situacao];
+          const marcador = { concluida: '✓', atual: indice + 1, bloqueada: '♧' }[etapa.situacao];
+          const legenda = etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`;
+          return <li className={classe} key={etapa.etapa_id}><span>{marcador}</span><b>{etapa.nome}</b><small>{legenda}</small></li>;
+        })}
+      </ol>
+    </section>
+  );
 }
 
 function Home({ onNavigate }) {
-  const nomeCrianca = obterPerfil()?.criancas?.[0]?.nome || 'criança';
-  const estrelas = useEstrelas(obterCriancaId());
+  const crianca = obterCriancaSelecionada();
+  const nomeCrianca = crianca?.nome || 'criança';
+  const resumo = useResumoProgresso(obterCriancaId());
   const cards = [
-    ['Jogar', 'ilustra-jogos.png', '32', 'jogos'],
+    ['Jogar', 'ilustra-jogos.png', '', 'jogos'],
     ['Histórias', 'ilustra-historias.png', '', 'historias'],
     ['Aprender', 'ilustra-aprender.png', '', 'inicio'],
     ['Atividades', 'ilustra-atividades.png', '', 'atividades'],
-    ['Conquistas', 'ilustra-conquistas.png', '3', 'progresso'],
+    ['Conquistas', 'ilustra-conquistas.png', '', 'progresso'],
     ['Jornada', 'ilustra-progresso.png', '', 'progresso'],
   ];
   return (
     <main className="app-shell">
       <AppHeader active="início" onNavigate={onNavigate} />
       <section className="home-content">
+        <AvisoFaixaEtaria crianca={crianca} />
         <div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
-        <div className="journey-stats">
-          <Stat icon="⭐" value={estrelas} label="estrelas ganhas" tone="yellow" />
-          <Stat icon="🔥" value="7" label="dias seguidos" tone="orange" />
-          <Stat icon="◷" value="18 min" label="por dia" tone="blue" />
-          <Stat icon="A" value="34" label="palavras lidas" tone="pink" />
-        </div>
-        <section className="adventure-map" aria-labelledby="map-title">
-          <div className="map-banner"><div><h2 id="map-title">Mapa da aventura</h2><p>Manu está atravessando a Ponte das Sílabas.</p></div><img src="/images/mascote.png" alt="Manu, a mascote" /></div>
-          <ol className="trail">
-            <li className="finished"><span>✓</span><b>Ilha das Vogais</b><small>100%</small></li>
-            <li className="finished"><span>✓</span><b>Vale do Alfabeto</b><small>100%</small></li>
-            <li className="current"><span>3</span><b>Ponte das Sílabas</b><small>60%</small></li>
-            <li className="locked"><span>♧</span><b>Floresta das Palavras</b><small>a descobrir</small></li>
-            <li className="locked"><span>♧</span><b>Castelo das Frases</b><small>a descobrir</small></li>
-          </ol>
-        </section>
+        <IndicadoresProgresso resumo={resumo} />
+        <MapaAventura nomeCrianca={nomeCrianca} etapas={resumo?.etapas} tituloId="map-title" />
         <section className="play-hero">
           <img src="/images/mascote.png" alt="" />
-          <div><span>◖ Oi, Manu!</span><h2>Vamos brincar de ler?</h2><div className="syllables"><i>⛺</i><i>BA</i><i>BE</i><i>BI</i></div><button type="button" onClick={() => onNavigate('jogos')}>▶ <b>Começar</b></button></div>
+          <div><span>◖ Oi, {nomeCrianca}!</span><h2>Vamos brincar de ler?</h2><div className="syllables"><i>⛺</i><i>BA</i><i>BE</i><i>BI</i></div><button type="button" onClick={() => onNavigate('jogos')}>▶ <b>Começar</b></button></div>
         </section>
         <section className="shortcut-grid" aria-label="Atalhos do Clubinho">
           {cards.map(([title, image, badge, id]) => <button className="shortcut-card" type="button" onClick={() => onNavigate(id)} key={title}>{badge && <em>{badge}</em>}<img src={`/images/${image}`} alt="" /><strong>{title}</strong></button>)}
@@ -543,14 +651,14 @@ function Activities({ onNavigate }) {
 }
 
 function Progress({ onNavigate }) {
-  const nomeCrianca = obterPerfil()?.criancas?.[0]?.nome || 'criança';
-  const estrelas = useEstrelas(obterCriancaId());
-  const mastery = [['Reconhecer vogais', '100%'], ['Letras do alfabeto', '82%'], ['Sílabas simples', '60%'], ['Leitura de palavras', '35%'], ['Escrita espontânea', '18%']];
-  const medals = [['🏅', 'Mestre das vogais'], ['⭐', '7 dias seguidos'], ['📖', 'Primeira leitura'], ['🚀', '50 palavras'], ['♛', 'Rei das sílabas'], ['🌈', 'Trilha completa']];
+  const crianca = obterCriancaSelecionada();
+  const nomeCrianca = crianca?.nome || 'criança';
+  const resumo = useResumoProgresso(obterCriancaId());
   return <main className="app-shell"><AppHeader active="progresso" onNavigate={onNavigate} />
-    <section className="page-content progress-page"><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div><div className="journey-stats"><Stat icon="⭐" value={estrelas} label="estrelas ganhas" tone="yellow" /><Stat icon="🔥" value="7" label="dias seguidos" tone="orange" /><Stat icon="◷" value="18 min" label="por dia" tone="blue" /><Stat icon="A" value="34" label="palavras lidas" tone="pink" /></div>
-      <section className="adventure-map"><div className="map-banner"><div><h2>Mapa da aventura</h2><p>{nomeCrianca} está atravessando a Ponte das Sílabas.</p></div><img src="/images/mascote.png" alt="" /></div><ol className="trail"><li className="finished"><span>✓</span><b>Ilha das Vogais</b><small>100%</small></li><li className="finished"><span>✓</span><b>Vale do Alfabeto</b><small>100%</small></li><li className="current"><span>3</span><b>Ponte das Sílabas</b><small>60%</small></li><li className="locked"><span>♧</span><b>Floresta das Palavras</b><small>a descobrir</small></li><li className="locked"><span>♧</span><b>Castelo das Frases</b><small>a descobrir</small></li></ol></section>
-      <div className="progress-bottom"><section className="mastery"><h2>O que {nomeCrianca} já domina</h2>{mastery.map(([name, value]) => <div className="mastery-row" key={name}><strong>{name}</strong><em>{value}</em><span><i style={{ width: value }} /></span></div>)}</section><section className="medals"><h2>Medalhas <span>3 de 6 conquistadas</span></h2><div>{medals.map(([icon, title], index) => <article className={index > 2 ? 'locked-medal' : ''} key={title}><i>{icon}</i><small>{title}</small></article>)}</div></section></div>
+    <section className="page-content progress-page"><AvisoFaixaEtaria crianca={crianca} /><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
+      <IndicadoresProgresso resumo={resumo} />
+      <MapaAventura nomeCrianca={nomeCrianca} etapas={resumo?.etapas} tituloId="progress-map-title" />
+      <div className="progress-bottom progress-bottom-single"><section className="mastery"><h2>Progresso de {nomeCrianca} em cada etapa</h2>{(resumo?.etapas ?? []).map((etapa) => <div className="mastery-row" key={etapa.etapa_id}><strong>{etapa.nome}</strong><em>{etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`}</em><span><i style={{ width: `${etapa.percentual}%` }} /></span></div>)}</section></div>
     </section>
     <AppFooter />
   </main>;

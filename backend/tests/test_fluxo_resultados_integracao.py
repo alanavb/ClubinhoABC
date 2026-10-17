@@ -1,3 +1,4 @@
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -28,7 +29,7 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
         self.crianca = Crianca(
             responsavel_id=self.responsavel.id,
             nome='Bia',
-            idade=6,
+            data_nascimento=datetime.date(2019, 5, 10),
             etapa_atual_id=etapa.id,
         )
         self.atividade = Atividade(

@@ -54,6 +54,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id)
     estrelas = 0
     atividades_concluidas = 0
+    concluidas_ids = set()
 
     for atividade in Atividade.query.order_by(Atividade.ordem).all():
         foi_concluida = (
@@ -64,12 +65,31 @@ def resumo_progresso(crianca_id, responsavel_id=None):
         )
         if foi_concluida:
             atividades_concluidas += 1
+            concluidas_ids.add(atividade.id)
             estrelas += 1 if atividade.obrigatoria else 2
+
+    # Mapa da aventura: etapas antes da atual estão concluídas, depois estão bloqueadas,
+    # e a atual mostra quanto das atividades obrigatórias a criança já acertou.
+    ordem_atual = crianca.etapa_atual.ordem
+    etapas = []
+    for etapa in Etapa.query.order_by(Etapa.ordem).all():
+        if etapa.ordem < ordem_atual:
+            situacao, percentual = 'concluida', 100
+        elif etapa.ordem > ordem_atual:
+            situacao, percentual = 'bloqueada', 0
+        else:
+            obrigatorias = [atividade.id for atividade in etapa.atividades if atividade.obrigatoria]
+            feitas = sum(1 for atividade_id in obrigatorias if atividade_id in concluidas_ids)
+            situacao = 'atual'
+            percentual = round(100 * feitas / len(obrigatorias)) if obrigatorias else 0
+        etapas.append({'etapa_id': etapa.id, 'nome': etapa.nome, 'situacao': situacao, 'percentual': percentual})
 
     return {
         'child_id': crianca.id,
         'estrelas': estrelas,
         'atividades_concluidas': atividades_concluidas,
+        'tentativas': Resultado.query.filter_by(crianca_id=crianca.id).count(),
+        'etapas': etapas,
     }
 
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):

@@ -8,21 +8,24 @@ from app.controllers.auth_controller import DadosInvalidosError
 auth_bp = Blueprint('auth', __name__)
 
 
+def _crianca_para_json(crianca):
+    return {
+        'crianca_id': crianca.id,
+        'nome': crianca.nome,
+        'data_nascimento': crianca.data_nascimento.isoformat() if crianca.data_nascimento else None,
+        'idade': crianca.idade(),
+        'fora_da_faixa_etaria': crianca.fora_da_faixa_etaria(),
+        'avatar': crianca.avatar,
+        'etapa_atual_id': crianca.etapa_atual_id,
+    }
+
+
 def _responsavel_para_json(responsavel):
     return {
         'responsavel_id': responsavel.id,
         'nome': responsavel.nome,
         'email': responsavel.email,
-        'criancas': [
-            {
-                'crianca_id': crianca.id,
-                'nome': crianca.nome,
-                'idade': crianca.idade,
-                'avatar': crianca.avatar,
-                'etapa_atual_id': crianca.etapa_atual_id,
-            }
-            for crianca in responsavel.criancas
-        ],
+        'criancas': [_crianca_para_json(crianca) for crianca in responsavel.criancas],
     }
 
 
@@ -33,8 +36,7 @@ def me():
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
-    # O cadastro atual possui uma criança por responsável; associar o acesso
-    # a ela mantém o registro completo conforme o modelo de auditoria.
+    # O log exige uma criança; o acesso é da família, então registra a primeira cadastrada.
     registrar_log(
         acao='acesso_responsavel',
         responsavel_id=responsavel.id,
@@ -56,10 +58,32 @@ def completar_cadastro():
             g.supabase_email,
             dados.get('nome'),
             dados.get('crianca_nome'),
-            dados.get('crianca_idade'),
+            dados.get('crianca_data_nascimento'),
             dados.get('crianca_avatar'),
         )
     except DadosInvalidosError as erro:
         return jsonify({'erro': str(erro)}), 400
 
     return jsonify(_responsavel_para_json(responsavel)), 201
+
+
+@auth_bp.route('/criancas', methods=['POST'])
+@requer_autenticacao
+def adicionar_crianca():
+    """Cadastra mais uma criança na conta do responsável autenticado."""
+    responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
+    if not responsavel:
+        return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
+
+    dados = request.get_json(silent=True) or {}
+    try:
+        crianca = auth_controller.adicionar_crianca(
+            responsavel,
+            dados.get('nome'),
+            dados.get('data_nascimento'),
+            dados.get('avatar'),
+        )
+    except DadosInvalidosError as erro:
+        return jsonify({'erro': str(erro)}), 400
+
+    return jsonify(_crianca_para_json(crianca)), 201
