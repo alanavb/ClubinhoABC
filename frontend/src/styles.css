@@ -195,3 +195,9 @@ button, input { font: inherit; } button { cursor: pointer; }
 .family-list strong { font: 800 18px/1.1 'Baloo 2', sans-serif; }
 .family-list small { color: #855f4f; font-size: 13px; }
 .progress-bottom.progress-bottom-single { grid-template-columns: 1fr; }
+
+/* Etapa 2 · Monte a Palavra: sílabas são mais largas que uma letra só. */
+.game-session .syllable-options button { width: auto; min-width: 82px; padding: 0 16px; font-size: 34px; }
+.syllable-slots { margin: 6px auto 18px; max-width: 420px; }
+.syllable-slots b { min-width: 46px; font-size: 30px; }
+.written-word b { font-size: 42px; letter-spacing: 4px; }
