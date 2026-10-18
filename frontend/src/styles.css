@@ -200,3 +200,18 @@ button, input { font: inherit; } button { cursor: pointer; }
 .syllable-slots { margin: 6px auto 18px; max-width: 420px; }
 .syllable-slots b { min-width: 46px; font-size: 30px; }
 .written-word b { font-size: 42px; letter-spacing: 4px; }
+/* Histórias e materiais: cards clicáveis e botões ainda indisponíveis. */
+button.story-card { width: 100%; border: 3px solid transparent; color: #4b2c1f; font: inherit; cursor: pointer; }
+button.story-card:hover, button.story-card:focus-visible { border-color: #f28b45; outline: 0; }
+button.story-card.selected { border-color: #ef1d69; }
+.story-hero p { margin: 8px 0 0; color: #5b3a1f; font-weight: 700; }
+button:disabled { cursor: not-allowed; opacity: .55; transform: none !important; }
+/* Mapa da aventura: as colunas seguem a quantidade real de etapas (o layout original previa 5 fixas). */
+.trail { grid-template-columns: repeat(var(--etapas, 5), 1fr); }
+.trail li:not(:last-child)::after { left: 50%; width: 100%; }
+@media (max-width: 720px) {
+  .trail { grid-template-columns: repeat(var(--etapas, 5), minmax(92px, 1fr)); padding-inline: 10px; }
+  .trail b { font-size: 12px; }
+}/* Card de material com um botão só ("Em breve"): ocupa a largura e não cobre o texto. */
+.activity-card { padding-bottom: 84px; }
+.activity-card button { width: calc(100% - 48px); }
