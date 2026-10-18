@@ -125,6 +125,21 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual([('atual', 50), ('bloqueada', 0)], [(e['situacao'], e['percentual']) for e in mapa_bia])
         self.assertEqual([('atual', 0), ('bloqueada', 0)], [(e['situacao'], e['percentual']) for e in mapa_leo])
 
+    def test_ultima_etapa_completa_conta_como_concluida_e_libera_conquistas(self):
+        etapa = Etapa.query.first()  # única etapa do cenário: é também a última
+        atividade = Atividade(etapa_id=etapa.id, chave='ouvir', nome='Ouvir', ordem=1, obrigatoria=True)
+        db.session.add(atividade)
+        db.session.commit()
+        bia = Crianca.query.filter_by(nome='Bia').first()
+        db.session.add(Resultado(crianca_id=bia.id, atividade_id=atividade.id, resposta='A', correta=True))
+        db.session.commit()
+
+        resumo = self.client.get(f'/api/criancas/{bia.id}/progresso', headers=self.auth).get_json()
+        conquistadas = {c['id'] for c in resumo['conquistas'] if c['conquistada']}
+
+        self.assertEqual('concluida', resumo['etapas'][0]['situacao'])
+        self.assertEqual({'primeira-atividade', 'etapa-caca-letras', 'trilha-completa'}, conquistadas)
+
     def test_deve_retornar_400_quando_data_de_nascimento_esta_no_futuro(self):
         resposta = self.client.post(
             '/api/criancas',

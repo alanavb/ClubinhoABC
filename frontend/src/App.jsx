@@ -538,16 +538,36 @@ function useEstrelas(criancaId) {
   return useResumoProgresso(criancaId).resumo?.estrelas ?? 0;
 }
 
-function IndicadoresProgresso({ resumo }) {
+function IndicadoresProgresso({ resumo, erro, recarregar }) {
+  if (erro) {
+    return <p className="form-message" role="alert">Não foi possível carregar o progresso. <button className="text-link" type="button" onClick={recarregar}>Tentar de novo</button></p>;
+  }
   const etapas = resumo?.etapas ?? [];
-  const etapasConcluidas = etapas.filter((etapa) => etapa.situacao === 'concluida').length;
+  const atual = etapas.find((etapa) => etapa.situacao === 'atual');
+  const carregando = !resumo;
+  const valor = (texto) => (carregando ? '…' : texto);
   return (
-    <div className="journey-stats">
-      <Stat icon="⭐" value={resumo?.estrelas ?? 0} label="estrelas ganhas" tone="yellow" />
-      <Stat icon="✓" value={resumo?.atividades_concluidas ?? 0} label="atividades concluídas" tone="orange" />
-      <Stat icon="🏁" value={`${etapasConcluidas} de ${etapas.length}`} label="etapas concluídas" tone="blue" />
-      <Stat icon="A" value={resumo?.tentativas ?? 0} label="tentativas nos jogos" tone="pink" />
+    <div className="journey-stats" aria-busy={carregando}>
+      <Stat icon="🏁" value={valor(atual?.nome ?? 'Trilha completa')} label="etapa atual" tone="blue" />
+      <Stat icon="%" value={valor(`${atual?.percentual ?? 100}%`)} label="da etapa atual" tone="pink" />
+      <Stat icon="✓" value={valor(resumo?.atividades_concluidas)} label="atividades concluídas" tone="orange" />
+      <Stat icon="⭐" value={valor(resumo?.estrelas)} label="estrelas ganhas" tone="yellow" />
     </div>
+  );
+}
+
+function Conquistas({ conquistas }) {
+  if (!conquistas) return null;
+  const ganhas = conquistas.filter((conquista) => conquista.conquistada).length;
+  return (
+    <section className="medals">
+      <h2>Conquistas <span>{ganhas} de {conquistas.length}</span></h2>
+      <div>{conquistas.map((conquista) => (
+        <article className={conquista.conquistada ? '' : 'locked-medal'} key={conquista.id} aria-label={`${conquista.titulo}: ${conquista.conquistada ? 'conquistada' : 'ainda não conquistada'}`}>
+          <i aria-hidden="true">{conquista.icone}</i><small>{conquista.titulo}</small>
+        </article>
+      ))}</div>
+    </section>
   );
 }
 
@@ -575,7 +595,7 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
 function Home({ onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'criança';
-  const { resumo } = useResumoProgresso(obterCriancaId());
+  const { resumo, erro, recarregar } = useResumoProgresso(obterCriancaId());
   const cards = [
     ['Jogar', 'ilustra-jogos.png', '', 'jogos'],
     ['Histórias', 'ilustra-historias.png', '', 'historias'],
@@ -590,7 +610,7 @@ function Home({ onNavigate }) {
       <section className="home-content">
         <AvisoFaixaEtaria crianca={crianca} />
         <div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
-        <IndicadoresProgresso resumo={resumo} />
+        <IndicadoresProgresso resumo={resumo} erro={erro} recarregar={recarregar} />
         <MapaAventura nomeCrianca={nomeCrianca} etapas={resumo?.etapas} tituloId="map-title" />
         <section className="play-hero">
           <img src="/images/mascote.png" alt="" />
@@ -633,12 +653,12 @@ function Activities({ onNavigate }) {
 function Progress({ onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'criança';
-  const { resumo } = useResumoProgresso(obterCriancaId());
+  const { resumo, erro, recarregar } = useResumoProgresso(obterCriancaId());
   return <main className="app-shell"><AppHeader active="progresso" onNavigate={onNavigate} />
     <section className="page-content progress-page"><AvisoFaixaEtaria crianca={crianca} /><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
-      <IndicadoresProgresso resumo={resumo} />
+      <IndicadoresProgresso resumo={resumo} erro={erro} recarregar={recarregar} />
       <MapaAventura nomeCrianca={nomeCrianca} etapas={resumo?.etapas} tituloId="progress-map-title" />
-      <div className="progress-bottom progress-bottom-single"><section className="mastery"><h2>Progresso de {nomeCrianca} em cada etapa</h2>{(resumo?.etapas ?? []).map((etapa) => <div className="mastery-row" key={etapa.etapa_id}><strong>{etapa.nome}</strong><em>{etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`}</em><span><i style={{ width: `${etapa.percentual}%` }} /></span></div>)}</section></div>
+      <div className="progress-bottom"><section className="mastery"><h2>Progresso de {nomeCrianca} em cada etapa</h2>{(resumo?.etapas ?? []).map((etapa) => <div className="mastery-row" key={etapa.etapa_id}><strong>{etapa.nome}</strong><em>{etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`}</em><span><i style={{ width: `${etapa.percentual}%` }} /></span></div>)}</section><Conquistas conquistas={resumo?.conquistas} /></div>
     </section>
     <AppFooter />
   </main>;
