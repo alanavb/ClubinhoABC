@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import AreaDeJogos from './jogos/AreaDeJogos';
+import { falar } from './jogos/alfabeto';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
 import {
@@ -282,7 +283,6 @@ function Login({ onCreateAccount, onLogin }) {
               <label htmlFor="password">Senha</label>
               <input id="password" type="password" placeholder="••••••••" value={password} onChange={(event) => setPassword(event.target.value)} required />
               <div className="form-options">
-                <label className="remember"><input type="checkbox" /> Lembrar de mim</label>
                 <button type="button" className="forgot" onClick={() => setShowForgot(true)}>Esqueci a senha</button>
               </div>
               {message && <p className="form-message" role="alert">{message}</p>}
@@ -580,7 +580,7 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
   return (
     <section className="adventure-map" aria-labelledby={tituloId}>
       <div className="map-banner"><div><h2 id={tituloId}>Mapa da aventura</h2><p>{texto}</p></div><img src="/images/mascote.png" alt="" /></div>
-      <ol className="trail">
+      <ol className="trail" style={{ '--etapas': etapas?.length || 1 }}>
         {(etapas ?? []).map((etapa, indice) => {
           const classe = { concluida: 'finished', atual: 'current', bloqueada: 'locked' }[etapa.situacao];
           const marcador = { concluida: '✓', atual: indice + 1, bloqueada: '♧' }[etapa.situacao];
@@ -599,7 +599,6 @@ function Home({ onNavigate }) {
   const cards = [
     ['Jogar', 'ilustra-jogos.png', '', 'jogos'],
     ['Histórias', 'ilustra-historias.png', '', 'historias'],
-    ['Aprender', 'ilustra-aprender.png', '', 'inicio'],
     ['Atividades', 'ilustra-atividades.png', '', 'atividades'],
     ['Conquistas', 'ilustra-conquistas.png', '', 'progresso'],
     ['Jornada', 'ilustra-progresso.png', '', 'progresso'],
@@ -625,26 +624,37 @@ function Home({ onNavigate }) {
   );
 }
 
-function PlayButton({ children = 'Jogar' }) { return <button className="round-play" type="button">▶ <b>{children}</b></button>; }
-
-const stories = [['🐳', 'A Baleia Bela', 'BA · BE', '4 min'], ['🦥', 'Bia e o Bicho-preguiça', 'BI', '5 min'], ['🎪', 'O Circo do Bê', 'BÊ · BA', '6 min'], ['🍇', 'A Uva que Voou', 'Vogais', '4 min'], ['🌼', 'Dente de Leão', 'DE · DI', '7 min'], ['🔒', 'O Soninho da Lua', 'Ninar', '8 min']];
+const stories = [
+  ['🐳', 'A Baleia Bela', 'BA · BE', '4 min', 'A baleia Bela nada bem devagar e brinca com as bolhas do mar.'],
+  ['🦥', 'Bia e o Bicho-preguiça', 'BI', '5 min', 'Bia encontra um bicho-preguiça que só quer dormir na árvore.'],
+  ['🎪', 'O Circo do Bê', 'BÊ · BA', '6 min', 'O palhaço Bê monta um circo cheio de bolas e balões.'],
+  ['🍇', 'A Uva que Voou', 'Vogais', '4 min', 'Uma uva pula do cacho e voa até o céu azul.'],
+  ['🌼', 'Dente de Leão', 'DE · DI', '7 min', 'Um dente-de-leão espalha suas sementes com o vento.'],
+  ['🌙', 'O Soninho da Lua', 'Ninar', '8 min', 'A lua dá boa-noite para todos os bichinhos da floresta.'],
+];
 function Stories({ onNavigate }) {
+  const [selecionada, setSelecionada] = useState(stories.length - 1);
+  const [icon, title, , time, resumo] = stories[selecionada];
+  const ouvir = (indice) => { const [, titulo, , , texto] = stories[indice]; falar(`${titulo}. ${texto}`); };
   return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
-    <section className="page-content stories-page"><section className="story-hero"><div><span>◔ Hora da história</span><h1>O Soninho da Lua</h1><div className="story-tags"><i>🌙</i><i>🦊</i><i>⭐</i></div><PlayButton children="Ouvir" /><small>♧ &nbsp; 8 min</small></div><img src="/images/ilustra-historias.png" alt="Ilustração da história" /></section>
-      <h2 className="section-title">✣ Escolha uma história</h2><div className="story-grid">{stories.map(([icon, title, tag, time]) => <article className="story-card" key={title}><span>{tag}</span><i>{icon}</i><strong>{title}</strong><small>♧ {time}</small></article>)}</div><p className="parent-note">Para os responsáveis: todas as histórias têm narração em áudio e usam as letras e sílabas da fase atual da trilha.</p>
+    <section className="page-content stories-page"><section className="story-hero"><div><span>◔ Hora da história</span><h1>{title}</h1><p>{resumo}</p><div className="story-tags"><i>{icon}</i></div><button className="round-play" type="button" onClick={() => ouvir(selecionada)}>▶ <b>Ouvir</b></button><small>♧ &nbsp; {time}</small></div><img src="/images/ilustra-historias.png" alt="Ilustração da história" /></section>
+      <h2 className="section-title">✣ Escolha uma história</h2><div className="story-grid">{stories.map(([cardIcon, cardTitle, tag, cardTime], indice) => <button type="button" className={`story-card ${indice === selecionada ? 'selected' : ''}`} aria-pressed={indice === selecionada} key={cardTitle} onClick={() => { setSelecionada(indice); ouvir(indice); }}><span>{tag}</span><i>{cardIcon}</i><strong>{cardTitle}</strong><small>♧ {cardTime}</small></button>)}</div><p className="parent-note">Para os responsáveis: toque em uma história para ouvir a narração. As histórias completas ainda estão em produção.</p>
     </section>
     <AppFooter />
   </main>;
 }
 
-const activities = [['▤', 'Caligrafia das vogais', 'Ficha para imprimir · 8 páginas', 'orange'], ['✂', 'Recorte e cole: sílabas', 'Atividade manual · 6 páginas', 'blue'], ['🎨', 'Pinte a letra inicial', 'Colorir · 12 páginas', 'yellow'], ['▤', 'Cruzadinha de animais', 'Ficha para imprimir · 4 páginas', 'blue'], ['✂', 'Alfabeto móvel', 'Atividade manual · 3 páginas', 'orange']];
+const activities = [['▤', 'Caligrafia das vogais', 'Ficha para imprimir · 8 páginas', 'orange', 'Para imprimir'], ['✂', 'Recorte e cole: sílabas', 'Atividade manual · 6 páginas', 'blue', 'Recortar'], ['🎨', 'Pinte a letra inicial', 'Colorir · 12 páginas', 'yellow', 'Colorir'], ['▤', 'Cruzadinha de animais', 'Ficha para imprimir · 4 páginas', 'blue', 'Para imprimir'], ['✂', 'Alfabeto móvel', 'Atividade manual · 3 páginas', 'orange', 'Recortar']];
+const EM_BREVE = 'Download disponível em breve';
 function Activities({ onNavigate }) {
   const [filter, setFilter] = useState('Todas');
+  const nomeCrianca = obterCriancaSelecionada()?.nome || 'criança';
+  const visiveis = activities.filter(([, , , , categoria]) => filter === 'Todas' || categoria === filter);
   return <main className="app-shell"><AppHeader active="atividades" onNavigate={onNavigate} />
-    <section className="page-content activities-page"><span className="eyebrow">Para fazer junto</span><h1>Atividades e materiais</h1><p className="page-intro">Selecionadas por professoras alfabetizadoras. Baixe, imprima e faça com a criança — offline também vale aprendizado.</p>
-      <section className="activity-feature"><div><span>Kit da semana</span><h2>Caderno BA-BE-BI completo</h2><p>22 páginas com traçado, colagem e leitura em voz alta, no ritmo da trilha atual da Manu.</p><button>⇩ &nbsp; Baixar PDF</button><button className="outline">▣ &nbsp; Imprimir</button></div><b>✏️</b></section>
-      <div className="filter-row">{['Todas', 'Para imprimir', 'Colorir', 'Recortar', 'Concluídas'].map(item => <button className={filter === item ? 'selected' : ''} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
-      <div className="activity-grid">{activities.map(([icon, title, desc, tone]) => <article className="activity-card" key={title}><span className={`activity-icon ${tone}`}>{icon}</span><em>✓ Feita</em><h2>{title}</h2><p>{desc}</p><button>⇩ &nbsp; Baixar</button><button className="print">▣</button></article>)}</div>
+    <section className="page-content activities-page"><span className="eyebrow">Para fazer junto</span><h1>Atividades e materiais</h1><p className="page-intro">Selecionadas por professoras alfabetizadoras. Os materiais para baixar e imprimir estão em produção.</p>
+      <section className="activity-feature"><div><span>Kit da semana</span><h2>Caderno BA-BE-BI completo</h2><p>22 páginas com traçado, colagem e leitura em voz alta, no ritmo da trilha de {nomeCrianca}.</p><button disabled title={EM_BREVE}>⇩ &nbsp; Em breve</button></div><b>✏️</b></section>
+      <div className="filter-row">{['Todas', 'Para imprimir', 'Colorir', 'Recortar'].map(item => <button className={filter === item ? 'selected' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
+      <div className="activity-grid">{visiveis.map(([icon, title, desc, tone]) => <article className="activity-card" key={title}><span className={`activity-icon ${tone}`}>{icon}</span><h2>{title}</h2><p>{desc}</p><button disabled title={EM_BREVE}>⇩ &nbsp; Em breve</button></article>)}</div>
     </section>
     <AppFooter />
   </main>;
@@ -691,7 +701,8 @@ function App() {
     if (!perfilCompleto()) {
       return (
         <main className="page-shell" id="inicio">
-          <p className="form-message" role="status">Carregando sua conta…</p>
+          <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
+          <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
         </main>
       );
     }
