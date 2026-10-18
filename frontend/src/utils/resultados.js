@@ -8,16 +8,9 @@ import { obterCriancaId, obterToken } from './auth';
 
 export { API_BASE_URL };
 
-// IDs criados por backend/seeds.py, na mesma ordem das atividades do front (CacaAsLetras.jsx)
-const ATIVIDADE_IDS = { ouvir: 1, palavra: 2, memoria: 3, bonus: 4 };
-
 function cabecalhosAutenticados(extras = {}) {
   const token = obterToken();
   return token ? { ...extras, Authorization: `Bearer ${token}` } : extras;
-}
-
-export async function registrarResultado(activityKey, respostaEnviada, respostaEsperada) {
-  return registrarResultadoPorId(ATIVIDADE_IDS[activityKey], respostaEnviada, respostaEsperada);
 }
 
 export async function registrarResultadoPorId(atividadeId, respostaEnviada, respostaEsperada) {

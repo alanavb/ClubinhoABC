@@ -1,5 +1,6 @@
 from app import create_app, db
 from app.models import Atividade, Etapa
+from migrar_data_nascimento import migrar
 
 app = create_app()
 
@@ -29,6 +30,7 @@ def garantir_atividades(etapa, atividades):
 
 with app.app_context():
     db.create_all()
+    migrar()  # create_all só cria tabelas novas; colunas novas em tabelas existentes vêm daqui
 
     etapa1 = Etapa.query.filter_by(chave='caca-as-letras').first()
     if not etapa1:
@@ -51,12 +53,14 @@ with app.app_context():
         etapa2 = Etapa(chave='monte-a-palavra', nome='Monte a Palavra', ordem=2)
         db.session.add(etapa2)
         db.session.commit()
-        print('Etapa "Monte a Palavra" criada (placeholder, para testar o RN1).')
+        print('Etapa "Monte a Palavra" criada.')
     else:
         print('Etapa "Monte a Palavra" já existia, nada foi criado.')
 
     garantir_atividades(etapa2, [
         ('formar-palavra', 'Forme a palavra', 1, True),
+        ('silaba-que-falta', 'Qual sílaba falta?', 2, True),
+        ('palavra-e-figura', 'Leia e encontre', 3, True),
     ])
 
     etapa3 = Etapa.query.filter_by(chave='ouca-e-escolha').first()
