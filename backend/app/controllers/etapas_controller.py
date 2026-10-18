@@ -55,6 +55,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
     estrelas = 0
     atividades_concluidas = 0
     concluidas_ids = set()
+    bonus_concluido = False
 
     for atividade in Atividade.query.order_by(Atividade.ordem).all():
         foi_concluida = (
@@ -67,6 +68,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             atividades_concluidas += 1
             concluidas_ids.add(atividade.id)
             estrelas += 1 if atividade.obrigatoria else 2
+            bonus_concluido = bonus_concluido or not atividade.obrigatoria
 
     # Mapa da aventura: etapas antes da atual estão concluídas, depois estão bloqueadas,
     # e a atual mostra quanto das atividades obrigatórias a criança já acertou.
@@ -87,12 +89,30 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             'situacao': situacao, 'percentual': percentual,
         })
 
+    # A última etapa não tem "próxima" para onde avançar: com 100% ela já está concluída.
+    if etapas and etapas[-1]['situacao'] == 'atual' and etapas[-1]['percentual'] == 100:
+        etapas[-1]['situacao'] = 'concluida'
+
+    trilha_completa = bool(etapas) and all(etapa['situacao'] == 'concluida' for etapa in etapas)
+    conquistas = [
+        {'id': 'primeira-atividade', 'icone': '🎯', 'titulo': 'Primeira atividade', 'conquistada': atividades_concluidas >= 1},
+        {'id': 'cinco-estrelas', 'icone': '⭐', 'titulo': '5 estrelas', 'conquistada': estrelas >= 5},
+        {'id': 'desafio-bonus', 'icone': '💎', 'titulo': 'Desafio bônus', 'conquistada': bonus_concluido},
+        *[
+            {'id': f'etapa-{etapa["chave"]}', 'icone': '🏅', 'titulo': f'{etapa["nome"]} concluída',
+             'conquistada': etapa['situacao'] == 'concluida'}
+            for etapa in etapas
+        ],
+        {'id': 'trilha-completa', 'icone': '🌈', 'titulo': 'Trilha completa', 'conquistada': trilha_completa},
+    ]
+
     return {
         'child_id': crianca.id,
         'estrelas': estrelas,
         'atividades_concluidas': atividades_concluidas,
         'tentativas': Resultado.query.filter_by(crianca_id=crianca.id).count(),
         'etapas': etapas,
+        'conquistas': conquistas,
     }
 
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):
