@@ -215,3 +215,17 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
 }/* Card de material com um botão só ("Em breve"): ocupa a largura e não cobre o texto. */
 .activity-card { padding-bottom: 84px; }
 .activity-card button { width: calc(100% - 48px); }
+/* Marca: a raposa mascote no lugar do "Aa". */
+.brand-mark { overflow: hidden; background: #fff3df; border: 2px solid #ffd27a; }
+.brand-mark img { width: 118%; height: 118%; margin-top: 18%; object-fit: contain; }
+
+/* Telas de um cartão só (confirmar e-mail, nova senha): centralizado e do tamanho do conteúdo. */
+.content-grid.single-card { grid-template-columns: minmax(0, 560px); justify-content: center; min-height: auto; margin-top: 70px; }
+.single-card .login-card { min-height: auto; }
+.single-card .login-card h1 { padding-right: 150px; }
+.single-card .card-intro { margin-bottom: 26px; font-size: 16px; line-height: 1.5; }
+.single-card .text-link { display: block; margin: 16px auto 0; }
+@media (max-width: 520px) {
+  .content-grid.single-card { margin-top: 50px; }
+  .single-card .login-card h1 { padding-right: 96px; }
+}.single-card .login-card h1 em { white-space: nowrap; }

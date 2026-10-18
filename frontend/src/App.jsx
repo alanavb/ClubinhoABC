@@ -45,7 +45,7 @@ function CamposCrianca({ nome, setNome, dataNascimento, setDataNascimento, pet, 
 function Brand() {
   return (
     <a className="brand" href="#inicio" aria-label="Clubinho ABC">
-      <span className="brand-mark">Aa</span>
+      <span className="brand-mark"><img src="/images/mascote.png" alt="" /></span>
       <span>CLUBINHO <strong>ABC</strong></span>
     </a>
   );
@@ -328,7 +328,7 @@ function ConfirmeSeuEmail({ email, onVoltar }) {
       <header className="site-header compact-header">
         <Brand />
       </header>
-      <section className="content-grid">
+      <section className="content-grid single-card">
         <section className="login-card" aria-labelledby="confirm-title">
           <img src="/images/mascote.png" alt="" className="login-mascot" />
           <h1 id="confirm-title">Confirme seu <em>e-mail</em></h1>
@@ -376,7 +376,7 @@ function RedefinirSenha() {
       <header className="site-header compact-header">
         <Brand />
       </header>
-      <section className="content-grid">
+      <section className="content-grid single-card">
         <section className="login-card" aria-labelledby="reset-title">
           <img src="/images/mascote.png" alt="" className="login-mascot" />
           <h1 id="reset-title">Crie uma <em>nova senha</em></h1>
