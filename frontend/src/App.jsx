@@ -502,6 +502,7 @@ function MinhaConta({ onNavigate }) {
   const [section, setSection] = useState('dados');
   const [securityMessage, setSecurityMessage] = useState('');
   const [securitySubmitting, setSecuritySubmitting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   async function salvar(event) {
     event.preventDefault();
@@ -592,13 +593,14 @@ function MinhaConta({ onNavigate }) {
                 <h3>Excluir conta</h3>
                 <p>A exclusão da conta remove o acesso do responsável e pode tornar indisponíveis os perfis, o histórico e o progresso das crianças vinculadas.</p>
                 <p>Para proteger a família, esse pedido é confirmado pela equipe antes de qualquer exclusão.</p>
-                <a href="mailto:clubinhoabc@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20Clubinho%20ABC">Solicitar exclusão da conta</a>
+                <button type="button" onClick={() => setShowDeleteConfirm(true)}>Solicitar exclusão da conta</button>
               </div>
             </section>}
           </div>
         </div>
       </section>
       {criancaEmEdicao && <EditarCriancaDialog crianca={criancaEmEdicao} onClose={() => setCriancaEmEdicao(null)} />}
+      {showDeleteConfirm && <ConfirmarExclusaoConta onClose={() => setShowDeleteConfirm(false)} />}
       <AppFooter />
     </main>
   );
@@ -636,6 +638,36 @@ function EditarCriancaDialog({ crianca, onClose }) {
           {message && <p className="form-message" role="alert">{message}</p>}
           <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Salvando…' : 'Salvar alterações'}</button>
         </form>
+      </section>
+    </div>
+  );
+}
+
+function ConfirmarExclusaoConta({ onClose }) {
+  const [confirmado, setConfirmado] = useState(false);
+
+  function enviarSolicitacao() {
+    window.location.href = 'mailto:clubinhoabc@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20Clubinho%20ABC';
+    onClose();
+  }
+
+  return (
+    <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="terms-dialog delete-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-confirm-title">
+        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar confirmação de exclusão">×</button>
+        <span className="delete-confirm-icon" aria-hidden="true">⚠️</span>
+        <h1 id="delete-confirm-title">Solicitar exclusão da conta</h1>
+        <p>Esta solicitação será analisada pela equipe para confirmar a identidade do responsável antes de qualquer exclusão.</p>
+        <ul>
+          <li>O acesso do responsável será encerrado.</li>
+          <li>Os perfis, resultados e progresso das crianças vinculadas poderão ser removidos.</li>
+          <li>Essa ação pode ser irreversível após a confirmação da equipe.</li>
+        </ul>
+        <label className="delete-confirm-check"><input type="checkbox" checked={confirmado} onChange={(event) => setConfirmado(event.target.checked)} /> Entendo as consequências e quero solicitar a exclusão.</label>
+        <div className="delete-confirm-actions">
+          <button className="back-button" type="button" onClick={onClose}>Cancelar</button>
+          <button className="delete-confirm-button" type="button" onClick={enviarSolicitacao} disabled={!confirmado}>Enviar solicitação</button>
+        </div>
       </section>
     </div>
   );
