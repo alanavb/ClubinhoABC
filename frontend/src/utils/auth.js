@@ -153,6 +153,28 @@ export async function adicionarCrianca({ nome, dataNascimento, avatar }) {
   return dados;
 }
 
+export async function editarCrianca({ criancaId, nome, dataNascimento, avatar }) {
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessaoSupabase?.access_token}`,
+    },
+    body: JSON.stringify({ nome, data_nascimento: dataNascimento, avatar }),
+  });
+  const dados = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível atualizar os dados da criança.');
+
+  perfil = {
+    ...perfil,
+    criancas: perfil.criancas.map((crianca) => (
+      crianca.crianca_id === dados.crianca_id ? dados : crianca
+    )),
+  };
+  avisarOuvintes();
+  return dados;
+}
+
 export function obterPerfil() {
   return perfil;
 }

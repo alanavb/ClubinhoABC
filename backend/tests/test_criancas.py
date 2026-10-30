@@ -150,3 +150,40 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual(400, resposta.status_code)
         self.assertIn('futuro', resposta.get_json()['erro'])
         self.assertEqual(1, Crianca.query.count())
+
+    def test_deve_editar_crianca_do_responsavel_autenticado(self):
+        bia = Crianca.query.filter_by(nome='Bia').first()
+
+        resposta = self.client.put(
+            f'/api/criancas/{bia.id}',
+            json={'nome': 'Beatriz', 'data_nascimento': '2019-06-12', 'avatar': '🦊'},
+            headers=self.auth,
+        )
+
+        self.assertEqual(200, resposta.status_code)
+        self.assertEqual('Beatriz', resposta.get_json()['nome'])
+        self.assertEqual('2019-06-12', resposta.get_json()['data_nascimento'])
+        self.assertEqual('🦊', resposta.get_json()['avatar'])
+
+    def test_nao_deve_editar_crianca_de_outro_responsavel(self):
+        etapa = Etapa.query.first()
+        outro_responsavel = Responsavel(
+            supabase_user_id='outro-user', nome='Rui', email='rui@gmail.com'
+        )
+        db.session.add(outro_responsavel)
+        db.session.flush()
+        outra_crianca = Crianca(
+            responsavel_id=outro_responsavel.id, nome='Teo',
+            data_nascimento=datetime.date(2019, 6, 12), etapa_atual_id=etapa.id,
+        )
+        db.session.add(outra_crianca)
+        db.session.commit()
+
+        resposta = self.client.put(
+            f'/api/criancas/{outra_crianca.id}',
+            json={'nome': 'Nome indevido', 'data_nascimento': '2019-06-12', 'avatar': '🐨'},
+            headers=self.auth,
+        )
+
+        self.assertEqual(404, resposta.status_code)
+        self.assertEqual('Teo', db.session.get(Crianca, outra_crianca.id).nome)

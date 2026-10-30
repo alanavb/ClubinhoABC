@@ -87,3 +87,28 @@ def adicionar_crianca():
         return jsonify({'erro': str(erro)}), 400
 
     return jsonify(_crianca_para_json(crianca)), 201
+
+
+@auth_bp.route('/criancas/<int:crianca_id>', methods=['PUT'])
+@requer_autenticacao
+def editar_crianca(crianca_id):
+    """Atualiza os dados de uma criança da conta autenticada."""
+    responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
+    if not responsavel:
+        return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
+
+    dados = request.get_json(silent=True) or {}
+    try:
+        crianca = auth_controller.editar_crianca(
+            responsavel,
+            crianca_id,
+            dados.get('nome'),
+            dados.get('data_nascimento'),
+            dados.get('avatar'),
+        )
+    except DadosInvalidosError as erro:
+        return jsonify({'erro': str(erro)}), 400
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+
+    return jsonify(_crianca_para_json(crianca))

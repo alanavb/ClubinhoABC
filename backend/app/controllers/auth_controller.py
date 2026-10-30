@@ -103,3 +103,25 @@ def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianc
     )
 
     return crianca
+
+
+def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
+    """Atualiza os dados de uma criança vinculada ao responsável autenticado."""
+    crianca = Crianca.query.get(crianca_id)
+    if not crianca or crianca.responsavel_id != responsavel.id:
+        raise ValueError('Criança não encontrada')
+
+    crianca.nome, crianca.data_nascimento = _validar_crianca(
+        crianca_nome, crianca_data_nascimento
+    )
+    crianca.avatar = crianca_avatar
+    db.session.commit()
+
+    registrar_log(
+        acao='edicao_crianca',
+        responsavel_id=responsavel.id,
+        crianca_id=crianca.id,
+        detalhes=f'crianca={crianca.nome}',
+    )
+
+    return crianca

@@ -8,6 +8,7 @@ import {
   aoMudarSessao,
   atualizarSenha,
   cadastrar,
+  editarCrianca,
   entrar,
   enviarRecuperacaoSenha,
   estaAutenticado,
@@ -474,6 +475,10 @@ function textoIdade(crianca) {
   return crianca.idade == null ? 'idade não informada' : `${crianca.idade} ${crianca.idade === 1 ? 'ano' : 'anos'}`;
 }
 
+function textoDataNascimento(dataNascimento) {
+  return dataNascimento ? dataNascimento.split('-').reverse().join('/') : 'data não informada';
+}
+
 function AvisoFaixaEtaria({ crianca }) {
   if (!crianca?.fora_da_faixa_etaria) return null;
   return (
@@ -484,20 +489,19 @@ function AvisoFaixaEtaria({ crianca }) {
   );
 }
 
-function FamiliaDialog({ onClose }) {
-  const criancas = obterPerfil()?.criancas ?? [];
+function MinhaConta({ onNavigate }) {
+  const perfil = obterPerfil();
+  const criancas = perfil?.criancas ?? [];
   const selecionadaId = obterCriancaId();
   const [nome, setNome] = useState('');
   const [dataNascimento, setDataNascimento] = useState('');
   const [pet, setPet] = useState(pets[0]);
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
-
-  useEffect(() => {
-    const fecharComEsc = (event) => { if (event.key === 'Escape') onClose(); };
-    window.addEventListener('keydown', fecharComEsc);
-    return () => window.removeEventListener('keydown', fecharComEsc);
-  }, [onClose]);
+  const [criancaEmEdicao, setCriancaEmEdicao] = useState(null);
+  const [section, setSection] = useState('dados');
+  const [securityMessage, setSecurityMessage] = useState('');
+  const [securitySubmitting, setSecuritySubmitting] = useState(false);
 
   async function salvar(event) {
     event.preventDefault();
@@ -505,6 +509,114 @@ function FamiliaDialog({ onClose }) {
     setMessage('');
     try {
       await adicionarCrianca({ nome, dataNascimento, avatar: pet });
+      setNome('');
+      setDataNascimento('');
+      setPet(pets[0]);
+    } catch (erro) {
+      setMessage(erro.message);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function solicitarAlteracaoSenha() {
+    setSecuritySubmitting(true);
+    setSecurityMessage('');
+    try {
+      await enviarRecuperacaoSenha(perfil?.email);
+      setSecurityMessage('Enviamos um link para alterar sua senha no e-mail cadastrado.');
+    } catch (erro) {
+      setSecurityMessage(erro.message);
+    } finally {
+      setSecuritySubmitting(false);
+    }
+  }
+
+  return (
+    <main className="app-shell"><AppHeader active="conta" onNavigate={onNavigate} />
+      <section className="page-content account-page">
+        <div className="account-heading"><span>Minha conta</span><h1>Dados da família</h1><p>Gerencie os dados da sua conta e das crianças vinculadas.</p></div>
+        <div className="account-layout">
+          <nav className="account-sidebar" aria-label="Seções da conta">
+            <button className={section === 'dados' ? 'active' : ''} type="button" onClick={() => setSection('dados')}>Dados da conta</button>
+            <button className={section === 'criancas' ? 'active' : ''} type="button" onClick={() => setSection('criancas')}>Crianças</button>
+            <button className={section === 'seguranca' ? 'active' : ''} type="button" onClick={() => setSection('seguranca')}>Segurança</button>
+            <button className={section === 'privacidade' ? 'active' : ''} type="button" onClick={() => setSection('privacidade')}>Privacidade</button>
+          </nav>
+          <div className="account-panel">
+            {section === 'dados' && <section className="account-card">
+              <h2>Dados da conta</h2>
+              <p>Estas informações identificam o responsável pela família cadastrada.</p>
+              <dl className="account-data-list"><div><dt>Nome</dt><dd>{perfil?.nome}</dd></div><div><dt>E-mail</dt><dd>{perfil?.email}</dd></div></dl>
+            </section>}
+            {section === 'criancas' && <>
+              <h2>Crianças vinculadas</h2>
+              <p>Escolha quem vai brincar agora, edite os dados ou cadastre outra criança.</p>
+              <ul className="family-list">
+                {criancas.map((crianca) => (
+                  <li key={crianca.crianca_id}>
+                    <button
+                      type="button"
+                      className={`family-child ${crianca.crianca_id === selecionadaId ? 'selected' : ''}`}
+                      aria-pressed={crianca.crianca_id === selecionadaId}
+                      onClick={() => selecionarCrianca(crianca.crianca_id)}
+                    >
+                      <span className="family-pet" aria-hidden="true">{crianca.avatar || '🙂'}</span>
+                      <strong>{crianca.nome}</strong>
+                      <small>{textoIdade(crianca)} · nascimento: {textoDataNascimento(crianca.data_nascimento)}{crianca.fora_da_faixa_etaria ? ' · fora da faixa de 6 a 7 anos' : ''}</small>
+                    </button>
+                    <button className="family-edit" type="button" onClick={() => setCriancaEmEdicao(crianca)}>Editar</button>
+                  </li>
+                ))}
+              </ul>
+              <h2>Adicionar criança</h2>
+              <form onSubmit={salvar}>
+                <CamposCrianca idPrefixo="new-child" nome={nome} setNome={setNome} dataNascimento={dataNascimento} setDataNascimento={setDataNascimento} pet={pet} setPet={setPet} />
+                {message && <p className="form-message" role="alert">{message}</p>}
+                <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Salvando…' : 'Adicionar criança'}</button>
+              </form>
+            </>}
+            {section === 'seguranca' && <section className="account-card">
+              <h2>Segurança</h2>
+              <h3>Senha</h3>
+              <p>A senha é armazenada pelo Supabase Auth e nunca é salva pelo Clubinho ABC.</p>
+              <p>Para definir uma nova senha, enviaremos um link seguro para <strong>{perfil?.email}</strong>.</p>
+              <button className="account-action-button" type="button" onClick={solicitarAlteracaoSenha} disabled={securitySubmitting}>{securitySubmitting ? 'Enviando…' : 'Alterar senha'}</button>
+              {securityMessage && <p className="account-status" role="status">{securityMessage}</p>}
+            </section>}
+            {section === 'privacidade' && <section className="account-card">
+              <h2>Privacidade e conta</h2>
+              <p>Para dúvidas sobre seus dados ou os dados das crianças vinculadas, entre em contato com a equipe pelo canal de suporte.</p>
+              <a className="account-contact-link" href="mailto:clubinhoabc@gmail.com?subject=D%C3%BAvida%20sobre%20privacidade%20-%20Clubinho%20ABC">Falar sobre privacidade</a>
+              <div className="delete-account-panel">
+                <h3>Excluir conta</h3>
+                <p>A exclusão da conta remove o acesso do responsável e pode tornar indisponíveis os perfis, o histórico e o progresso das crianças vinculadas.</p>
+                <p>Para proteger a família, esse pedido é confirmado pela equipe antes de qualquer exclusão.</p>
+                <a href="mailto:clubinhoabc@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20Clubinho%20ABC">Solicitar exclusão da conta</a>
+              </div>
+            </section>}
+          </div>
+        </div>
+      </section>
+      {criancaEmEdicao && <EditarCriancaDialog crianca={criancaEmEdicao} onClose={() => setCriancaEmEdicao(null)} />}
+      <AppFooter />
+    </main>
+  );
+}
+
+function EditarCriancaDialog({ crianca, onClose }) {
+  const [nome, setNome] = useState(crianca.nome);
+  const [dataNascimento, setDataNascimento] = useState(crianca.data_nascimento || '');
+  const [pet, setPet] = useState(crianca.avatar || pets[0]);
+  const [message, setMessage] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+
+  async function salvar(event) {
+    event.preventDefault();
+    setSubmitting(true);
+    setMessage('');
+    try {
+      await editarCrianca({ criancaId: crianca.crianca_id, nome, dataNascimento, avatar: pet });
       onClose();
     } catch (erro) {
       setMessage(erro.message);
@@ -514,32 +626,15 @@ function FamiliaDialog({ onClose }) {
   }
 
   return (
-    <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
-      <section className="terms-dialog family-dialog" role="dialog" aria-modal="true" aria-labelledby="family-title">
-        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar">×</button>
-        <h1 id="family-title">Crianças da família</h1>
-        <p>Escolha quem vai brincar agora.</p>
-        <ul className="family-list">
-          {criancas.map((crianca) => (
-            <li key={crianca.crianca_id}>
-              <button
-                type="button"
-                className={crianca.crianca_id === selecionadaId ? 'selected' : ''}
-                aria-pressed={crianca.crianca_id === selecionadaId}
-                onClick={() => { selecionarCrianca(crianca.crianca_id); onClose(); }}
-              >
-                <span className="family-pet" aria-hidden="true">{crianca.avatar || '🙂'}</span>
-                <strong>{crianca.nome}</strong>
-                <small>{textoIdade(crianca)}{crianca.fora_da_faixa_etaria ? ' · fora da faixa de 6 a 7 anos' : ''}</small>
-              </button>
-            </li>
-          ))}
-        </ul>
-        <h2>Adicionar criança</h2>
+    <div className="terms-overlay edit-child-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="terms-dialog family-dialog" role="dialog" aria-modal="true" aria-labelledby="edit-child-title">
+        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar edição da criança">×</button>
+        <h1 id="edit-child-title">Editar dados da criança</h1>
+        <p>Atualize as informações de {crianca.nome}.</p>
         <form onSubmit={salvar}>
-          <CamposCrianca idPrefixo="new-child" nome={nome} setNome={setNome} dataNascimento={dataNascimento} setDataNascimento={setDataNascimento} pet={pet} setPet={setPet} />
+          <CamposCrianca idPrefixo="edit-child" nome={nome} setNome={setNome} dataNascimento={dataNascimento} setDataNascimento={setDataNascimento} pet={pet} setPet={setPet} />
           {message && <p className="form-message" role="alert">{message}</p>}
-          <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Salvando…' : 'Adicionar criança'}</button>
+          <button className="small-primary" type="submit" disabled={submitting}>{submitting ? 'Salvando…' : 'Salvar alterações'}</button>
         </form>
       </section>
     </div>
@@ -550,7 +645,6 @@ function AppHeader({ active, onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'Manu';
   const estrelas = useEstrelas(obterCriancaId());
-  const [showFamilia, setShowFamilia] = useState(false);
 
   async function sairDaConta() {
     await sair();
@@ -569,12 +663,11 @@ function AppHeader({ active, onNavigate }) {
       </nav>
       <div className="profile-summary">
         <span className="stars">⭐ <b>{estrelas} estrelas</b></span>
-        <button className="child-profile" type="button" onClick={() => setShowFamilia(true)} aria-label={`${nomeCrianca}: trocar ou adicionar criança`}>
+        <button className="child-profile" type="button" onClick={() => onNavigate('conta')} aria-label="Abrir minha conta">
           <span className="child-avatar" aria-hidden="true">{crianca?.avatar || '🙂'}</span>{nomeCrianca}
         </button>
         <button className="text-link" type="button" onClick={sairDaConta}>Sair</button>
       </div>
-      {showFamilia && <FamiliaDialog onClose={() => setShowFamilia(false)} />}
     </header>
   );
 }
@@ -769,7 +862,7 @@ function Progress({ onNavigate }) {
   </main>;
 }
 
-const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso'];
+const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso', 'conta'];
 const VIEWS_PRE_LOGIN = ['login', 'signup', 'confirmar-email'];
 
 function App() {
@@ -820,6 +913,7 @@ function App() {
   if (view === 'historias') return <Stories onNavigate={navigate} />;
   if (view === 'atividades') return <Activities onNavigate={navigate} />;
   if (view === 'progresso') return <Progress onNavigate={navigate} />;
+  if (view === 'conta') return <MinhaConta onNavigate={navigate} />;
   return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
 }
 
