@@ -149,7 +149,7 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     }
 
 
-def avancar_etapa_se_concluida(crianca_id, etapa_id, responsavel_id=None):
+def avancar_etapa_se_concluida(crianca_id, etapa_id, responsavel_id=None, confirmar=True):
     crianca = _buscar_crianca(crianca_id, responsavel_id)
     if crianca.etapa_atual_id != etapa_id:
         raise AcessoNegadoError('Esta não é a etapa atual da criança')
@@ -169,7 +169,8 @@ def avancar_etapa_se_concluida(crianca_id, etapa_id, responsavel_id=None):
         return {**status, 'avancou': False, 'proxima_etapa': None}
 
     crianca.etapa_atual_id = proxima_etapa.id
-    db.session.commit()
+    if confirmar:
+        db.session.commit()
     return {
         **status,
         'avancou': True,

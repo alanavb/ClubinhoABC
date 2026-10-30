@@ -19,6 +19,7 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.resultado_model = self._substituir('Resultado')
         self.db_mock = self._substituir('db')
         self.log_mock = self._substituir('registrar_log')
+        self.avanco_mock = self._substituir('avancar_etapa_se_concluida')
 
         # Cenário base: criança de um responsável, na etapa 5, com atividade da etapa 5.
         self.crianca = SimpleNamespace(id=1, responsavel_id=10, etapa_atual_id=5)
@@ -50,6 +51,7 @@ class RegistrarResultadoTest(unittest.TestCase):
         )
         self.db_mock.session.add.assert_called_once_with(resultado)
         self.db_mock.session.commit.assert_called_once()
+        self.avanco_mock.assert_called_once_with(1, 5, responsavel_id=10, confirmar=False)
         self.assertEqual('atividade_realizada', self.log_mock.call_args.kwargs['acao'])
 
     # TESTE 2 - violação: criança inexistente
@@ -85,3 +87,5 @@ class RegistrarResultadoTest(unittest.TestCase):
                 resultados_controller.registrar_resultado(1, 2, enviada, esperada, responsavel_id=10)
 
                 self.assertEqual(correta_esperada, self.resultado_model.call_args.kwargs['correta'])
+                self.assertEqual(correta_esperada, self.avanco_mock.called)
+                self.avanco_mock.reset_mock()

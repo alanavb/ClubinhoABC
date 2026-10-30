@@ -3,7 +3,7 @@
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log
-from app.controllers.etapas_controller import AcessoNegadoError
+from app.controllers.etapas_controller import AcessoNegadoError, avancar_etapa_se_concluida
 from app.models import Atividade, Crianca, Resultado
 
 
@@ -30,6 +30,17 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
         correta=correta,
     )
     db.session.add(resultado)
+    # Inclui a tentativa nas consultas do status antes de verificar se esta foi
+    # a última atividade obrigatória concluída.
+    db.session.flush()
+
+    if correta:
+        avancar_etapa_se_concluida(
+            crianca_id,
+            atividade.etapa_id,
+            responsavel_id=responsavel_id,
+            confirmar=False,
+        )
     db.session.commit()
 
     registrar_log(

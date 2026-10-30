@@ -73,3 +73,43 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
         self.assertEqual(1, len(listagem.get_json()))
         self.assertEqual('A', listagem.get_json()[0]['answer'])
         self.assertTrue(listagem.get_json()[0]['correct'])
+
+    def test_deve_avancar_automaticamente_apos_acertar_todas_as_obrigatorias(self):
+        etapa_atual = db.session.get(Etapa, self.crianca.etapa_atual_id)
+        proxima_etapa = Etapa(chave='monte-palavra', nome='Monte a Palavra', ordem=2)
+        segunda_obrigatoria = Atividade(
+            etapa_id=etapa_atual.id,
+            chave='identificar-letra',
+            nome='Identifique a letra',
+            ordem=2,
+            obrigatoria=True,
+        )
+        db.session.add_all([proxima_etapa, segunda_obrigatoria])
+        db.session.commit()
+
+        with patch('app.auth_utils._decodificar_token', return_value=self.claims):
+            primeira_resposta = self.client.post(
+                '/api/resultados',
+                json={
+                    'crianca_id': self.crianca.id,
+                    'atividade_id': self.atividade.id,
+                    'resposta_enviada': 'A',
+                    'resposta_esperada': 'A',
+                },
+                headers={'Authorization': 'Bearer token-de-teste'},
+            )
+            segunda_resposta = self.client.post(
+                '/api/resultados',
+                json={
+                    'crianca_id': self.crianca.id,
+                    'atividade_id': segunda_obrigatoria.id,
+                    'resposta_enviada': 'B',
+                    'resposta_esperada': 'B',
+                },
+                headers={'Authorization': 'Bearer token-de-teste'},
+            )
+
+        db.session.refresh(self.crianca)
+        self.assertEqual(201, primeira_resposta.status_code)
+        self.assertEqual(201, segunda_resposta.status_code)
+        self.assertEqual(proxima_etapa.id, self.crianca.etapa_atual_id)
