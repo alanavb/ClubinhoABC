@@ -19,8 +19,14 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
   function responder(silaba) {
     if (retorno === 'correct') return;
     falar(silaba);
-    registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
-    setRetorno(silaba === rodada.resposta ? 'correct' : 'incorrect');
+    const correta = silaba === rodada.resposta;
+    setRetorno(correta ? 'correct' : 'incorrect');
+    if (correta) {
+      if (ultima) registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
+      window.setTimeout(avancar, 800);
+    } else {
+      registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
+    }
   }
 
   function avancar() {
@@ -41,6 +47,6 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
       {antes && <b>{antes}</b>}<i>{retorno === 'correct' ? rodada.resposta : '?'}</i>{depois && <b>{depois}</b>}
     </div>
     <div className="letter-options syllable-options">{opcoes.map((silaba) => <button type="button" key={silaba} onClick={() => responder(silaba)}>{silaba}</button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{ultima ? 'Concluir fase' : 'Próxima palavra →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />}</div>
   </div></section>;
 }

@@ -18,12 +18,13 @@ export default function Prova({ atividadeId, aoConcluir, aoFechar }) {
     if (retorno === 'correct') return;
     falar(letra);
     const correta = letra === desafio.letra;
-    registrarResultadoPorId(atividadeId, letra, desafio.letra);
     if (correta) {
       setRetorno('correct');
+      if (rodada === totalRodadas) registrarResultadoPorId(atividadeId, letra, desafio.letra);
       window.setTimeout(avancarRodada, 800);
       return;
     }
+    registrarResultadoPorId(atividadeId, letra, desafio.letra);
     setRetorno('incorrect');
   }
 

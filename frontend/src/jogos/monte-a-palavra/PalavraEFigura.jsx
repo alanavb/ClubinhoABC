@@ -19,8 +19,14 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
   function responder(nome) {
     if (retorno === 'correct') return;
     falar(nome);
-    registrarResultadoPorId(atividadeId, nome, rodada.palavra);
-    setRetorno(nome === rodada.palavra ? 'correct' : 'incorrect');
+    const correta = nome === rodada.palavra;
+    setRetorno(correta ? 'correct' : 'incorrect');
+    if (correta) {
+      if (ultima) registrarResultadoPorId(atividadeId, nome, rodada.palavra);
+      window.setTimeout(avancar, 800);
+    } else {
+      registrarResultadoPorId(atividadeId, nome, rodada.palavra);
+    }
   }
 
   function avancar() {
@@ -37,6 +43,6 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
     <div className="missing-sentence written-word"><b>{rodada.palavra}</b></div>
     <button className="sentence-clue" type="button" onClick={() => falar(rodada.palavra)}>🔊 Ouvir a palavra</button>
     <div className="scene-options">{opcoes.map(([nome, icone]) => <button type="button" key={nome} onClick={() => responder(nome)} aria-label={nome}><span>{icone}</span></button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{ultima ? 'Concluir fase' : 'Próxima palavra →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />}</div>
   </div></section>;
 }

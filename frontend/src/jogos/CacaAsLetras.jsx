@@ -23,8 +23,9 @@ export default function CacaAsLetras({ jogavel }) {
   return <section className="current-world" aria-labelledby="current-world-title">
     <header><div><div className="current-world-title"><span>🔤</span><div><small>ETAPA 1</small><h2 id="current-world-title">Caça às Letras</h2></div></div></div><b>⭐ {obrigatoriasFeitas}/3</b></header>
     {erro && <p className="form-message" role="alert">{erro} <button className="text-link" type="button" onClick={carregar}>Tentar de novo</button></p>}
-    <div className="current-activities">{fases.map(({ chave, icone, titulo, rotulo, requisito }) => {
-      const liberada = jogavel && (!requisito || concluidas.includes(requisito));
+    <div className="current-activities">{fases.map(({ chave, icone, titulo, rotulo, requisito, obrigatoria }) => {
+      const bonusLiberado = !obrigatoria && obrigatoriasFeitas === fases.filter((fase) => fase.obrigatoria).length;
+      const liberada = jogavel && (bonusLiberado || (obrigatoria && (!requisito || concluidas.includes(requisito))));
       const feita = concluidas.includes(chave);
       let acao;
       if (feita) acao = <small>⭐ Feito!</small>;

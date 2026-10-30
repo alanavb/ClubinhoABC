@@ -32,8 +32,14 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
   function responder(resposta) {
     if (retorno === 'correct') return;
     falar(resposta);
-    if (atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
-    setRetorno(resposta === desafio.resposta ? 'correct' : 'incorrect');
+    const correta = resposta === desafio.resposta;
+    setRetorno(correta ? 'correct' : 'incorrect');
+    if (correta) {
+      if (indice === desafios.length - 1 && atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
+      window.setTimeout(avancar, 800);
+    } else if (atividadeId) {
+      registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
+    }
   }
 
   function avancar() {
@@ -49,6 +55,6 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
     <div className="detective-step"><small>1 · OUÇA A HISTÓRIA</small><div className="detective-story"><button type="button" onClick={() => falar(desafio.historia)}>🔊 Ouvir história</button></div></div>
     <section className="detective-question"><small>2 · LEIA A PERGUNTA</small><h3>{desafio.pergunta}</h3></section>
     <section className="detective-answers"><small>3 · ESCOLHA UMA RESPOSTA</small><div className="clue-options">{embaralhar(desafio.opcoes).map((opcao) => <button type="button" key={opcao} onClick={() => responder(opcao)}>{opcao}</button>)}</div></section>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{indice === desafios.length - 1 ? 'Concluir bônus' : 'Próximo caso →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />}</div>
   </div></section>;
 }

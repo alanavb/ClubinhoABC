@@ -25,7 +25,8 @@ export default function OucaEEscolha({ jogavel }) {
   function faseDisponivel(indice) {
     const fase = fases[indice];
     if (!jogavel) return false;
-    if (!fase.obrigatoria || indice === 0) return true;
+    if (!fase.obrigatoria) return concluidasObrigatorias === fases.filter((item) => item.obrigatoria).length;
+    if (indice === 0) return true;
     return concluidas.includes(fases[indice - 1].chave);
   }
 

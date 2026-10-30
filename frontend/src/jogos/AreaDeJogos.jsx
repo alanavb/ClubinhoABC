@@ -12,15 +12,15 @@ const telasDasEtapas = {
   'ouca-e-escolha': { Tela: OucaEEscolha, icone: '👂', legenda: 'Frases' },
 };
 
-const textoSituacao = { concluida: 'Concluída', atual: 'Etapa atual', bloqueada: 'Bloqueada' };
-
 export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
   const { resumo, erro, recarregar } = useResumoProgresso(obterCriancaId());
   const [selecionada, setSelecionada] = useState(null);
 
   const etapas = (resumo?.etapas ?? []).filter((etapa) => telasDasEtapas[etapa.chave]);
   const atual = etapas.find((etapa) => etapa.situacao === 'atual');
-  const visualizada = etapas.find((etapa) => etapa.chave === selecionada) ?? atual ?? etapas[0];
+  // Quando a última etapa é concluída, não existe uma próxima como "atual".
+  // Mantemos a última visível para a criança acessar seu desafio bônus.
+  const visualizada = etapas.find((etapa) => etapa.chave === selecionada) ?? atual ?? etapas[etapas.length - 1];
   const posicao = visualizada ? etapas.indexOf(visualizada) + 1 : 0;
   const Tela = visualizada && telasDasEtapas[visualizada.chave].Tela;
 
@@ -35,22 +35,34 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
         {etapas.map((etapa) => {
           const { icone, legenda } = telasDasEtapas[etapa.chave];
           const bloqueada = etapa.situacao === 'bloqueada';
+          const faixaProgresso = etapa.percentual === 100
+            ? 'progress-complete'
+            : etapa.percentual > 0
+              ? 'progress-partial'
+              : 'progress-start';
+          const textoProgresso = bloqueada
+            ? 'A descobrir'
+            : etapa.percentual === 100
+              ? 'Concluída'
+              : etapa.percentual > 0
+                ? 'Em andamento'
+                : 'Ainda não iniciada';
           return <button
             key={etapa.chave}
             type="button"
-            className={`world-card ${bloqueada ? 'locked' : 'available'} ${etapa.chave === visualizada?.chave ? 'selected-world' : ''}`}
+            className={`world-card ${bloqueada ? 'locked' : 'available'} ${faixaProgresso} ${etapa.chave === visualizada?.chave ? 'selected-world' : ''}`}
             disabled={bloqueada}
             onClick={() => setSelecionada(etapa.chave)}
           >
             <div className="world-icon">{bloqueada ? '🔒' : icone}</div>
             <strong>{etapa.nome}</strong>
             <small>{bloqueada ? '???' : legenda}</small>
-            <span>{textoSituacao[etapa.situacao]}{bloqueada ? '' : ` · ${etapa.percentual}%`}</span>
+            <span className="world-progress"><i aria-hidden="true">{etapa.percentual === 100 ? '★' : etapa.percentual > 0 ? '●' : '○'}</i><em>{textoProgresso}</em><b>{etapa.percentual}%</b></span>
           </button>;
         })}
       </section>
       {/* key: ao trocar de etapa, a tela recomeça do zero */}
-      {Tela && <Tela key={visualizada.chave} jogavel={visualizada.situacao === 'atual'} />}
+      {Tela && <Tela key={visualizada.chave} jogavel={visualizada.situacao !== 'bloqueada'} />}
       <p className="games-journey-note">
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>
         {visualizada?.situacao === 'concluida'

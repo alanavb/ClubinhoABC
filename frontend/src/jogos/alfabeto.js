@@ -25,7 +25,10 @@ export function criarAlternativas(resposta, quantidade = 4) {
 export function falar(texto) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const fala = new SpeechSynthesisUtterance(texto);
+  // Sílabas escritas em maiúsculas (BA, CA...) podem ser soletradas por
+  // algumas vozes do navegador. Em minúsculas, a voz em pt-BR as lê como som.
+  const textoFalado = /^[A-ZÀ-ÖØ-Þ]{2,3}$/.test(texto) ? texto.toLowerCase() : texto;
+  const fala = new SpeechSynthesisUtterance(textoFalado);
   fala.lang = 'pt-BR';
   window.speechSynthesis.speak(fala);
 }

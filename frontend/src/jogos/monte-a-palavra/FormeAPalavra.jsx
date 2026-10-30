@@ -29,12 +29,14 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
       return;
     }
     const resposta = proxima.join('');
-    registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
     if (resposta === rodada.palavra) {
       setMontada(proxima);
       setRetorno('correct');
       falar(rodada.palavra);
+      if (ultima) registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
+      window.setTimeout(avancar, 800);
     } else {
+      registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
       setMontada([]);
       setRetorno('incorrect');
     }
@@ -57,6 +59,6 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
       {rodada.silabas.map((_, posicao) => montada[posicao] ? <b key={posicao}>{montada[posicao]}</b> : <i key={posicao}>?</i>)}
     </div>
     <div className="letter-options syllable-options">{opcoes.map((silaba) => <button type="button" key={silaba} onClick={() => escolher(silaba)}>{silaba}</button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{ultima ? 'Concluir fase' : 'Próxima palavra →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />}</div>
   </div></section>;
 }

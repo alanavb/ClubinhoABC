@@ -13,7 +13,7 @@ export default function FrasesSonoras({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
-  const responder = (frase) => { if (retorno !== 'correct') { falar(frase); registrarResultadoPorId(atividadeId, frase, desafio.resposta); setRetorno(frase === desafio.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (frase) => { if (retorno !== 'correct') { const correta = frase === desafio.resposta; falar(frase); setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, frase, desafio.resposta); window.setTimeout(avancar, 800); } else registrarResultadoPorId(atividadeId, frase, desafio.resposta); } };
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frases-sonoras" aria-live="polite"><div className="game-session-card sound-session">
@@ -22,6 +22,6 @@ export default function FrasesSonoras({ atividadeId, aoConcluir, aoFechar }) {
     <h2>Ouça, leia e encontre</h2><p>O trem vai ler uma frase. Leia as placas e encontre a frase que ele falou.</p>
     <div className="sentence-train"><span aria-hidden="true">🚂</span><button type="button" onClick={() => falar(desafio.resposta)}>🔊 Ouvir a frase</button><i aria-hidden="true">☁️</i></div>
     <div className="sentence-signs">{embaralhar(desafio.opcoes).map(({ frase }) => <button type="button" key={frase} onClick={() => responder(frase)}><b>{frase}</b></button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{indice === desafios.length - 1 ? 'Concluir fase' : 'Próxima estação →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />}</div>
   </div></section>;
 }

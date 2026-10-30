@@ -24,15 +24,18 @@ export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
     if (proximasAbertas.length !== 2) { setRetorno(''); return; }
     const [primeira, segunda] = proximasAbertas;
     const correta = cartas[primeira].par === cartas[segunda].par;
-    registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par);
     if (correta) {
       setRetorno('correct');
       const proximasEncontradas = [...encontradas, primeira, segunda];
       setEncontradas(proximasEncontradas);
       setAbertas([]);
-      if (proximasEncontradas.length === cartas.length) window.setTimeout(avancarRodada, 800);
+      if (proximasEncontradas.length === cartas.length) {
+        if (rodada === totalRodadas) registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par);
+        window.setTimeout(avancarRodada, 800);
+      }
       return;
     }
+    registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par);
     setRetorno('incorrect');
     window.setTimeout(() => setAbertas([]), 700);
   }

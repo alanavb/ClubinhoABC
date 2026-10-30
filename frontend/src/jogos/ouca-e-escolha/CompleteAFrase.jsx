@@ -13,7 +13,7 @@ export default function CompleteAFrase({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
-  const responder = (palavra) => { if (retorno !== 'correct') { falar(palavra); registrarResultadoPorId(atividadeId, palavra, desafio.resposta); setRetorno(palavra === desafio.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (palavra) => { if (retorno !== 'correct') { const correta = palavra === desafio.resposta; falar(palavra); setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, palavra, desafio.resposta); window.setTimeout(avancar, 800); } else registrarResultadoPorId(atividadeId, palavra, desafio.resposta); } };
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage complete-frase" aria-live="polite"><div className="game-session-card sound-session">
@@ -23,6 +23,6 @@ export default function CompleteAFrase({ atividadeId, aoConcluir, aoFechar }) {
     <button className="sentence-clue" type="button" onClick={() => falar(desafio.completa)}>🔊 Ouvir a frase inteira</button>
     <div className="missing-sentence"><span>{desafio.icone}</span><b>{desafio.partes[0]}</b><i>?</i><b>{desafio.partes[1]}</b></div>
     <div className="word-bubbles">{embaralhar(desafio.opcoes).map((palavra) => <button type="button" key={palavra} onClick={() => responder(palavra)}><span>{palavra}</span></button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{indice === desafios.length - 1 ? 'Concluir fase' : 'Próxima frase →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === desafios.length - 1} />}</div>
   </div></section>;
 }

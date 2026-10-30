@@ -13,7 +13,7 @@ export default function FraseECena({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const rodada = rodadas[indice];
-  const responder = (id, texto) => { if (retorno !== 'correct') { falar(texto); registrarResultadoPorId(atividadeId, texto, rodada.frase); setRetorno(id === rodada.resposta ? 'correct' : 'incorrect'); } };
+  const responder = (id, texto) => { if (retorno !== 'correct') { const correta = id === rodada.resposta; falar(texto); setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === rodadas.length - 1) registrarResultadoPorId(atividadeId, texto, rodada.frase); window.setTimeout(avancar, 800); } else registrarResultadoPorId(atividadeId, texto, rodada.frase); } };
   const avancar = () => { if (indice === rodadas.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frase-cena" aria-live="polite"><div className="game-session-card sound-session">
@@ -22,6 +22,6 @@ export default function FraseECena({ atividadeId, aoConcluir, aoFechar }) {
     <h2>Qual cena o rádio contou?</h2><p>Ouça a história no rádio e escolha a cena certa.</p>
     <div className="story-radio"><span aria-hidden="true">📻</span><button type="button" onClick={() => falar(rodada.frase)} aria-label="Ouvir frase">🔊 Ouvir narrador</button></div>
     <div className="scene-options">{embaralhar(rodada.opcoes).map(({ id, icone, texto }) => <button type="button" key={id} onClick={() => responder(id, texto)}><span>{icone}</span><b>{texto}</b></button>)}</div>
-    <div className="feedback-slot">{retorno && <><FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === rodadas.length - 1} />{retorno === 'correct' && <button className="next-sound-round" type="button" onClick={avancar}>{indice === rodadas.length - 1 ? 'Concluir fase' : 'Próxima frase →'}</button>}</>}</div>
+    <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && indice === rodadas.length - 1} />}</div>
   </div></section>;
 }

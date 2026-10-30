@@ -854,7 +854,7 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
       <ol className="trail" style={{ '--etapas': etapas?.length || 1 }}>
         {(etapas ?? []).map((etapa, indice) => {
           const classe = { concluida: 'finished', atual: 'current', bloqueada: 'locked' }[etapa.situacao];
-          const marcador = { concluida: '✓', atual: indice + 1, bloqueada: '🚩' }[etapa.situacao];
+          const marcador = etapa.situacao === 'atual' ? indice + 1 : '🚩';
           const legenda = etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`;
           return <li className={classe} key={etapa.etapa_id}><span>{marcador}</span><b>{etapa.nome}</b><small>{legenda}</small></li>;
         })}
