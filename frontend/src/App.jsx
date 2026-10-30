@@ -582,6 +582,7 @@ function AppHeader({ active, onNavigate }) {
 function AppFooter() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showContact, setShowContact] = useState(false);
 
   return (
     <footer className="app-footer">
@@ -589,10 +590,38 @@ function AppFooter() {
       <div>
         <button type="button" onClick={() => setShowTerms(true)}>Termos de Uso</button>
         <button type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>
+        <button type="button" onClick={() => setShowContact(true)}>Contato</button>
       </div>
       {showTerms && <TermosDeUso onClose={() => setShowTerms(false)} />}
       {showPrivacy && <PoliticaDePrivacidade onClose={() => setShowPrivacy(false)} />}
+      {showContact && <ContactDialog onClose={() => setShowContact(false)} />}
     </footer>
+  );
+}
+
+function ContactDialog({ onClose }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onClose]);
+
+  return (
+    <div className="terms-overlay" role="presentation" onMouseDown={(event) => {
+      if (event.target === event.currentTarget) onClose();
+    }}>
+      <section className="terms-dialog contact-dialog" role="dialog" aria-modal="true" aria-labelledby="contact-title">
+        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar contato">×</button>
+        <span className="contact-dialog-icon" aria-hidden="true">💌</span>
+        <h1 id="contact-title">Fale com a gente</h1>
+        <p>Precisa de ajuda, quer enviar uma sugestão ou encontrou alguma dificuldade? A equipe do Clubinho ABC está à disposição para ouvir você.</p>
+        <p>Envie sua mensagem para:</p>
+        <a className="contact-dialog-email" href="mailto:clubinhoabc@gmail.com?subject=Contato%20pelo%20Clubinho%20ABC">clubinhoabc@gmail.com</a>
+        <p className="contact-dialog-note">Para proteger sua conta, não envie senhas, códigos de confirmação ou outras credenciais por e-mail.</p>
+      </section>
+    </div>
   );
 }
 
