@@ -4,7 +4,7 @@
 from app import db
 from app.controllers.auditoria_controller import registrar_log
 from app.controllers.etapas_controller import AcessoNegadoError, avancar_etapa_se_concluida
-from app.models import Atividade, Crianca, Resultado
+from app.models import Atividade, Crianca, Etapa, Resultado
 
 
 def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada, responsavel_id=None):
@@ -19,7 +19,14 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
         raise ValueError('Atividade não encontrada')
 
     if atividade.etapa_id != crianca.etapa_atual_id:  # RN1
-        raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
+        if getattr(atividade, 'obrigatoria', True):
+            raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
+        etapa_atividade = Etapa.query.get(atividade.etapa_id)
+        bonus_de_etapa_concluida = (
+            etapa_atividade.ordem < crianca.etapa_atual.ordem
+        )
+        if not bonus_de_etapa_concluida:
+            raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
 
     correta = resposta_enviada == resposta_esperada  # RN2: o sistema verifica a resposta
 
@@ -32,7 +39,9 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     db.session.add(resultado)
     db.session.flush()
 
-    if correta:
+    # Apenas atividades obrigatórias podem liberar uma nova etapa. Um bônus
+    # concluído depois da etapa permanece disponível, mas não altera a trilha.
+    if correta and getattr(atividade, 'obrigatoria', True):
         avancar_etapa_se_concluida(
             crianca_id,
             atividade.etapa_id,

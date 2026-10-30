@@ -113,3 +113,42 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
         self.assertEqual(201, primeira_resposta.status_code)
         self.assertEqual(201, segunda_resposta.status_code)
         self.assertEqual(proxima_etapa.id, self.crianca.etapa_atual_id)
+
+    def test_deve_permitir_bonus_de_etapa_concluida_sem_alterar_etapa_atual(self):
+        etapa_atual = db.session.get(Etapa, self.crianca.etapa_atual_id)
+        proxima_etapa = Etapa(chave='monte-palavra', nome='Monte a Palavra', ordem=2)
+        bonus = Atividade(
+            etapa_id=etapa_atual.id,
+            chave='bonus-letras',
+            nome='Desafio bônus',
+            ordem=2,
+            obrigatoria=False,
+        )
+        db.session.add_all([proxima_etapa, bonus])
+        db.session.commit()
+
+        with patch('app.auth_utils._decodificar_token', return_value=self.claims):
+            self.client.post(
+                '/api/resultados',
+                json={
+                    'crianca_id': self.crianca.id,
+                    'atividade_id': self.atividade.id,
+                    'resposta_enviada': 'A',
+                    'resposta_esperada': 'A',
+                },
+                headers={'Authorization': 'Bearer token-de-teste'},
+            )
+            resposta_bonus = self.client.post(
+                '/api/resultados',
+                json={
+                    'crianca_id': self.crianca.id,
+                    'atividade_id': bonus.id,
+                    'resposta_enviada': 'B',
+                    'resposta_esperada': 'B',
+                },
+                headers={'Authorization': 'Bearer token-de-teste'},
+            )
+
+        db.session.refresh(self.crianca)
+        self.assertEqual(201, resposta_bonus.status_code)
+        self.assertEqual(proxima_etapa.id, self.crianca.etapa_atual_id)
