@@ -632,9 +632,15 @@ function ConfirmarResponsavel({ onBack, onConfirmed }) {
       <AppHeader onNavigate={onBack} />
       <section className="page-content parent-gate-page">
         <section className="parent-gate-card" aria-labelledby="parent-gate-title">
-          <span aria-hidden="true">🔒</span>
-          <h1 id="parent-gate-title">Área do responsável</h1>
-          <p>Para proteger os dados da família, confirme a senha do responsável antes de acessar esta área.</p>
+          <div className="parent-gate-hero">
+            <div>
+              <span>Recado importante</span>
+              <h1 id="parent-gate-title">Ops! Esta parte é dos adultos.</h1>
+              <p>Chame seu responsável para continuar cuidando da aventura.</p>
+            </div>
+            <img src="/images/mascote.png" alt="" />
+          </div>
+          <p className="parent-gate-instruction">Responsável, confirme sua senha para acessar os dados da família.</p>
           <p className="parent-gate-account">Conta: <strong>{perfil?.email}</strong></p>
           <form onSubmit={confirmar}>
             <label htmlFor="parent-password">Senha do responsável</label>
