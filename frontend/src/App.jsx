@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import AreaDeJogos from './jogos/AreaDeJogos';
-import { falar } from './jogos/alfabeto';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
 import {
@@ -896,21 +895,169 @@ function Home({ onNavigate }) {
   );
 }
 
-const stories = [
-  ['🐳', 'A Baleia Bela', 'BA · BE', '4 min', 'A baleia Bela nada bem devagar e brinca com as bolhas do mar.'],
-  ['🦥', 'Bia e o Bicho-preguiça', 'BI', '5 min', 'Bia encontra um bicho-preguiça que só quer dormir na árvore.'],
-  ['🎪', 'O Circo do Bê', 'BÊ · BA', '6 min', 'O palhaço Bê monta um circo cheio de bolas e balões.'],
-  ['🍇', 'A Uva que Voou', 'Vogais', '4 min', 'Uma uva pula do cacho e voa até o céu azul.'],
-  ['🌼', 'Dente de Leão', 'DE · DI', '7 min', 'Um dente-de-leão espalha suas sementes com o vento.'],
-  ['🌙', 'O Soninho da Lua', 'Ninar', '8 min', 'A lua dá boa-noite para todos os bichinhos da floresta.'],
-];
-function Stories({ onNavigate }) {
-  const [selecionada, setSelecionada] = useState(stories.length - 1);
-  const [icon, title, , time, resumo] = stories[selecionada];
-  const ouvir = (indice) => { const [, titulo, , , texto] = stories[indice]; falar(`${titulo}. ${texto}`); };
+const stories = [{
+  id: 'baleia-bela',
+  icon: '🐳',
+  title: 'A Baleia Bela e a Bola',
+  tag: 'BA · BE · BI · BO',
+  time: '2 min',
+  tema: 'oceano',
+  texto: 'Bela é uma baleia azul. Ela nada no mar bem calmo. Bela vê uma bola boiando. A baleia bate na bola: ploc, ploc! Depois, Bela dá tchau para a bola e volta feliz para casa.',
+}];
+
+function separarPalavras(texto) {
+  return [...texto.matchAll(/[A-Za-zÀ-ÖØ-öø-ÿ]+(?:-[A-Za-zÀ-ÖØ-öø-ÿ]+)*[.,!?;:]*/g)].map((resultado) => ({
+    texto: resultado[0],
+    inicio: resultado.index,
+  }));
+}
+
+function IconeLeitor({ tipo }) {
+  if (tipo === 'reiniciar') return <svg className="reader-icon-reiniciar" viewBox="0 0 24 24" aria-hidden="true"><path className="restart-arrowhead" d="M4 3v7h7Z" /><path d="M5.5 8A8 8 0 1 1 4 14" /></svg>;
+  if (tipo === 'pausar') return <svg className="reader-icon-pausar" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>;
+  return <svg className="reader-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z" /></svg>;
+}
+
+function LivroHistoria({ historia, onVoltar, onNavigate }) {
+  const palavras = separarPalavras(historia.texto);
+  const falaAtual = useRef(null);
+  const proximaPalavra = useRef(0);
+  const [palavraAtiva, setPalavraAtiva] = useState(-1);
+  const [lendo, setLendo] = useState(false);
+  const [pausada, setPausada] = useState(false);
+  const [repetindoPalavra, setRepetindoPalavra] = useState(false);
+  const [mensagem, setMensagem] = useState('');
+
+  useEffect(() => () => {
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  }, []);
+
+  function palavraNoIndiceDeCaractere(indice) {
+    let encontrada = 0;
+    palavras.forEach((palavra, posicao) => {
+      if (palavra.inicio <= indice) encontrada = posicao;
+    });
+    return encontrada;
+  }
+
+  function iniciarLeitura(indiceInicial = proximaPalavra.current) {
+    if (!('speechSynthesis' in window)) {
+      setMensagem('A narração não está disponível neste navegador.');
+      return;
+    }
+    if (indiceInicial >= palavras.length) indiceInicial = 0;
+    window.speechSynthesis.cancel();
+
+    const inicio = palavras[indiceInicial].inicio;
+    const fala = new SpeechSynthesisUtterance(historia.texto.slice(inicio));
+    fala.lang = 'pt-BR';
+    fala.rate = 0.84;
+    fala.onboundary = (evento) => {
+      if (evento.name !== 'word') return;
+      const indiceDaPalavra = palavraNoIndiceDeCaractere(inicio + evento.charIndex);
+      proximaPalavra.current = indiceDaPalavra + 1;
+      setPalavraAtiva(indiceDaPalavra);
+    };
+    fala.onend = () => {
+      if (falaAtual.current !== fala) return;
+      setLendo(false);
+      setPausada(false);
+      setMensagem('Fim da história! Você pode ouvir de novo quando quiser.');
+    };
+    fala.onerror = () => {
+      setLendo(false);
+      setPausada(false);
+      setMensagem('Não foi possível reproduzir a narração agora.');
+    };
+    falaAtual.current = fala;
+    proximaPalavra.current = indiceInicial;
+    setPalavraAtiva(indiceInicial);
+    setLendo(true);
+    setPausada(false);
+    setMensagem('Acompanhe as palavras enquanto a história é lida.');
+    window.speechSynthesis.speak(fala);
+  }
+
+  function pausarOuContinuar() {
+    if (!('speechSynthesis' in window) || repetindoPalavra) return;
+    if (!lendo && !pausada) {
+      iniciarLeitura();
+      return;
+    }
+    if (pausada) {
+      if (falaAtual.current && window.speechSynthesis.paused) {
+        window.speechSynthesis.resume();
+        setLendo(true);
+        setPausada(false);
+        setMensagem('Leitura retomada.');
+      } else {
+        iniciarLeitura();
+      }
+      return;
+    }
+    window.speechSynthesis.pause();
+    setLendo(false);
+    setPausada(true);
+    setMensagem('Leitura pausada.');
+  }
+
+  function repetirPalavra(indice) {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    falaAtual.current = null;
+    proximaPalavra.current = indice + 1;
+    setPalavraAtiva(indice);
+    setLendo(false);
+    setPausada(true);
+    setRepetindoPalavra(true);
+    setMensagem(`Ouvindo novamente: ${palavras[indice].texto}.`);
+    const fala = new SpeechSynthesisUtterance(palavras[indice].texto);
+    fala.lang = 'pt-BR';
+    fala.rate = 0.78;
+    fala.onend = () => {
+      setRepetindoPalavra(false);
+      setMensagem('Leitura pausada. Toque em continuar para seguir a história.');
+    };
+    fala.onerror = () => setRepetindoPalavra(false);
+    window.speechSynthesis.speak(fala);
+  }
+
+  function recomecar() {
+    proximaPalavra.current = 0;
+    setPalavraAtiva(-1);
+    iniciarLeitura(0);
+  }
+
   return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
-    <section className="page-content stories-page"><section className="story-hero"><div><span>◔ Hora da história</span><h1>{title}</h1><p>{resumo}</p><div className="story-tags"><i>{icon}</i></div><button className="round-play" type="button" onClick={() => ouvir(selecionada)}>▶ <b>Ouvir</b></button><small>♧ &nbsp; {time}</small></div><img src="/images/ilustra-historias.png" alt="Ilustração da história" /></section>
-      <h2 className="section-title">✣ Escolha uma história</h2><div className="story-grid">{stories.map(([cardIcon, cardTitle, tag, cardTime], indice) => <button type="button" className={`story-card ${indice === selecionada ? 'selected' : ''}`} aria-pressed={indice === selecionada} key={cardTitle} onClick={() => { setSelecionada(indice); ouvir(indice); }}><span>{tag}</span><i>{cardIcon}</i><strong>{cardTitle}</strong><small>♧ {cardTime}</small></button>)}</div><p className="parent-note">Para os responsáveis: toque em uma história para ouvir a narração. As histórias completas ainda estão em produção.</p>
+    <section className={`page-content story-reader-page story-theme-${historia.tema}`}>
+      <button className="story-back" type="button" onClick={onVoltar}>← Voltar para histórias</button>
+      <header className="story-reader-heading"><span>{historia.tag}</span><h1>{historia.title}</h1></header>
+      <section className="storybook" aria-label={`Leitura da história ${historia.title}`}>
+        <div className="storybook-decoration" aria-hidden="true">{historia.icon}</div>
+        <div className="storybook-page">
+          <p className="storybook-text">{palavras.map((palavra, indice) => <button key={`${palavra.inicio}-${palavra.texto}`} type="button" className={`story-word ${indice < palavraAtiva ? 'read' : ''} ${indice === palavraAtiva ? 'active' : ''}`} onClick={() => repetirPalavra(indice)}>{palavra.texto}</button>)}</p>
+        </div>
+        <div className="storybook-controls">
+          <button className="story-control-button story-restart" type="button" onClick={recomecar} aria-label="Ouvir a história desde o começo" title="Recomeçar história"><IconeLeitor tipo="reiniciar" /></button>
+          <button className="story-control-button story-pause" type="button" onClick={pausarOuContinuar} disabled={repetindoPalavra} aria-label={lendo ? 'Pausar leitura' : 'Ouvir ou continuar a história'} title={lendo ? 'Pausar' : 'Ouvir ou continuar'}>{repetindoPalavra ? '…' : <IconeLeitor tipo={lendo ? 'pausar' : 'play'} />}</button>
+        </div>
+        {mensagem && <p className="story-reader-status" role="status">{mensagem}</p>}
+      </section>
+    </section>
+    <AppFooter />
+  </main>;
+}
+
+function Stories({ onNavigate }) {
+  const [historiaAberta, setHistoriaAberta] = useState(null);
+  if (historiaAberta) return <LivroHistoria historia={historiaAberta} onVoltar={() => setHistoriaAberta(null)} onNavigate={onNavigate} />;
+
+  return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
+    <section className="page-content stories-page">
+      <section className="stories-intro"><img src="/images/ilustra-historias.png" alt="" /><div><span>Hora da história</span><h1>Vamos ler juntos?</h1><p>Escolha uma história e acompanhe a leitura palavra por palavra.</p></div></section>
+      <h2 className="section-title">Escolha uma história</h2>
+      <div className="story-grid">{stories.map((historia) => <button type="button" className="story-card" key={historia.id} onClick={() => setHistoriaAberta(historia)}><span>{historia.tag}</span><i>{historia.icon}</i><strong>{historia.title}</strong><small>♧ {historia.time}</small></button>)}</div>
+      <p className="parent-note">A história foi criada para o Clubinho ABC. Novas leituras serão adicionadas gradualmente.</p>
     </section>
     <AppFooter />
   </main>;
