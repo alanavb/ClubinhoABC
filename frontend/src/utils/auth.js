@@ -191,6 +191,16 @@ export async function entrar(email, senha) {
   if (error) throw new Error(mensagemAmigavel(error));
 }
 
+// Confirma que quem está usando uma sessão já aberta conhece a senha do
+// responsável. É usada antes de abrir a área que administra a família.
+export async function confirmarSenhaResponsavel(senha) {
+  const email = perfil?.email || sessaoSupabase?.user?.email;
+  if (!email) throw new Error('Não foi possível identificar a conta do responsável.');
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
+  if (error) throw new Error(mensagemAmigavel(error));
+}
+
 export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNascimento, criancaAvatar }) {
   const { error } = await supabase.auth.signUp({
     email,

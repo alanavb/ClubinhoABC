@@ -8,6 +8,7 @@ import {
   aoMudarSessao,
   atualizarSenha,
   cadastrar,
+  confirmarSenhaResponsavel,
   editarCrianca,
   entrar,
   enviarRecuperacaoSenha,
@@ -606,6 +607,51 @@ function MinhaConta({ onNavigate }) {
   );
 }
 
+function ConfirmarResponsavel({ onBack, onConfirmed }) {
+  const perfil = obterPerfil();
+  const [senha, setSenha] = useState('');
+  const [erro, setErro] = useState('');
+  const [enviando, setEnviando] = useState(false);
+
+  async function confirmar(event) {
+    event.preventDefault();
+    setErro('');
+    setEnviando(true);
+    try {
+      await confirmarSenhaResponsavel(senha);
+      onConfirmed();
+    } catch (falha) {
+      setErro(falha.message);
+    } finally {
+      setEnviando(false);
+    }
+  }
+
+  return (
+    <main className="app-shell">
+      <AppHeader onNavigate={onBack} />
+      <section className="page-content parent-gate-page">
+        <section className="parent-gate-card" aria-labelledby="parent-gate-title">
+          <span aria-hidden="true">🔒</span>
+          <h1 id="parent-gate-title">Área do responsável</h1>
+          <p>Para proteger os dados da família, confirme a senha do responsável antes de acessar esta área.</p>
+          <p className="parent-gate-account">Conta: <strong>{perfil?.email}</strong></p>
+          <form onSubmit={confirmar}>
+            <label htmlFor="parent-password">Senha do responsável</label>
+            <CampoSenha id="parent-password" placeholder="Digite sua senha" value={senha} onChange={(event) => setSenha(event.target.value)} autoComplete="current-password" />
+            {erro && <p className="form-message" role="alert">{erro}</p>}
+            <div className="parent-gate-actions">
+              <button className="back-button" type="button" onClick={onBack}>Voltar</button>
+              <button className="small-primary" type="submit" disabled={enviando}>{enviando ? 'Confirmando…' : 'Continuar'}</button>
+            </div>
+          </form>
+        </section>
+      </section>
+      <AppFooter />
+    </main>
+  );
+}
+
 function EditarCriancaDialog({ crianca, onClose }) {
   const [nome, setNome] = useState(crianca.nome);
   const [dataNascimento, setDataNascimento] = useState(crianca.data_nascimento || '');
@@ -894,7 +940,7 @@ function Progress({ onNavigate }) {
   </main>;
 }
 
-const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso', 'conta'];
+const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso', 'confirmar-responsavel', 'conta'];
 const VIEWS_PRE_LOGIN = ['login', 'signup', 'confirmar-email'];
 
 function App() {
@@ -912,7 +958,10 @@ function App() {
     }
   }, [authTick, view]);
 
-  const navigate = (page) => setView(page === 'início' || page === 'inicio' ? 'home' : page);
+  const navigate = (page) => {
+    const destino = page === 'início' || page === 'inicio' ? 'home' : page;
+    setView(destino === 'conta' ? 'confirmar-responsavel' : destino);
+  };
 
   if (precisaRedefinirSenha()) return <RedefinirSenha />;
 
@@ -945,6 +994,7 @@ function App() {
   if (view === 'historias') return <Stories onNavigate={navigate} />;
   if (view === 'atividades') return <Activities onNavigate={navigate} />;
   if (view === 'progresso') return <Progress onNavigate={navigate} />;
+  if (view === 'confirmar-responsavel') return <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
   if (view === 'conta') return <MinhaConta onNavigate={navigate} />;
   return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
 }
