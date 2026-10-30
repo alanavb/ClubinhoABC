@@ -18,7 +18,7 @@ def create_app(test_config=None):
     # Front-end (Vite, porta 5173) e back-end (porta 5000) rodam em origens
     # diferentes em desenvolvimento — libera só as rotas /api/* e só para o
     # front-end local, não para qualquer origem.
-    CORS(app, resources={r'/api/*': {'origins': 'http://localhost:5173'}})
+    CORS(app, resources={r'/api/*': {'origins': app.config['CORS_ALLOWED_ORIGINS']}})
 
     from .routes.auth_routes import auth_bp
     from .routes.resultados_routes import resultados_bp

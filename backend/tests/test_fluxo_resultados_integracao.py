@@ -7,7 +7,7 @@ from app.models import Atividade, Crianca, Etapa, Responsavel
 
 
 class FluxoResultadosIntegracaoTest(unittest.TestCase):
-    #Fazeno o teste de integração do fluxo completo
+    #Fazendo o teste de integração do fluxo completo
     def setUp(self):
         self.app = create_app({
             'TESTING': True,

@@ -30,8 +30,6 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
         correta=correta,
     )
     db.session.add(resultado)
-    # Inclui a tentativa nas consultas do status antes de verificar se esta foi
-    # a última atividade obrigatória concluída.
     db.session.flush()
 
     if correta:
