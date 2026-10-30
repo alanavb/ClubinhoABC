@@ -55,6 +55,10 @@ button, input { font: inherit; } button { cursor: pointer; }
 /* O selo de áudio é igual nos dois exercícios e não acompanha o tamanho da imagem. */
 .sound-badge, .word-picture .sound-badge { font-size: 0; }.sound-badge::after { content: '🔊'; font-size: 22px; line-height: 1; }
 
+/* Mensagens de validação exigem mais destaque que os avisos informativos. */
+.form-message[role="alert"] { color: #963b43; background: #ffe1e3; border: 1px solid #f3adb4; }
+.password-input { position: relative; }.login-card .password-input input, .signup-card .password-input input { padding-right: 58px; }.password-input button { position: absolute; top: 50%; right: 12px; display: grid; place-items: center; width: 34px; height: 34px; transform: translateY(-50%); border: 0; border-radius: 50%; color: #a34563; background: #ffe0ea; }.password-input button svg { width: 19px; height: 19px; fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2; }.password-input button:hover, .password-input button:focus-visible { color: #7d2947; background: #ffc9da; outline: 0; }
+
 /* Ícones discretos e alternativas neutras antes da resposta. */
 .sound-badge { background: transparent; box-shadow: none; }.word-picture .sound-badge { top: 14px; right: -24px; }.sound-session .letter-options button:first-child, .word-session .letter-options button:first-child { border-color: #f2ddbd; background: #fff4e4; }
 

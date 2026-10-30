@@ -24,6 +24,56 @@ import { useResumoProgresso } from './utils/etapas';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
+const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
+const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
+
+function senhaAtendeRequisitos(senha) {
+  return senha.length >= 8
+    && /[a-z]/.test(senha)
+    && /[A-Z]/.test(senha)
+    && /\d/.test(senha)
+    && /[^A-Za-z0-9\s]/.test(senha);
+}
+
+function CampoSenha({ id, value, onChange, placeholder, autoComplete = 'new-password' }) {
+  const [visivel, setVisivel] = useState(false);
+
+  return (
+    <div className="password-input">
+      <input
+        id={id}
+        type={visivel ? 'text' : 'password'}
+        placeholder={placeholder}
+        value={value}
+        onChange={onChange}
+        minLength={8}
+        autoComplete={autoComplete}
+        required
+      />
+      <button
+        type="button"
+        onClick={() => setVisivel((atual) => !atual)}
+        aria-label={visivel ? 'Ocultar senha' : 'Mostrar senha'}
+        aria-pressed={visivel}
+        title={visivel ? 'Ocultar senha' : 'Mostrar senha'}
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          {visivel ? (
+            <>
+              <path d="M3 3l18 18" />
+              <path d="M10.6 6.2A10.7 10.7 0 0 1 12 6c5.5 0 9.3 4.5 10 6-0.3.7-1.3 2.1-2.9 3.4M6.7 6.7C4.3 8.2 2.6 10.6 2 12c.7 1.5 4.5 6 10 6 1 0 1.9-.1 2.7-.4M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+            </>
+          ) : (
+            <>
+              <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6S2 12 2 12Z" />
+              <circle cx="12" cy="12" r="3" />
+            </>
+          )}
+        </svg>
+      </button>
+    </div>
+  );
+}
 
 function CamposCrianca({ nome, setNome, dataNascimento, setDataNascimento, pet, setPet, idPrefixo = 'child' }) {
   return (
@@ -94,10 +144,19 @@ function Signup({ onBackToLogin, onFinish }) {
   function advance(event) {
     event.preventDefault();
     setMessage('');
+    if (step === 1 && !senhaAtendeRequisitos(guardianPassword)) {
+      setMessage(ERRO_SENHA);
+      return;
+    }
     setStep((current) => Math.min(3, current + 1));
   }
 
   async function finalizarCadastro() {
+    if (!senhaAtendeRequisitos(guardianPassword)) {
+      setStep(1);
+      setMessage(ERRO_SENHA);
+      return;
+    }
     setSubmitting(true);
     setMessage('');
     try {
@@ -138,7 +197,9 @@ function Signup({ onBackToLogin, onFinish }) {
               <label htmlFor="guardian-email">E-mail</label>
               <input id="guardian-email" type="email" placeholder="voce@email.com" value={guardianEmail} onChange={(event) => setGuardianEmail(event.target.value)} required />
               <label htmlFor="guardian-password">Criar senha</label>
-              <input id="guardian-password" type="password" placeholder="mínimo 8 caracteres" value={guardianPassword} onChange={(event) => setGuardianPassword(event.target.value)} minLength={8} required />
+              <CampoSenha id="guardian-password" placeholder="Crie uma senha forte" value={guardianPassword} onChange={(event) => setGuardianPassword(event.target.value)} />
+              <p className="field-hint">{REQUISITOS_SENHA}</p>
+              {message && <p className="form-message" role="alert">{message}</p>}
               <div className="terms-acceptance">
                 <input id="accept-terms" type="checkbox" required />
                 <label htmlFor="accept-terms">Sou responsável pela criança e li e aceito os</label>
@@ -167,7 +228,7 @@ function Signup({ onBackToLogin, onFinish }) {
               <div className="chosen-pet">{pet}</div>
               <h2>Tudo pronto!</h2>
               <p>A trilha das letras foi montada. É só entrar e começar a brincar.</p>
-              <div className="trail-tags"><span>✣ Letras do nome</span><span>✣ Sílabas mágicas</span><span>✣ Primeiras palavras</span></div>
+              <div className="trail-tags"><span>⭐ Letras do nome</span><span>⭐ Sílabas mágicas</span><span>⭐ Primeiras palavras</span></div>
               <div className="signup-actions">
                 <button className="back-button" type="button" onClick={previousStep} disabled={submitting}>← &nbsp; Voltar</button>
                 <button className="small-primary" type="button" onClick={finalizarCadastro} disabled={submitting}>
@@ -354,6 +415,10 @@ function RedefinirSenha() {
 
   async function salvar(event) {
     event.preventDefault();
+    if (!senhaAtendeRequisitos(senha)) {
+      setMessage(ERRO_SENHA);
+      return;
+    }
     if (senha !== confirmacao) {
       setMessage('As senhas não são iguais.');
       return;
@@ -382,9 +447,10 @@ function RedefinirSenha() {
           <h1 id="reset-title">Crie uma <em>nova senha</em></h1>
           <form onSubmit={salvar}>
             <label htmlFor="new-password">Nova senha</label>
-            <input id="new-password" type="password" placeholder="mínimo 8 caracteres" value={senha} onChange={(event) => setSenha(event.target.value)} minLength={8} required />
+            <CampoSenha id="new-password" placeholder="Crie uma senha forte" value={senha} onChange={(event) => setSenha(event.target.value)} />
+            <p className="field-hint">{REQUISITOS_SENHA}</p>
             <label htmlFor="new-password-confirm">Confirme a nova senha</label>
-            <input id="new-password-confirm" type="password" placeholder="digite de novo" value={confirmacao} onChange={(event) => setConfirmacao(event.target.value)} minLength={8} required />
+            <CampoSenha id="new-password-confirm" placeholder="digite de novo" value={confirmacao} onChange={(event) => setConfirmacao(event.target.value)} />
             {message && <p className="form-message" role="alert">{message}</p>}
             <button className="primary-button" type="submit" disabled={submitting}>
               {submitting ? 'Salvando…' : 'Salvar nova senha'}
@@ -583,7 +649,7 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
       <ol className="trail" style={{ '--etapas': etapas?.length || 1 }}>
         {(etapas ?? []).map((etapa, indice) => {
           const classe = { concluida: 'finished', atual: 'current', bloqueada: 'locked' }[etapa.situacao];
-          const marcador = { concluida: '✓', atual: indice + 1, bloqueada: '♧' }[etapa.situacao];
+          const marcador = { concluida: '✓', atual: indice + 1, bloqueada: '🚩' }[etapa.situacao];
           const legenda = etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`;
           return <li className={classe} key={etapa.etapa_id}><span>{marcador}</span><b>{etapa.nome}</b><small>{legenda}</small></li>;
         })}
