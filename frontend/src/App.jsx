@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import AreaDeJogos from './jogos/AreaDeJogos';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
@@ -27,6 +28,36 @@ const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
 const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
 const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
+
+function AvisoDoSistema({ onEntrarNovamente }) {
+  const [aviso, setAviso] = useState(null);
+
+  useEffect(() => {
+    const receberAviso = (evento) => setAviso(evento.detail);
+    window.addEventListener('clubinho:aviso', receberAviso);
+    return () => window.removeEventListener('clubinho:aviso', receberAviso);
+  }, []);
+
+  if (!aviso) return null;
+
+  const entrarNovamente = async () => {
+    await sair();
+    setAviso(null);
+    onEntrarNovamente();
+  };
+
+  return createPortal(
+    <section className="system-notice" role="status" aria-live="polite" aria-atomic="true">
+      <p>{aviso.mensagem}</p>
+      {aviso.acao === 'entrar' ? (
+        <button type="button" onClick={entrarNovamente}>Entrar novamente</button>
+      ) : (
+        <button type="button" onClick={() => setAviso(null)}>Entendi</button>
+      )}
+    </section>,
+    document.body,
+  );
+}
 
 function senhaAtendeRequisitos(senha) {
   return senha.length >= 8
@@ -1194,22 +1225,21 @@ function App() {
     setView(destino === 'conta' ? 'confirmar-responsavel' : destino);
   };
 
-  if (precisaRedefinirSenha()) return <RedefinirSenha />;
+  let conteudo;
 
-  if (VIEWS_PROTEGIDAS.includes(view)) {
-    if (!estaAutenticado()) return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
-    if (!perfilCompleto()) {
-      return (
-        <main className="page-shell" id="inicio">
-          <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
-          <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
-        </main>
-      );
-    }
-  }
-
-  if (view === 'signup') {
-    return (
+  if (precisaRedefinirSenha()) {
+    conteudo = <RedefinirSenha />;
+  } else if (VIEWS_PROTEGIDAS.includes(view) && !estaAutenticado()) {
+    conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
+  } else if (VIEWS_PROTEGIDAS.includes(view) && !perfilCompleto()) {
+    conteudo = (
+      <main className="page-shell" id="inicio">
+        <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
+        <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
+      </main>
+    );
+  } else if (view === 'signup') {
+    conteudo = (
       <Signup
         onBackToLogin={() => setView('login')}
         onFinish={(email) => {
@@ -1218,16 +1248,27 @@ function App() {
         }}
       />
     );
+  } else if (view === 'confirmar-email') {
+    conteudo = <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
+  } else if (view === 'home') {
+    conteudo = <Home onNavigate={navigate} />;
+  } else if (view === 'jogos') {
+    conteudo = <AreaDeJogos key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
+  } else if (view === 'historias') {
+    conteudo = <Stories onNavigate={navigate} />;
+  } else if (view === 'atividades') {
+    conteudo = <Activities onNavigate={navigate} />;
+  } else if (view === 'progresso') {
+    conteudo = <Progress onNavigate={navigate} />;
+  } else if (view === 'confirmar-responsavel') {
+    conteudo = <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
+  } else if (view === 'conta') {
+    conteudo = <MinhaConta onNavigate={navigate} />;
+  } else {
+    conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
   }
-  if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
-  if (view === 'home') return <Home onNavigate={navigate} />;
-  if (view === 'jogos') return <AreaDeJogos key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
-  if (view === 'historias') return <Stories onNavigate={navigate} />;
-  if (view === 'atividades') return <Activities onNavigate={navigate} />;
-  if (view === 'progresso') return <Progress onNavigate={navigate} />;
-  if (view === 'confirmar-responsavel') return <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
-  if (view === 'conta') return <MinhaConta onNavigate={navigate} />;
-  return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
+
+  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}</>;
 }
 
 export default App;

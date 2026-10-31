@@ -3,6 +3,7 @@ from flask import Blueprint, g, jsonify, request
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller, resultados_controller
 from app.controllers.etapas_controller import AcessoNegadoError
+from app.error_responses import MENSAGEM_ACESSO_NEGADO, erro_publico
 
 resultados_bp = Blueprint('resultados', __name__)
 
@@ -39,8 +40,8 @@ def criar_resultado():
         )
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify(resultado.to_dict()), 201
 
@@ -59,7 +60,7 @@ def listar_resultados():
         resultados = resultados_controller.listar_resultados(
             crianca_id, atividade_id, responsavel_id=responsavel_id
         )
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify([resultado.to_dict() for resultado in resultados])
