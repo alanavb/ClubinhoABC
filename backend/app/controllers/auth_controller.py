@@ -107,7 +107,7 @@ def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianc
 def buscar_crianca(responsavel,crianca_id): 
     """Devolve uma criança vinculada a responsável autenticado (404 se não for dele)."""
     crianca = Crianca.query.get(crianca_id)
-    if not crianca or crianca.responsave_id != responsavel.id:
+    if not crianca or crianca.responsavel_id != responsavel.id:
         raise ValueError('Criança nãoo encontrada')
     
     return crianca
