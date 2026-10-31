@@ -1,6 +1,7 @@
 """RN — Login e controle de acesso: perfil do responsável (autenticação em si é do Supabase Auth)."""
 
 import datetime
+import unicodedata
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log
@@ -38,14 +39,24 @@ def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=Tru
 
 def _crianca_ja_cadastrada(responsavel_id, nome, data_nascimento, ignorar_crianca_id=None):
     """Evita duplicidade acidental na mesma conta, sem usar o avatar como identidade."""
-    nome_normalizado = nome.casefold()
+    nome_normalizado = _normalizar_nome_para_comparacao(nome)
     criancas_da_conta = Crianca.query.filter_by(responsavel_id=responsavel_id).all()
     return any(
         crianca.id != ignorar_crianca_id
         and crianca.data_nascimento == data_nascimento
-        and ' '.join(crianca.nome.split()).casefold() == nome_normalizado
+        and _normalizar_nome_para_comparacao(crianca.nome) == nome_normalizado
         for crianca in criancas_da_conta
     )
+
+
+def _normalizar_nome_para_comparacao(nome):
+    """Compara nomes sem diferenciar espaços, maiúsculas ou acentos."""
+    nome_sem_acentos = ''.join(
+        caractere
+        for caractere in unicodedata.normalize('NFD', nome)
+        if unicodedata.category(caractere) != 'Mn'
+    )
+    return ' '.join(nome_sem_acentos.split()).casefold()
 
 
 def _etapa_inicial():

@@ -160,6 +160,23 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
         self.assertEqual(1, Crianca.query.count())
 
+    def test_nao_deve_cadastrar_criancas_iguais_quando_apenas_o_acento_muda(self):
+        primeira = self.client.post(
+            '/api/criancas',
+            json={'nome': 'Ágatha', 'data_nascimento': '2020-02-22', 'avatar': '🐥'},
+            headers=self.auth,
+        )
+        resposta = self.client.post(
+            '/api/criancas',
+            json={'nome': 'Agatha', 'data_nascimento': '2020-02-22', 'avatar': '🐱'},
+            headers=self.auth,
+        )
+
+        self.assertEqual(201, primeira.status_code)
+        self.assertEqual(400, resposta.status_code)
+        self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
+        self.assertEqual(2, Crianca.query.count())
+
     def test_deve_permitir_criancas_iguais_em_contas_diferentes(self):
         outro_responsavel = Responsavel(
             supabase_user_id='outro-user', nome='Rui', email='rui@example.test'
