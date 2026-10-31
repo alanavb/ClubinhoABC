@@ -9,7 +9,6 @@ HOJE = datetime.date(2026, 10, 17)
 
 
 class IdadeCriancaTest(unittest.TestCase):
-    """A idade é calculada pela data de nascimento, e fora de 6 a 7 anos o responsável é avisado."""
 
     def test_deve_calcular_idade_considerando_se_ja_fez_aniversario(self):
         casos = [
@@ -23,10 +22,10 @@ class IdadeCriancaTest(unittest.TestCase):
 
     def test_deve_avisar_somente_quando_idade_sai_da_faixa_de_6_a_7_anos(self):
         casos = [
-            (datetime.date(2020, 10, 18), True),   # 5 anos
-            (datetime.date(2020, 10, 17), False),  # 6 anos
-            (datetime.date(2018, 10, 18), False),  # 7 anos, véspera dos 8
-            (datetime.date(2018, 10, 17), True),   # 8 anos hoje
+            (datetime.date(2020, 10, 18), True),   # ainda tem 5 anos
+            (datetime.date(2020, 10, 17), False),  # fez 6 hoje
+            (datetime.date(2018, 10, 18), False),  # ainda tem 7, véspera dos 8
+            (datetime.date(2018, 10, 17), True),   # fez 8 anos hoje
         ]
         for nascimento, fora in casos:
             with self.subTest(nascimento=nascimento):
@@ -40,7 +39,6 @@ class IdadeCriancaTest(unittest.TestCase):
 
 
 class AdicionarCriancaIntegracaoTest(unittest.TestCase):
-    """POST /api/criancas: um responsável pode ter mais de uma criança (RF01)."""
 
     def setUp(self):
         self.app = create_app({
@@ -150,6 +148,54 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual(400, resposta.status_code)
         self.assertIn('futuro', resposta.get_json()['erro'])
         self.assertEqual(1, Crianca.query.count())
+
+    def test_nao_deve_cadastrar_duas_criancas_iguais_na_mesma_conta(self):
+        resposta = self.client.post(
+            '/api/criancas',
+            json={'nome': '  BIA  ', 'data_nascimento': '2019-05-10', 'avatar': '🐨'},
+            headers=self.auth,
+        )
+
+        self.assertEqual(400, resposta.status_code)
+        self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
+        self.assertEqual(1, Crianca.query.count())
+
+    def test_deve_permitir_criancas_iguais_em_contas_diferentes(self):
+        outro_responsavel = Responsavel(
+            supabase_user_id='outro-user', nome='Rui', email='rui@example.test'
+        )
+        db.session.add(outro_responsavel)
+        db.session.commit()
+
+        with patch(
+            'app.auth_utils._decodificar_token',
+            return_value={'sub': 'outro-user', 'email': 'rui@example.test'},
+        ):
+            resposta = self.client.post(
+                '/api/criancas',
+                json={'nome': 'Bia', 'data_nascimento': '2019-05-10', 'avatar': '🐨'},
+                headers=self.auth,
+            )
+
+        self.assertEqual(201, resposta.status_code)
+        self.assertEqual(2, Crianca.query.count())
+
+    def test_nao_deve_editar_crianca_para_dados_iguais_aos_de_outra(self):
+        criada = self.client.post(
+            '/api/criancas',
+            json={'nome': 'Leo', 'data_nascimento': '2020-02-01', 'avatar': '🐨'},
+            headers=self.auth,
+        ).get_json()
+
+        resposta = self.client.put(
+            f"/api/criancas/{criada['crianca_id']}",
+            json={'nome': 'Bia', 'data_nascimento': '2019-05-10', 'avatar': '🐨'},
+            headers=self.auth,
+        )
+
+        self.assertEqual(400, resposta.status_code)
+        self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
+        self.assertEqual('Leo', db.session.get(Crianca, criada['crianca_id']).nome)
 
     def test_deve_editar_crianca_do_responsavel_autenticado(self):
         bia = Crianca.query.filter_by(nome='Bia').first()
