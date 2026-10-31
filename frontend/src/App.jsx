@@ -898,12 +898,76 @@ function Home({ onNavigate }) {
 const stories = [{
   id: 'baleia-bela',
   icon: '🐳',
-  title: 'A Baleia Bela e a Bola',
+  title: 'A Baleia e a Bola',
+  nivel: 'Nível 1',
+  nivelClasse: 'iniciante',
+  objetivo: 'Reconhecer e acompanhar sílabas simples com BA, BE, BI e BO.',
   tag: 'BA · BE · BI · BO',
   time: '2 min',
   tema: 'oceano',
   texto: 'Bela é uma baleia azul. Ela nada no mar bem calmo. Bela vê uma bola boiando. A baleia bate na bola: ploc, ploc! Depois, Bela dá tchau para a bola e volta feliz para casa.',
+}, {
+  id: 'gato-guto',
+  icon: '🐱',
+  title: 'O Gato Guto',
+  nivel: 'Nível 1',
+  nivelClasse: 'iniciante',
+  objetivo: 'Reconhecer e acompanhar sílabas simples com GA, GO e GU.',
+  tag: 'GA · GO · GU',
+  time: '2 min',
+  tema: 'noite',
+  texto: 'Guto é um gato. O gato viu uma gota de leite no prato. Guto lambeu a gota. Depois, o gato dormiu no tapete.',
+}, {
+  id: 'bia-borboleta',
+  icon: '🦋',
+  title: 'Bia e a Borboleta',
+  nivel: 'Nível 2',
+  nivelClasse: 'intermediario',
+  objetivo: 'Ler frases curtas conectadas, observando a repetição de BI, BO e BR.',
+  tag: 'BI · BO · BR',
+  time: '2 min',
+  tema: 'jardim',
+  texto: 'Bia viu uma borboleta na flor. A borboleta bateu as asas e voou. Bia ficou bem feliz. Ela viu a borboleta pousar em uma folha.',
+}, {
+  id: 'casa-lia',
+  icon: '🏠',
+  title: 'A Casa de Lia',
+  nivel: 'Nível 2',
+  nivelClasse: 'intermediario',
+  objetivo: 'Ler frases curtas com palavras do cotidiano e sílabas LA, SA e MA.',
+  tag: 'LA · SA · MA',
+  time: '2 min',
+  tema: 'casa',
+  texto: 'Lia mora em uma casa amarela. Na sala, ela viu uma mala e uma bola. Lia chamou sua avó para brincar.',
+}, {
+  id: 'piquenique-caio',
+  icon: '🧺',
+  title: 'Piquenique com Caio',
+  nivel: 'Nível 3',
+  nivelClasse: 'avancado',
+  objetivo: 'Acompanhar uma narrativa curta com começo, acontecimento e final.',
+  tag: 'CA · CO · PI',
+  time: '3 min',
+  tema: 'parque',
+  texto: 'Caio levou uma cesta com bolo, banana e suco. No parque, ele viu uma borboleta perto das flores. Caio dividiu o lanche com Bia. Depois, os dois correram e brincaram na grama.',
+}, {
+  id: 'passeio-nino',
+  icon: '🛴',
+  title: 'O Passeio de Nino',
+  nivel: 'Nível 3',
+  nivelClasse: 'avancado',
+  objetivo: 'Acompanhar uma narrativa curta com mais personagens e ações.',
+  tag: 'NI · PA · CA',
+  time: '3 min',
+  tema: 'ceu',
+  texto: 'Nino levou seu patinete para o parque. No caminho, ele encontrou uma amiga e seu cachorro. Os dois pararam perto de uma árvore para beber água. Depois, Nino voltou para casa muito contente.',
 }];
+
+const metodologiaHistorias = {
+  iniciante: 'Palavras e frases curtas, com repetição de sílabas simples para apoiar a decodificação.',
+  intermediario: 'Frases conectadas e vocabulário do cotidiano para desenvolver ritmo e fluência de leitura.',
+  avancado: 'Histórias curtas com início, acontecimento e desfecho para apoiar a compreensão do texto.',
+};
 
 function separarPalavras(texto) {
   return [...texto.matchAll(/[A-Za-zÀ-ÖØ-öø-ÿ]+(?:-[A-Za-zÀ-ÖØ-öø-ÿ]+)*[.,!?;:]*/g)].map((resultado) => ({
@@ -1031,7 +1095,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
   return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
     <section className={`page-content story-reader-page story-theme-${historia.tema}`}>
       <button className="story-back" type="button" onClick={onVoltar}>← Voltar para histórias</button>
-      <header className="story-reader-heading"><span>{historia.tag}</span><h1>{historia.title}</h1></header>
+      <header className="story-reader-heading"><div><span className={`story-level story-level-${historia.nivelClasse}`}>{historia.nivel}</span><small>{historia.tag}</small></div><h1>{historia.title}</h1></header>
       <section className="storybook" aria-label={`Leitura da história ${historia.title}`}>
         <div className="storybook-decoration" aria-hidden="true">{historia.icon}</div>
         <div className="storybook-page">
@@ -1048,17 +1112,31 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
   </main>;
 }
 
+function InformacoesHistoria({ historia, onClose }) {
+  return <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+    <section className="terms-dialog story-info-dialog" role="dialog" aria-modal="true" aria-labelledby="story-info-title">
+      <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar informações da história">×</button>
+      <span className={`story-level story-level-${historia.nivelClasse}`}>{historia.nivel}</span>
+      <h1 id="story-info-title">Sobre esta história</h1>
+      <p><strong>Foco:</strong> {historia.objetivo}</p>
+      <p><strong>Como ela foi pensada:</strong> {metodologiaHistorias[historia.nivelClasse]}</p>
+    </section>
+  </div>;
+}
+
 function Stories({ onNavigate }) {
   const [historiaAberta, setHistoriaAberta] = useState(null);
+  const [historiaInfo, setHistoriaInfo] = useState(null);
   if (historiaAberta) return <LivroHistoria historia={historiaAberta} onVoltar={() => setHistoriaAberta(null)} onNavigate={onNavigate} />;
 
   return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
     <section className="page-content stories-page">
       <section className="stories-intro"><img src="/images/ilustra-historias.png" alt="" /><div><span>Hora da história</span><h1>Vamos ler juntos?</h1><p>Escolha uma história e acompanhe a leitura palavra por palavra.</p></div></section>
       <h2 className="section-title">Escolha uma história</h2>
-      <div className="story-grid">{stories.map((historia) => <button type="button" className="story-card" key={historia.id} onClick={() => setHistoriaAberta(historia)}><span>{historia.tag}</span><i>{historia.icon}</i><strong>{historia.title}</strong><small>♧ {historia.time}</small></button>)}</div>
+      <div className="story-grid">{stories.map((historia) => <article className={`story-card story-card-${historia.tema}`} key={historia.id}><button className="story-card-open" type="button" onClick={() => setHistoriaAberta(historia)} aria-label={`Abrir a história ${historia.title}`}><span className={`story-level story-level-${historia.nivelClasse}`}>{historia.nivel}</span><i>{historia.icon}</i><strong>{historia.title}</strong><small>{historia.tag}</small><em>{historia.time}</em></button><button className="story-info-button" type="button" onClick={() => setHistoriaInfo(historia)} aria-label={`Informações sobre ${historia.title}`} title="Sobre esta história">i</button></article>)}</div>
       <p className="parent-note">A história foi criada para o Clubinho ABC. Novas leituras serão adicionadas gradualmente.</p>
     </section>
+    {historiaInfo && <InformacoesHistoria historia={historiaInfo} onClose={() => setHistoriaInfo(null)} />}
     <AppFooter />
   </main>;
 }
