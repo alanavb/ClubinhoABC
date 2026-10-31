@@ -1,4 +1,4 @@
-from flask import Blueprint, g, jsonify, request
+from flask import Blueprint, g, jsonify, request, url_for
 
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller
@@ -86,8 +86,25 @@ def adicionar_crianca():
     except DadosInvalidosError as erro:
         return jsonify({'erro': str(erro)}), 400
 
-    return jsonify(_crianca_para_json(crianca)), 201
+    resposta = jsonify(_crianca_para_json(crianca))
+    resposta.status_code = 201
+    resposta.headers['Location'] =  url_for('auth.buscar_crianca', crianca_id=crianca.id)
+    return resposta
 
+@auth_bp.route('/criancas/<int:crianca_id>', methods=['GET'])
+@requer_autenticacao
+def buscar_crianca(crianca_id):
+    """Devolve uma criança da conta autenticada."""
+    responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
+    if not responsavel:
+        return jsonify({'erro': 'Cadastro ainda não concluído para est usuário.'}), 404
+
+    try:
+        crianca = auth_controller.buscar_crianca(responsavel, crianca_id)
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+
+    return jsonify(_crianca_para_json(crianca))
 
 @auth_bp.route('/criancas/<int:crianca_id>', methods=['PUT'])
 @requer_autenticacao
