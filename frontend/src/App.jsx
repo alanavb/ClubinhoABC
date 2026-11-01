@@ -569,8 +569,12 @@ function MinhaConta({ onNavigate }) {
                       <small>{textoIdade(crianca)} · nascimento: {textoDataNascimento(crianca.data_nascimento)}{crianca.fora_da_faixa_etaria ? ' · fora da faixa de 6 a 7 anos' : ''}</small>
                     </button>
                     <div className="family-actions">
-                      <button className="family-edit" type="button" onClick={() => setCriancaEmEdicao(crianca)}>Editar</button>
-                      <button className="family-delete" type="button" onClick={() => setCriancaParaExcluir(crianca)}>Excluir</button>
+                      <button className="family-edit family-icon-button" type="button" onClick={() => setCriancaEmEdicao(crianca)} aria-label={`Editar dados de ${crianca.nome}`} title="Editar">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></svg>
+                      </button>
+                      <button className="family-delete family-icon-button" type="button" onClick={() => setCriancaParaExcluir(crianca)} aria-label={`Excluir ${crianca.nome}`} title="Excluir">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></svg>
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -1088,6 +1092,11 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
       proximaPalavra.current = indiceDaPalavra + 1;
       setPalavraAtiva(indiceDaPalavra);
     };
+    fala.onstart = () => {
+      if (falaAtual.current !== fala) return;
+      setLendo(true);
+      setPausada(false);
+    };
     fala.onend = () => {
       if (falaAtual.current !== fala) return;
       setLendo(false);
@@ -1095,6 +1104,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
       setMensagem('Fim da história! Você pode ouvir de novo quando quiser.');
     };
     fala.onerror = () => {
+      if (falaAtual.current !== fala) return;
       setLendo(false);
       setPausada(false);
       setMensagem('Não foi possível reproduzir a narração agora.');
