@@ -129,3 +129,24 @@ def editar_crianca(crianca_id):
         return jsonify({'erro': str(erro)}), 404
 
     return jsonify(_crianca_para_json(crianca))
+
+
+@auth_bp.route('/criancas/<int:crianca_id>', methods=['DELETE'])
+@requer_autenticacao
+def excluir_crianca(crianca_id):
+    """Exclui uma criança da conta autenticada após confirmação expressa."""
+    responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
+    if not responsavel:
+        return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
+
+    dados = request.get_json(silent=True) or {}
+    try:
+        auth_controller.excluir_crianca(
+            responsavel, crianca_id, dados.get('confirmacao')
+        )
+    except DadosInvalidosError as erro:
+        return jsonify({'erro': str(erro)}), 400
+    except ValueError as erro:
+        return jsonify({'erro': str(erro)}), 404
+
+    return '', 204

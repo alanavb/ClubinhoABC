@@ -5,7 +5,7 @@ import unicodedata
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log
-from app.models import Crianca, Etapa, Responsavel
+from app.models import Crianca, Etapa, LogAuditoria, Responsavel, Resultado
 
 
 class DadosInvalidosError(Exception):
@@ -167,3 +167,25 @@ def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nasciment
     )
 
     return crianca
+
+
+def excluir_crianca(responsavel, crianca_id, confirmacao):
+    """Exclui definitivamente uma criança e os dados de aprendizagem vinculados."""
+    crianca = Crianca.query.get(crianca_id)
+    if not crianca or crianca.responsavel_id != responsavel.id:
+        raise ValueError('Criança não encontrada')
+
+    frase_esperada = f'EXCLUIR {crianca.nome}'
+    confirmacao_normalizada = ' '.join((confirmacao or '').split())
+    frase_normalizada = ' '.join(frase_esperada.split())
+    if confirmacao_normalizada != frase_normalizada:
+        raise DadosInvalidosError(
+            f'Digite "{frase_esperada}" para confirmar a exclusão.'
+        )
+
+    # As tabelas usam chaves estrangeiras para a criança; removemos primeiro
+    # os dados vinculados para que nenhum resultado ou registro fique órfão.
+    Resultado.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
+    LogAuditoria.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
+    db.session.delete(crianca)
+    db.session.commit()
