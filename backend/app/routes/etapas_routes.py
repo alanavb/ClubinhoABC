@@ -3,6 +3,7 @@ from flask import Blueprint, g, jsonify
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller, etapas_controller
 from app.controllers.etapas_controller import AcessoNegadoError
+from app.error_responses import MENSAGEM_ACESSO_NEGADO, erro_publico
 
 etapas_bp = Blueprint('etapas', __name__)
 
@@ -28,8 +29,8 @@ def atividades_acessiveis(crianca_id):
         )
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify({
         'child_id': crianca.id,
@@ -57,8 +58,8 @@ def progresso_da_crianca(crianca_id):
         resumo = etapas_controller.resumo_progresso(crianca_id, responsavel_id=responsavel_id)
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify(resumo)
 
@@ -99,8 +100,8 @@ def etapa_status(crianca_id, etapa_id):
         status = etapas_controller.status_etapa(crianca_id, etapa_id, responsavel_id=responsavel_id)
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify(status)
 
@@ -118,7 +119,7 @@ def concluir_etapa(crianca_id, etapa_id):
         )
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
-    except AcessoNegadoError as erro:
-        return jsonify({'erro': str(erro)}), 403
+    except AcessoNegadoError:
+        return erro_publico(MENSAGEM_ACESSO_NEGADO, 403)
 
     return jsonify(resultado)

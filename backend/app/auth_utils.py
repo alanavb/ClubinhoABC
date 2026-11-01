@@ -1,21 +1,11 @@
-"""Login e controle de acesso — verificação do JWT emitido pelo Supabase Auth.
-
-O Supabase (não o nosso back-end) autentica o responsável, faz o hash da
-senha e envia os e-mails de confirmação/recuperação. Aqui só conferimos se
-o token que chegou no header Authorization foi realmente emitido por ele e
-não expirou, usando a chave pública publicada no endereço JWKS do projeto.
-"""
-
 from functools import lru_cache, wraps
-
 import jwt
 from flask import current_app, g, jsonify, request
+from app.error_responses import MENSAGEM_SESSAO_INVALIDA, erro_publico
 
 
 class TokenInvalidoError(Exception):
-    """Token ausente, expirado ou não emitido pelo Supabase deste projeto."""
-
-
+   pass
 @lru_cache(maxsize=1)
 def _cliente_jwks(jwks_url):
     return jwt.PyJWKClient(jwks_url)
@@ -39,8 +29,7 @@ def _decodificar_token(token):
 
 
 def requer_autenticacao(funcao):
-    """Exige um token válido do Supabase e disponibiliza os dados do usuário em `g`."""
-
+   
     @wraps(funcao)
     def decorada(*args, **kwargs):
         cabecalho = request.headers.get('Authorization', '')
@@ -49,8 +38,8 @@ def requer_autenticacao(funcao):
 
         try:
             claims = _decodificar_token(cabecalho.removeprefix('Bearer ').strip())
-        except TokenInvalidoError as erro:
-            return jsonify({'erro': f'Token inválido: {erro}'}), 401
+        except TokenInvalidoError:
+            return erro_publico(MENSAGEM_SESSAO_INVALIDA, 401)
 
         g.supabase_user_id = claims['sub']
         g.supabase_email = claims.get('email')

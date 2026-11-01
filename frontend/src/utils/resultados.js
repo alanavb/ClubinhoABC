@@ -8,6 +8,26 @@ import { obterCriancaId, obterToken } from './auth';
 
 export { API_BASE_URL };
 
+function publicarAviso(mensagem, acao = null) {
+  window.dispatchEvent(new CustomEvent('clubinho:aviso', { detail: { mensagem, acao } }));
+}
+
+function mensagemAmigavel(status) {
+  if (status === 401) {
+    return {
+      mensagem: 'Sua sessão terminou. Entre novamente para continuar brincando.',
+      acao: 'entrar',
+    };
+  }
+  if (status === 403) {
+    return { mensagem: 'Não foi possível salvar esta resposta. Volte à sua trilha e tente novamente.' };
+  }
+  if (status === 400) {
+    return { mensagem: 'Não foi possível registrar a resposta agora. Tente novamente.' };
+  }
+  return { mensagem: 'Tivemos um probleminha ao salvar sua resposta. Tente novamente em instantes.' };
+}
+
 function cabecalhosAutenticados(extras = {}) {
   const token = obterToken();
   return token ? { ...extras, Authorization: `Bearer ${token}` } : extras;
@@ -25,12 +45,18 @@ export async function registrarResultadoPorId(atividadeId, respostaEnviada, resp
         resposta_esperada: respostaEsperada,
       }),
     });
-    if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
+    if (!resposta.ok) {
+      const aviso = mensagemAmigavel(resposta.status);
+      publicarAviso(aviso.mensagem, aviso.acao);
+      console.warn('RN2: resposta não salva.', { status: resposta.status });
+      return null;
+    }
     const resultado = await resposta.json();
     if (resultado.correct) window.dispatchEvent(new Event('progresso-atualizado'));
     return resultado;
-  } catch (erro) {
-    console.error('RN2: não foi possível registrar o resultado no back-end.', erro);
+  } catch {
+    publicarAviso('Não foi possível conectar para salvar sua resposta. Verifique a conexão e tente novamente.');
+    console.error('RN2: não foi possível registrar o resultado no back-end.');
     return null;
   }
 }

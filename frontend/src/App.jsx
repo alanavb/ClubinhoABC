@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import AreaDeJogos from './jogos/AreaDeJogos';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
@@ -9,6 +10,7 @@ import {
   cadastrar,
   confirmarSenhaResponsavel,
   editarCrianca,
+  excluirCrianca,
   entrar,
   enviarRecuperacaoSenha,
   estaAutenticado,
@@ -27,6 +29,36 @@ const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
 const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
 const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
+
+function AvisoDoSistema({ onEntrarNovamente }) {
+  const [aviso, setAviso] = useState(null);
+
+  useEffect(() => {
+    const receberAviso = (evento) => setAviso(evento.detail);
+    window.addEventListener('clubinho:aviso', receberAviso);
+    return () => window.removeEventListener('clubinho:aviso', receberAviso);
+  }, []);
+
+  if (!aviso) return null;
+
+  const entrarNovamente = async () => {
+    await sair();
+    setAviso(null);
+    onEntrarNovamente();
+  };
+
+  return createPortal(
+    <section className="system-notice" role="status" aria-live="polite" aria-atomic="true">
+      <p>{aviso.mensagem}</p>
+      {aviso.acao === 'entrar' ? (
+        <button type="button" onClick={entrarNovamente}>Entrar novamente</button>
+      ) : (
+        <button type="button" onClick={() => setAviso(null)}>Entendi</button>
+      )}
+    </section>,
+    document.body,
+  );
+}
 
 function senhaAtendeRequisitos(senha) {
   return senha.length >= 8
@@ -499,6 +531,7 @@ function MinhaConta({ onNavigate }) {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [criancaEmEdicao, setCriancaEmEdicao] = useState(null);
+  const [criancaParaExcluir, setCriancaParaExcluir] = useState(null);
   const [section, setSection] = useState('dados');
   const [securityMessage, setSecurityMessage] = useState('');
   const [securitySubmitting, setSecuritySubmitting] = useState(false);
@@ -566,7 +599,14 @@ function MinhaConta({ onNavigate }) {
                       <strong>{crianca.nome}</strong>
                       <small>{textoIdade(crianca)} · nascimento: {textoDataNascimento(crianca.data_nascimento)}{crianca.fora_da_faixa_etaria ? ' · fora da faixa de 6 a 7 anos' : ''}</small>
                     </button>
-                    <button className="family-edit" type="button" onClick={() => setCriancaEmEdicao(crianca)}>Editar</button>
+                    <div className="family-actions">
+                      <button className="family-edit family-icon-button" type="button" onClick={() => setCriancaEmEdicao(crianca)} aria-label={`Editar dados de ${crianca.nome}`} title="Editar">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4l11-11a2.8 2.8 0 0 0-4-4L4 16v4Z" /><path d="m13.5 6.5 4 4" /></svg>
+                      </button>
+                      <button className="family-delete family-icon-button" type="button" onClick={() => setCriancaParaExcluir(crianca)} aria-label={`Excluir ${crianca.nome}`} title="Excluir">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M7 7l1 13h8l1-13M10 11v5M14 11v5" /></svg>
+                      </button>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -600,6 +640,7 @@ function MinhaConta({ onNavigate }) {
         </div>
       </section>
       {criancaEmEdicao && <EditarCriancaDialog crianca={criancaEmEdicao} onClose={() => setCriancaEmEdicao(null)} />}
+      {criancaParaExcluir && <ConfirmarExclusaoCrianca crianca={criancaParaExcluir} onClose={() => setCriancaParaExcluir(null)} />}
       {showDeleteConfirm && <ConfirmarExclusaoConta onClose={() => setShowDeleteConfirm(false)} />}
       <AppFooter />
     </main>
@@ -694,10 +735,62 @@ function EditarCriancaDialog({ crianca, onClose }) {
   );
 }
 
+function ConfirmarExclusaoCrianca({ crianca, onClose }) {
+  const fraseConfirmacao = `EXCLUIR ${crianca.nome}`;
+  const [confirmacao, setConfirmacao] = useState('');
+  const [erro, setErro] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
+  const confirmacaoCorreta = confirmacao.trim().replace(/\s+/g, ' ') === fraseConfirmacao;
+
+  async function confirmar(event) {
+    event.preventDefault();
+    setErro('');
+    setExcluindo(true);
+    try {
+      await excluirCrianca({ criancaId: crianca.crianca_id, confirmacao });
+      onClose();
+    } catch (falha) {
+      setErro(falha.message);
+    } finally {
+      setExcluindo(false);
+    }
+  }
+
+  return (
+    <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="terms-dialog delete-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-child-title">
+        <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar confirmação de exclusão da criança">×</button>
+        <span className="delete-confirm-icon" aria-hidden="true">⚠️</span>
+        <h1 id="delete-child-title">Excluir {crianca.nome}?</h1>
+        <p>Esta ação remove definitivamente o perfil, as respostas e o progresso de {crianca.nome}. Ela não pode ser desfeita.</p>
+        <form onSubmit={confirmar}>
+          <label className="delete-confirm-phrase" htmlFor="delete-child-confirmation">Para confirmar, escreva <strong>{fraseConfirmacao}</strong>.</label>
+          <input
+            id="delete-child-confirmation"
+            value={confirmacao}
+            onChange={(event) => setConfirmacao(event.target.value)}
+            placeholder={fraseConfirmacao}
+            autoComplete="off"
+          />
+          {erro && <p className="form-message" role="alert">{erro}</p>}
+          <div className="delete-confirm-actions">
+            <button className="back-button" type="button" onClick={onClose} disabled={excluindo}>Cancelar</button>
+            <button className="delete-confirm-button" type="submit" disabled={!confirmacaoCorreta || excluindo}>{excluindo ? 'Excluindo…' : 'Excluir definitivamente'}</button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
 function ConfirmarExclusaoConta({ onClose }) {
+  const fraseConfirmacao = 'EXCLUIR MINHA CONTA';
+  const [confirmacao, setConfirmacao] = useState('');
   const [confirmado, setConfirmado] = useState(false);
+  const confirmacaoCorreta = confirmacao.trim().replace(/\s+/g, ' ') === fraseConfirmacao;
 
   function enviarSolicitacao() {
+    if (!confirmacaoCorreta || !confirmado) return;
     window.location.href = 'mailto:clubinhoabc@gmail.com?subject=Solicita%C3%A7%C3%A3o%20de%20exclus%C3%A3o%20da%20conta%20Clubinho%20ABC';
     onClose();
   }
@@ -714,10 +807,18 @@ function ConfirmarExclusaoConta({ onClose }) {
           <li>Os perfis, resultados e progresso das crianças vinculadas poderão ser removidos.</li>
           <li>Essa ação pode ser irreversível após a confirmação da equipe.</li>
         </ul>
+        <label className="delete-confirm-phrase" htmlFor="delete-account-confirmation">Para continuar, escreva <strong>{fraseConfirmacao}</strong>.</label>
+        <input
+          id="delete-account-confirmation"
+          value={confirmacao}
+          onChange={(event) => setConfirmacao(event.target.value)}
+          placeholder={fraseConfirmacao}
+          autoComplete="off"
+        />
         <label className="delete-confirm-check"><input type="checkbox" checked={confirmado} onChange={(event) => setConfirmado(event.target.checked)} /> Entendo as consequências e quero solicitar a exclusão.</label>
         <div className="delete-confirm-actions">
           <button className="back-button" type="button" onClick={onClose}>Cancelar</button>
-          <button className="delete-confirm-button" type="button" onClick={enviarSolicitacao} disabled={!confirmado}>Enviar solicitação</button>
+          <button className="delete-confirm-button" type="button" onClick={enviarSolicitacao} disabled={!confirmacaoCorreta || !confirmado}>Enviar solicitação</button>
         </div>
       </section>
     </div>
@@ -1022,6 +1123,11 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
       proximaPalavra.current = indiceDaPalavra + 1;
       setPalavraAtiva(indiceDaPalavra);
     };
+    fala.onstart = () => {
+      if (falaAtual.current !== fala) return;
+      setLendo(true);
+      setPausada(false);
+    };
     fala.onend = () => {
       if (falaAtual.current !== fala) return;
       setLendo(false);
@@ -1029,6 +1135,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
       setMensagem('Fim da história! Você pode ouvir de novo quando quiser.');
     };
     fala.onerror = () => {
+      if (falaAtual.current !== fala) return;
       setLendo(false);
       setPausada(false);
       setMensagem('Não foi possível reproduzir a narração agora.');
@@ -1194,22 +1301,21 @@ function App() {
     setView(destino === 'conta' ? 'confirmar-responsavel' : destino);
   };
 
-  if (precisaRedefinirSenha()) return <RedefinirSenha />;
+  let conteudo;
 
-  if (VIEWS_PROTEGIDAS.includes(view)) {
-    if (!estaAutenticado()) return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
-    if (!perfilCompleto()) {
-      return (
-        <main className="page-shell" id="inicio">
-          <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
-          <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
-        </main>
-      );
-    }
-  }
-
-  if (view === 'signup') {
-    return (
+  if (precisaRedefinirSenha()) {
+    conteudo = <RedefinirSenha />;
+  } else if (VIEWS_PROTEGIDAS.includes(view) && !estaAutenticado()) {
+    conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
+  } else if (VIEWS_PROTEGIDAS.includes(view) && !perfilCompleto()) {
+    conteudo = (
+      <main className="page-shell" id="inicio">
+        <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
+        <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
+      </main>
+    );
+  } else if (view === 'signup') {
+    conteudo = (
       <Signup
         onBackToLogin={() => setView('login')}
         onFinish={(email) => {
@@ -1218,16 +1324,27 @@ function App() {
         }}
       />
     );
+  } else if (view === 'confirmar-email') {
+    conteudo = <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
+  } else if (view === 'home') {
+    conteudo = <Home onNavigate={navigate} />;
+  } else if (view === 'jogos') {
+    conteudo = <AreaDeJogos key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
+  } else if (view === 'historias') {
+    conteudo = <Stories onNavigate={navigate} />;
+  } else if (view === 'atividades') {
+    conteudo = <Activities onNavigate={navigate} />;
+  } else if (view === 'progresso') {
+    conteudo = <Progress onNavigate={navigate} />;
+  } else if (view === 'confirmar-responsavel') {
+    conteudo = <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
+  } else if (view === 'conta') {
+    conteudo = <MinhaConta onNavigate={navigate} />;
+  } else {
+    conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
   }
-  if (view === 'confirmar-email') return <ConfirmeSeuEmail email={emailCadastrado} onVoltar={() => setView('login')} />;
-  if (view === 'home') return <Home onNavigate={navigate} />;
-  if (view === 'jogos') return <AreaDeJogos key={obterCriancaId()} Cabecalho={AppHeader} Rodape={AppFooter} onNavigate={navigate} />;
-  if (view === 'historias') return <Stories onNavigate={navigate} />;
-  if (view === 'atividades') return <Activities onNavigate={navigate} />;
-  if (view === 'progresso') return <Progress onNavigate={navigate} />;
-  if (view === 'confirmar-responsavel') return <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
-  if (view === 'conta') return <MinhaConta onNavigate={navigate} />;
-  return <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
+
+  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}</>;
 }
 
 export default App;

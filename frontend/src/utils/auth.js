@@ -175,6 +175,32 @@ export async function editarCrianca({ criancaId, nome, dataNascimento, avatar })
   return dados;
 }
 
+export async function excluirCrianca({ criancaId, confirmacao }) {
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessaoSupabase?.access_token}`,
+    },
+    body: JSON.stringify({ confirmacao }),
+  });
+  const dados = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível excluir a criança.');
+
+  perfil = {
+    ...perfil,
+    criancas: perfil.criancas.filter((crianca) => crianca.crianca_id !== criancaId),
+  };
+  if (lerCriancaSelecionada() === criancaId) {
+    try {
+      localStorage.removeItem(CHAVE_CRIANCA_SELECIONADA);
+    } catch {
+      // sem armazenamento local, a primeira criança restante será usada normalmente
+    }
+  }
+  avisarOuvintes();
+}
+
 export function obterPerfil() {
   return perfil;
 }

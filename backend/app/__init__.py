@@ -1,23 +1,30 @@
-from flask import Flask
+from uuid import uuid4
+from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
-
 from .config import Config
 
 db = SQLAlchemy()
 
-
 def create_app(test_config=None):
-    """Cria a aplicação e aceita configuração descartável para testes."""
     app = Flask(__name__)
     app.config.from_object(Config)
     if test_config:
         app.config.update(test_config)
 
     db.init_app(app)
-    # Front-end (Vite, porta 5173) e back-end (porta 5000) rodam em origens
-    # diferentes em desenvolvimento — libera só as rotas /api/* e só para o
-    # front-end local, não para qualquer origem.
+
+    @app.errorhandler(Exception)
+    def tratar_erro_inesperado(erro):
+        codigo_suporte = str(uuid4())
+        app.logger.exception('Erro inesperado na API. Código de suporte: %s', codigo_suporte, exc_info=erro)
+        if request.path.startswith('/api/'):
+            return jsonify({
+                'erro': 'Não foi possível concluir esta ação agora. Tente novamente em instantes.',
+                'codigo': codigo_suporte,
+            }), 500
+        return 'Ocorreu um erro inesperado.', 500
+    
     CORS(app, resources={r'/api/*': {'origins': app.config['CORS_ALLOWED_ORIGINS']}})
 
     from .routes.auth_routes import auth_bp
@@ -28,6 +35,5 @@ def create_app(test_config=None):
     app.register_blueprint(resultados_bp, url_prefix='/api')
     app.register_blueprint(etapas_bp, url_prefix='/api')
     app.register_blueprint(auditoria_bp, url_prefix='/api')
-
 
     return app

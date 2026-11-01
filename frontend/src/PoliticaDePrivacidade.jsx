@@ -76,7 +76,7 @@ function PoliticaDePrivacidade({ onClose }) {
           <li><strong>Solicitações enviadas por e-mail:</strong> são mantidas durante o atendimento e pelo período necessário para demonstrar a resposta e resguardar direitos.</li>
           <li><strong>Cópias de segurança:</strong> podem permanecer até sua substituição pelas rotinas técnicas do prestador, com acesso restrito.</li>
         </ul>
-        <p>A versão atual ainda não possui exclusão automática pela interface. O responsável pode solicitar o encerramento, a eliminação ou a anonimização pelo canal da seção 1. Após a confirmação da legitimidade do pedido, a equipe realizará o procedimento nos ambientes de autenticação e banco de dados, ressalvada a conservação permitida ou exigida por lei.</p>
+        <p>O responsável pode excluir definitivamente, pela área da conta, o perfil de uma criança e seus resultados e progresso vinculados, após confirmação expressa. Para encerrar a conta inteira, solicitar eliminação ou anonimização de outros dados, deve usar o canal da seção 1. Após a confirmação da legitimidade do pedido, a equipe realizará o procedimento nos ambientes de autenticação e banco de dados, ressalvada a conservação permitida ou exigida por lei.</p>
 
         <h2>9. Direitos do responsável e da criança</h2>
         <p>O responsável pode exercer, em nome próprio ou da criança e conforme a LGPD:</p>
