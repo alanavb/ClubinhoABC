@@ -91,6 +91,12 @@ class IntegracaoHttpBase(unittest.TestCase):
 
     def post(self, caminho, json=None):
         return requests.post(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
+
+    def put(self, caminho, json=None):
+        return requests.put(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
+
+    def delete(self, caminho, json=None):
+        return requests.delete(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
     # ------------------------------------------------------------------ helpers de dados
     def montar_request_crianca(self, nome, data_nascimento=None, avatar='🦊'):
         # 1º de janeiro de 6 anos atrás: a idade é 6 em qualquer dia do ano.
