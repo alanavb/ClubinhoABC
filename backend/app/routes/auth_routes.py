@@ -99,7 +99,7 @@ def buscar_crianca(crianca_id):
     """Devolve uma criança da conta autenticada."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
-        return jsonify({'erro': 'Cadastro ainda não concluído para est usuário.'}), 404
+        return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
     try:
         crianca = auth_controller.buscar_crianca(responsavel, crianca_id)
