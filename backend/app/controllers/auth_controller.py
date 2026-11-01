@@ -1,6 +1,7 @@
 """RN — Login e controle de acesso: perfil do responsável (autenticação em si é do Supabase Auth)."""
 
 import datetime
+import unicodedata
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log
@@ -11,12 +12,16 @@ class DadosInvalidosError(Exception):
     """Campos obrigatórios ausentes para concluir o cadastro."""
 
 
+class CriancaDuplicadaError(DadosInvalidosError):
+    """A conta já possui uma criança com o mesmo nome e data de nascimento."""
+
+
 def buscar_por_supabase_id(supabase_user_id):
     return Responsavel.query.filter_by(supabase_user_id=supabase_user_id).first()
 
 
 def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=True):
-    crianca_nome = (crianca_nome or '').strip()
+    crianca_nome = ' '.join((crianca_nome or '').split())
     if not crianca_nome:
         raise DadosInvalidosError('Preencha o nome e a data de nascimento da criança.')
     if not crianca_data_nascimento:
@@ -30,6 +35,28 @@ def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=Tru
     if data_nascimento > datetime.date.today():
         raise DadosInvalidosError('A data de nascimento não pode estar no futuro.')
     return crianca_nome, data_nascimento
+
+
+def _crianca_ja_cadastrada(responsavel_id, nome, data_nascimento, ignorar_crianca_id=None):
+    """Evita duplicidade acidental na mesma conta, sem usar o avatar como identidade."""
+    nome_normalizado = _normalizar_nome_para_comparacao(nome)
+    criancas_da_conta = Crianca.query.filter_by(responsavel_id=responsavel_id).all()
+    return any(
+        crianca.id != ignorar_crianca_id
+        and crianca.data_nascimento == data_nascimento
+        and _normalizar_nome_para_comparacao(crianca.nome) == nome_normalizado
+        for crianca in criancas_da_conta
+    )
+
+
+def _normalizar_nome_para_comparacao(nome):
+    """Compara nomes sem diferenciar espaços, maiúsculas ou acentos."""
+    nome_sem_acentos = ''.join(
+        caractere
+        for caractere in unicodedata.normalize('NFD', nome)
+        if unicodedata.category(caractere) != 'Mn'
+    )
+    return ' '.join(nome_sem_acentos.split()).casefold()
 
 
 def _etapa_inicial():
@@ -84,6 +111,8 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
 def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
     """Vincula mais uma criança a um responsável já cadastrado (RF01: um responsável, várias crianças)."""
     crianca_nome, data_nascimento = _validar_crianca(crianca_nome, crianca_data_nascimento)
+    if _crianca_ja_cadastrada(responsavel.id, crianca_nome, data_nascimento):
+        raise CriancaDuplicadaError('Esta criança já está cadastrada nesta conta.')
 
     crianca = Crianca(
         responsavel_id=responsavel.id,
@@ -118,9 +147,15 @@ def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nasciment
     if not crianca or crianca.responsavel_id != responsavel.id:
         raise ValueError('Criança não encontrada')
 
-    crianca.nome, crianca.data_nascimento = _validar_crianca(
+    novo_nome, nova_data_nascimento = _validar_crianca(
         crianca_nome, crianca_data_nascimento
     )
+    if _crianca_ja_cadastrada(
+        responsavel.id, novo_nome, nova_data_nascimento, ignorar_crianca_id=crianca.id
+    ):
+        raise CriancaDuplicadaError('Esta criança já está cadastrada nesta conta.')
+    crianca.nome = novo_nome
+    crianca.data_nascimento = nova_data_nascimento
     crianca.avatar = crianca_avatar
     db.session.commit()
 
