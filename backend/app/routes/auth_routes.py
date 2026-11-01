@@ -37,11 +37,13 @@ def me():
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
     # O log exige uma criança; o acesso é da família, então registra a primeira cadastrada.
-    registrar_log(
-        acao='acesso_responsavel',
-        responsavel_id=responsavel.id,
-        crianca_id=responsavel.criancas[0].id,
-    )
+    # A conta pode ficar sem crianças depois de uma exclusão: nesse caso não há o que registrar.
+    if responsavel.criancas:
+        registrar_log(
+            acao='acesso_responsavel',
+            responsavel_id=responsavel.id,
+            crianca_id=responsavel.criancas[0].id,
+        )
     return jsonify(_responsavel_para_json(responsavel))
 
 
