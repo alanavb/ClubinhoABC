@@ -22,6 +22,11 @@ def migrar():
     if 'idade' in colunas and db.engine.dialect.name == 'postgresql':
         db.session.execute(text('ALTER TABLE criancas ALTER COLUMN idade DROP NOT NULL'))
 
+    # resultados.resposta passou de 50 para 255 caracteres: a Etapa 3 envia frases
+    # inteiras (até 65). O SQLite não impõe o limite do VARCHAR; o PostgreSQL impõe.
+    if db.engine.dialect.name == 'postgresql':
+        db.session.execute(text('ALTER TABLE resultados ALTER COLUMN resposta TYPE VARCHAR(255)'))
+
     db.session.commit()
 
 
