@@ -4,12 +4,12 @@ import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
 const rodadas = [ 
-    { remetente: 'da Titia', texto: 'Fiz um bolo de chocolate. Ele está na mesa.', pergunta: 'Onde estáo bolo?', resposta: 'Na mesa.', opcoes: ['Na mesa.', 'Na bolsa.', 'No forno.'] },
+    { remetente: 'da Titia', texto: 'Fiz um bolo de chocolate. Ele está na mesa.', pergunta: 'Onde está o bolo?', resposta: 'Na mesa.', opcoes: ['Na mesa.', 'Na bolsa.', 'No forno.'] },
     { remetente: 'da Mamãe', texto: 'Fui ao mercado comprar pão e leite. Volto logo.', pergunta: 'O que a mamãe foi comprar?', resposta: 'Pão e leite.', opcoes: ['Pão e leite.', 'Bolo e suco.', 'Pizza e Doces.'] },
     { remetente: 'da Vizinha', texto: 'Meu gato fugiu para o jardim. Ele é preto e pequeno.', pergunta: 'Como é o gato?', resposta: 'Preto e pequeno.', opcoes: ['Preto e pequeno.', 'Branco e grande.', 'Preto e grande.'] },
 ];
 
-export default function LeiaOBilhete({ atividadeId,onConcluir, onFechar }) {
+export default function LeiaOBilhete({ atividadeId, aoConcluir, aoFechar }) {
     const [indice, setIndice] = useState(0);
     const [opcoes, setOpcoes] = useState(() => embaralhar(rodadas[0].opcoes));
     const [retorno, setRetorno] = useState('');
