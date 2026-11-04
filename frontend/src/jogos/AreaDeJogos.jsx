@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CacaAsLetras from './CacaAsLetras';
 import MonteAPalavra from './MonteAPalavra';
 import OucaEEscolha from './OucaEEscolha';
+import LeiaEDescubra from './LeiaEDescubra';
 import { obterCriancaId } from '../utils/auth';
 import { useResumoProgresso } from '../utils/etapas';
 
@@ -10,6 +11,7 @@ const telasDasEtapas = {
   'caca-as-letras': { Tela: CacaAsLetras, icone: '🔤', legenda: 'A · B · C' },
   'monte-a-palavra': { Tela: MonteAPalavra, icone: '🧩', legenda: 'BA + LA' },
   'ouca-e-escolha': { Tela: OucaEEscolha, icone: '👂', legenda: 'Frases' },
+  'leia-e-descubra': { Tela: LeiaEDescubra, icone: '🔎', legenda: 'Textos' },
 };
 
 export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
