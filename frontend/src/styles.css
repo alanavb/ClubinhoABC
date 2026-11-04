@@ -252,3 +252,14 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
   .content-grid.single-card { margin-top: 50px; }
   .single-card .login-card h1 { padding-right: 96px; }
 }.single-card .login-card h1 em { white-space: nowrap; }
+
+/* Etapa 4 - Leia e Descubra: tema da etapa e caixa de leitura dos textos. */
+.current-world.reading-world { background: linear-gradient(135deg, #2f9a8a, #4a8fd6); box-shadow: 0 10px 0 rgb(24 83 99 / 25%); }
+.reading-world .sentence-phase-card small { color: #2f7f86; }
+.reading-world .sentence-phase-card button { background: #2f8f83; }
+.reading-note { flex-direction: column; text-align: center; }
+.reading-note small { color: #a0566f; font: 800 13px 'Baloo 2', sans-serif; }
+.reading-note b { font-size: 22px; line-height: 1.35; }
+.reading-question { margin: 18px 0 12px; color: #4b2c1f; font: 800 24px/1.2 'Baloo 2', sans-serif; }
+.sentence-sings button:disabled { opacity: .45; cursor: default; transform: none; }
+
