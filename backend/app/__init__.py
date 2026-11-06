@@ -19,6 +19,16 @@ def create_app(test_config=None):
     app.extensions['contadores_por_ip'] = ContadoresPorIp()
     app.before_request(verificar_limites)
 
+    # 404 e 405 são erros do cliente, não falhas do servidor: têm resposta própria
+    # e não podem cair no tratador de erro inesperado (500) logo abaixo.
+    @app.errorhandler(404)
+    def tratar_endereco_nao_encontrado(erro):
+        return jsonify({'erro': 'Endereço não encontrado.'}), 404
+
+    @app.errorhandler(405)
+    def tratar_metodo_nao_permitido(erro):
+        return jsonify({'erro': 'Método não permitido para este endereço.'}), 405
+
     @app.errorhandler(Exception)
     def tratar_erro_inesperado(erro):
         codigo_suporte = str(uuid4())
