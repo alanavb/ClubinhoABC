@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from .config import Config
+from .limite_tentativas import ContadoresPorIp, verificar_limites
 
 db = SQLAlchemy()
 
@@ -13,6 +14,10 @@ def create_app(test_config=None):
         app.config.update(test_config)
 
     db.init_app(app)
+
+    # Limite de requisições e bloqueio de tentativas por IP, antes de qualquer rota.
+    app.extensions['contadores_por_ip'] = ContadoresPorIp()
+    app.before_request(verificar_limites)
 
     @app.errorhandler(Exception)
     def tratar_erro_inesperado(erro):

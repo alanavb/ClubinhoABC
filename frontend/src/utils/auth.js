@@ -207,6 +207,9 @@ export function obterPerfil() {
 
 function mensagemAmigavel(erro) {
   const texto = erro?.message || '';
+  // Limites de tentativas e de envio de e-mail configurados no Supabase Auth (status 429).
+  if (erro?.code === 'over_email_send_rate_limit') return 'Muitos e-mails enviados em pouco tempo. Aguarde alguns minutos e tente novamente.';
+  if (erro?.status === 429) return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
   if (texto.includes('Invalid login credentials')) return 'E-mail ou senha inválidos.';
   if (texto.includes('Email not confirmed')) return 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.';
   return texto || 'Não foi possível completar a operação.';

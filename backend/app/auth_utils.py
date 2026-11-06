@@ -2,6 +2,7 @@ from functools import lru_cache, wraps
 import jwt
 from flask import current_app, g, jsonify, request
 from app.error_responses import MENSAGEM_SESSAO_INVALIDA, erro_publico
+from app.limite_tentativas import limpar_falhas_de_autenticacao, registrar_falha_de_autenticacao
 
 
 class TokenInvalidoError(Exception):
@@ -34,12 +35,16 @@ def requer_autenticacao(funcao):
     def decorada(*args, **kwargs):
         cabecalho = request.headers.get('Authorization', '')
         if not cabecalho.startswith('Bearer '):
+            registrar_falha_de_autenticacao()
             return jsonify({'erro': 'Token de autenticação ausente.'}), 401
 
         try:
             claims = _decodificar_token(cabecalho.removeprefix('Bearer ').strip())
         except TokenInvalidoError:
+            registrar_falha_de_autenticacao()
             return erro_publico(MENSAGEM_SESSAO_INVALIDA, 401)
+
+        limpar_falhas_de_autenticacao()
 
         g.supabase_user_id = claims['sub']
         g.supabase_email = claims.get('email')
