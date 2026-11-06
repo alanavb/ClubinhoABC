@@ -68,8 +68,11 @@ def listar_resultados(crianca_id=None, atividade_id=None, responsavel_id=None):
             raise AcessoNegadoError('Esta criança não pertence ao responsável autenticado')
 
     query = Resultado.query
+    if responsavel_id is not None:
+        # Sem filtro de criança, a lista não pode trazer resultados de outras famílias.
+        query = query.join(Crianca).filter(Crianca.responsavel_id == responsavel_id)
     if crianca_id is not None:
-        query = query.filter_by(crianca_id=crianca_id)
+        query = query.filter(Resultado.crianca_id == crianca_id)
     if atividade_id is not None:
-        query = query.filter_by(atividade_id=atividade_id)
+        query = query.filter(Resultado.atividade_id == atividade_id)
     return query.order_by(Resultado.criado_em.desc()).all()
