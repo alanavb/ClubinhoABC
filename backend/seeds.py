@@ -79,6 +79,22 @@ with app.app_context():
         ('bonus-ouca', 'Detetive de Histórias', 4, False),
     ])
 
+    etapa4 = Etapa.query.filter_by(chave='leia-e-descubra').first()
+    if not etapa4:
+        etapa4 = Etapa(chave='leia-e-descubra', nome='Leia e Descubra', ordem=4)
+        db.session.add(etapa4)
+        db.session.commit()
+        print('Etapa "Leia e Descubra" criada.')
+    else:
+        print('Etapa "Leia e Descubra" já existia, nada foi criado.')
+
+    garantir_atividades(etapa4, [
+        ('bilhete', 'Leio o bilhete', 1, True),
+        ('quem-sou-eu', 'Quem sou eu?', 2, True),
+        ('ordene-historia', 'Coloque em ordem', 3, True),
+        ('bonus-leia', 'Tesouro da leitura', 4, False),
+    ])
+
     # Responsável e criança não são mais fabricados aqui: a conta agora nasce
     # no Supabase Auth (cadastro real, com confirmação por e-mail) e o perfil
     # local (responsável + criança) é criado automaticamente pelo back-end
@@ -90,19 +106,3 @@ with app.app_context():
         print(f'  etapa "{etapa.chave}": etapa_id={etapa.id}')
         for atividade in Atividade.query.filter_by(etapa_id=etapa.id).order_by(Atividade.ordem).all():
             print(f'    {atividade.chave}: activity_id={atividade.id} (obrigatoria={atividade.obrigatoria})')
-
-    etapa4 = Etapa.query.filter_by(chave='leia-e-descubra').first()
-    if not etapa4:
-        etapa4 = Etapa(chave='leia-e-descubra', nome='Leia e Descubra', ordem=4)
-        db.session.add(etapa4)
-        db.session.commit()
-        print('Etapa "Leia e Descubra" criada.')
-    else:
-        print('Etapa "Leia e Descubra" já existia, nada foi criado.')
-
-        garantir_atividades(etapa4, [
-            ('bilhete', 'Leio o bilhete', 1, True),
-            ('quem-sou-eu', 'Quem sou eu?', 2, True),
-            ('ordene-historia', 'Coloque em ordem', 3, True),
-            ('bonus-leia', 'Tesouro da leitura', 4, False),
-        ])
