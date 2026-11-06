@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CacaAsLetras from './CacaAsLetras';
 import MonteAPalavra from './MonteAPalavra';
 import OucaEEscolha from './OucaEEscolha';
@@ -23,6 +23,12 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
   // Quando a última etapa é concluída, não existe uma próxima como "atual".
   // Mantemos a última visível para a criança acessar seu desafio bônus.
   const visualizada = etapas.find((etapa) => etapa.chave === selecionada) ?? atual ?? etapas[etapas.length - 1];
+  // Fixa a etapa aberta na tela. Ao concluir as obrigatórias, a trilha avança no
+  // back-end, mas a criança continua na etapa que jogou para ver o bônus liberado.
+  useEffect(() => {
+    if (!selecionada && visualizada) setSelecionada(visualizada.chave);
+  }, [selecionada, visualizada]);
+
   const posicao = visualizada ? etapas.indexOf(visualizada) + 1 : 0;
   const Tela = visualizada && telasDasEtapas[visualizada.chave].Tela;
 
@@ -68,7 +74,7 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
       <p className="games-journey-note">
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>
         {visualizada?.situacao === 'concluida'
-          ? 'Etapa concluída! Você pode passar para a próxima etapa da trilha.'
+          ? 'Etapa concluída! Jogue o desafio bônus ou toque na próxima etapa da trilha.'
           : 'Complete as atividades obrigatórias para abrir a próxima etapa!'}
       </p>
     </>;
