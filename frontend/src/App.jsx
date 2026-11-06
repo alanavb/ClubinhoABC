@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import AreaDeJogos from './jogos/AreaDeJogos';
 import TermosDeUso from './TermosDeUso';
 import PoliticaDePrivacidade from './PoliticaDePrivacidade';
+import DashboardProgresso from './DashboardProgresso';
 import {
   adicionarCrianca,
   aoMudarSessao,
@@ -1272,6 +1273,7 @@ function Progress({ onNavigate }) {
     <section className="page-content progress-page"><AvisoFaixaEtaria crianca={crianca} /><div className="journey-heading"><img src="/images/ilustra-progresso.png" alt="" /><div><span>Acompanhamento</span><h1>A jornada de {nomeCrianca}</h1></div></div>
       <IndicadoresProgresso resumo={resumo} erro={erro} recarregar={recarregar} />
       <MapaAventura nomeCrianca={nomeCrianca} etapas={resumo?.etapas} tituloId="progress-map-title" />
+      <DashboardProgresso criancaId={obterCriancaId()} nomeCrianca={nomeCrianca} onNavigate={onNavigate} />
       <div className="progress-bottom"><section className="mastery"><h2>Progresso de {nomeCrianca} em cada etapa</h2>{(resumo?.etapas ?? []).map((etapa) => <div className="mastery-row" key={etapa.etapa_id}><strong>{etapa.nome}</strong><em>{etapa.situacao === 'bloqueada' ? 'a descobrir' : `${etapa.percentual}%`}</em><span><i style={{ width: `${etapa.percentual}%` }} /></span></div>)}</section><Conquistas conquistas={resumo?.conquistas} /></div>
     </section>
     <AppFooter />

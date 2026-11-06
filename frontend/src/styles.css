@@ -263,3 +263,44 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
 .reading-question { margin: 18px 0 12px; color: #4b2c1f; font: 800 24px/1.2 'Baloo 2', sans-serif; }
 .sentence-sings button:disabled { opacity: .45; cursor: default; transform: none; }
 
+
+/* RF06 — Dashboard de desempenho (DashboardProgresso.jsx). Gráficos feitos só com CSS. */
+.painel-desempenho { --acerto: #16a34a; --erro: #dc2626; --texto-suave: #7a5a4b; --trilho: #f1ebe2; margin-top: 30px; }
+.painel-cabecalho { margin-bottom: 18px; }.painel-cabecalho span { color: #ef2171; font-size: 13px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; }.painel-cabecalho h2 { margin: 4px 0 0; font: 800 34px/1.1 'Baloo 2', sans-serif; }
+.painel-numeros { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; margin-bottom: 22px; }
+.painel-numero { display: flex; align-items: center; gap: 16px; padding: 20px; border-radius: 24px; background: white; box-shadow: 0 4px 12px rgb(98 63 43 / 9%); }
+.painel-numero-icone { display: grid; flex: none; place-items: center; width: 50px; height: 50px; border-radius: 16px; }.painel-numero-icone svg { width: 26px; height: 26px; }
+.painel-numero strong { display: block; font: 800 36px/1 'Baloo 2', sans-serif; }.painel-numero small { color: var(--texto-suave); font-weight: 800; }
+.painel-numero.azul .painel-numero-icone { color: #2f5bd3; background: #e3ebff; }.painel-numero.azul strong { color: #2f5bd3; }
+.painel-numero.verde .painel-numero-icone { color: var(--acerto); background: #dcf5e4; }.painel-numero.verde strong { color: var(--acerto); }
+.painel-numero.vermelho .painel-numero-icone { color: var(--erro); background: #fde2e2; }.painel-numero.vermelho strong { color: var(--erro); }
+.painel-numero.laranja .painel-numero-icone { color: #e46a00; background: #ffead3; }.painel-numero.laranja strong { color: #e46a00; }
+.painel-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
+.painel-card { padding: 24px 26px; border-radius: 24px; background: white; box-shadow: 0 4px 12px rgb(98 63 43 / 9%); }.painel-card h3 { margin: 0; font: 800 21px/1.15 'Baloo 2', sans-serif; }
+.painel-subtitulo { margin: 4px 0 20px; color: var(--texto-suave); font-size: 13px; font-weight: 700; }
+.painel-card-topo { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px 16px; flex-wrap: wrap; margin-bottom: 12px; }
+.painel-legenda { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; font-weight: 800; }.painel-legenda i { display: inline-block; flex: none; width: 12px; height: 12px; border-radius: 3px; }
+.painel-legenda.horizontal { display: flex; gap: 18px; font-size: 13px; }.painel-legenda.horizontal li { display: flex; align-items: center; gap: 7px; }
+.painel-desempenho .acerto { background: var(--acerto); }.painel-desempenho .erro { background: var(--erro); }
+.painel-rosca-area { display: flex; align-items: center; justify-content: center; gap: 32px; flex-wrap: wrap; }
+.painel-rosca { display: grid; place-items: center; width: 176px; height: 176px; border-radius: 50%; background: conic-gradient(var(--acerto) 0 var(--taxa), var(--erro) var(--taxa) 100%); }.painel-rosca > div { display: grid; place-items: center; width: 120px; height: 120px; border-radius: 50%; background: white; text-align: center; }.painel-rosca strong { font: 800 36px/1 'Baloo 2', sans-serif; }.painel-rosca small { color: var(--texto-suave); font-size: 13px; font-weight: 800; }
+.painel-rosca-area .painel-legenda { min-width: 190px; }.painel-rosca-area .painel-legenda li { display: grid; grid-template-columns: 12px 1fr auto 44px; align-items: center; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--trilho); }.painel-rosca-area .painel-legenda b { font-size: 18px; }.painel-rosca-area .painel-legenda em { color: var(--texto-suave); font-style: normal; text-align: right; }
+.painel-etapas { display: grid; gap: 18px; }.painel-etapa small { display: block; margin-top: 5px; color: var(--texto-suave); font-size: 12px; font-weight: 700; }
+.painel-etapa-titulo { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 7px; }.painel-etapa-titulo b { font-size: 15px; }
+.painel-barra { display: flex; height: 14px; overflow: hidden; border-radius: 7px; background: var(--trilho); }.painel-barra span + span { border-left: 2px solid white; }
+.painel-evolucao { margin-bottom: 22px; }
+.painel-grafico { position: relative; height: 200px; margin: 6px 0 0 34px; }
+.painel-grade-linha { position: absolute; right: 0; left: 0; border-top: 1px dashed #e4dccf; }.painel-grade-linha span { position: absolute; top: -9px; left: -34px; width: 26px; color: var(--texto-suave); font-size: 12px; font-weight: 800; text-align: right; }
+.painel-colunas { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; padding: 0 6px; }
+.painel-coluna { position: relative; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; }.painel-coluna b { margin-bottom: 4px; font-size: 13px; }
+.painel-coluna-barra { display: flex; flex: none; flex-direction: column; width: min(100%, 42px); overflow: hidden; border-radius: 8px 8px 0 0; }.painel-coluna-barra .erro { border-bottom: 2px solid white; }
+.painel-eixo-x { display: grid; grid-template-columns: repeat(7, 1fr); gap: 14px; margin: 8px 0 0 34px; padding: 0 6px; border-top: 2px solid #d9cfc0; }.painel-eixo-x small { padding-top: 6px; color: var(--texto-suave); font-weight: 800; text-align: center; text-transform: capitalize; }
+.painel-dificuldades, .painel-recomendacoes ol { display: grid; gap: 16px; margin: 0; padding: 0; list-style: none; }.painel-dificuldades li, .painel-recomendacoes li { display: grid; grid-template-columns: 30px 1fr; align-items: start; gap: 12px; }
+.painel-posicao { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; color: white; background: #4b2c1f; font-size: 14px; font-weight: 900; }
+.painel-dificuldade-titulo { display: flex; justify-content: space-between; gap: 10px; margin-bottom: 6px; }.painel-dificuldade-titulo em { color: var(--erro); font-style: normal; font-weight: 900; }
+.painel-dificuldades small { display: block; margin-top: 5px; color: var(--texto-suave); font-size: 12px; font-weight: 700; }
+.painel-mini-barra { display: block; height: 8px; overflow: hidden; border-radius: 4px; background: #fbd5d5; }.painel-mini-barra i { display: block; height: 100%; background: var(--acerto); }
+.painel-recomendacoes ol { margin-bottom: 20px; }.painel-recomendacoes .painel-posicao { background: #ef2171; }.painel-recomendacoes p { margin: 4px 0 0; font-weight: 800; }.painel-recomendacoes p small { display: block; margin-top: 3px; color: var(--texto-suave); font-size: 12px; font-weight: 700; }
+.painel-vazio { color: var(--texto-suave); font-weight: 800; }.painel-sem-dados { display: grid; justify-items: center; gap: 14px; text-align: center; font-weight: 800; }
+@media (max-width: 1000px) { .painel-numeros { grid-template-columns: repeat(2, 1fr); }.painel-grade { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .painel-card { padding: 20px 16px; }.painel-numero { padding: 14px; gap: 12px; }.painel-numero-icone { width: 40px; height: 40px; border-radius: 12px; }.painel-numero strong { font-size: 28px; }.painel-numero small { font-size: 12px; }.painel-grafico { height: 170px; }.painel-colunas, .painel-eixo-x { gap: 6px; padding: 0; } }
