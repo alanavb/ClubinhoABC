@@ -22,13 +22,24 @@ export function criarAlternativas(resposta, quantidade = 4) {
   return embaralhar([resposta, ...embaralhar(letras.filter((letra) => letra !== resposta)).slice(0, quantidade - 1)]);
 }
 
+const vogaisAcentuadas = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
+
+// Palavras curtas em maiúsculas (CA, MA, UVA) são lidas como siglas por algumas
+// vozes do navegador, que soletram as letras ("cê, á"). Por isso o texto vai em
+// minúsculas e, quando é uma sílaba (só uma vogal), a vogal recebe acento:
+// "cá" é lido como um som só.
+function prepararTextoParaFala(texto) {
+  if (!/^[A-ZÀ-ÖØ-Þ]{2,3}$/.test(texto)) return texto;
+  const minusculo = texto.toLowerCase();
+  const vogais = minusculo.match(/[aeiou]/g) || [];
+  if (vogais.length !== 1) return minusculo;
+  return minusculo.replace(vogais[0], vogaisAcentuadas[vogais[0]]);
+}
+
 export function falar(texto) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  // Sílabas escritas em maiúsculas (BA, CA...) podem ser soletradas por
-  // algumas vozes do navegador. Em minúsculas, a voz em pt-BR as lê como som.
-  const textoFalado = /^[A-ZÀ-ÖØ-Þ]{2,3}$/.test(texto) ? texto.toLowerCase() : texto;
-  const fala = new SpeechSynthesisUtterance(textoFalado);
+  const fala = new SpeechSynthesisUtterance(prepararTextoParaFala(texto));
   fala.lang = 'pt-BR';
   window.speechSynthesis.speak(fala);
 }
