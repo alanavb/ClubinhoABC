@@ -523,7 +523,7 @@ function AvisoFaixaEtaria({ crianca }) {
   );
 }
 
-function MinhaConta({ onNavigate }) {
+function MinhaConta({ onNavigate, onAccountDeleted }) {
   const perfil = obterPerfil();
   const criancas = perfil?.criancas ?? [];
   const selecionadaId = obterCriancaId();
@@ -643,7 +643,7 @@ function MinhaConta({ onNavigate }) {
       </section>
       {criancaEmEdicao && <EditarCriancaDialog crianca={criancaEmEdicao} onClose={() => setCriancaEmEdicao(null)} />}
       {criancaParaExcluir && <ConfirmarExclusaoCrianca crianca={criancaParaExcluir} onClose={() => setCriancaParaExcluir(null)} />}
-      {showDeleteConfirm && <ConfirmarExclusaoConta onClose={() => setShowDeleteConfirm(false)} onDeleted={() => onNavigate('login')} />}
+      {showDeleteConfirm && <ConfirmarExclusaoConta onClose={() => setShowDeleteConfirm(false)} onDeleted={onAccountDeleted} />}
       <AppFooter />
     </main>
   );
@@ -833,6 +833,19 @@ function ConfirmarExclusaoConta({ onClose, onDeleted }) {
           <button className="back-button" type="button" onClick={onClose} disabled={excluindo}>Cancelar</button>
           <button className="delete-confirm-button" type="button" onClick={excluirDefinitivamente} disabled={!confirmacaoCorreta || !confirmado || excluindo}>{excluindo ? 'Excluindo…' : 'Excluir definitivamente'}</button>
         </div>
+      </section>
+    </div>
+  );
+}
+
+function ExclusaoContaConcluida({ onClose }) {
+  return (
+    <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
+      <section className="terms-dialog delete-success-dialog" role="dialog" aria-modal="true" aria-labelledby="delete-success-title">
+        <span className="delete-success-icon" aria-hidden="true">✓</span>
+        <h1 id="delete-success-title">Conta excluída com sucesso</h1>
+        <p>A conta do responsável e os dados vinculados foram removidos do Clubinho ABC.</p>
+        <button className="account-action-button" type="button" onClick={onClose}>Entendi</button>
       </section>
     </div>
   );
@@ -1299,6 +1312,7 @@ function App() {
   const [view, setView] = useState('login');
   const [authTick, setAuthTick] = useState(0);
   const [emailCadastrado, setEmailCadastrado] = useState('');
+  const [exclusaoConcluida, setExclusaoConcluida] = useState(false);
 
   useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
 
@@ -1353,12 +1367,15 @@ function App() {
   } else if (view === 'confirmar-responsavel') {
     conteudo = <ConfirmarResponsavel onBack={() => setView('home')} onConfirmed={() => setView('conta')} />;
   } else if (view === 'conta') {
-    conteudo = <MinhaConta onNavigate={navigate} />;
+    conteudo = <MinhaConta onNavigate={navigate} onAccountDeleted={() => {
+      setView('login');
+      setExclusaoConcluida(true);
+    }} />;
   } else {
     conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
   }
 
-  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}</>;
+  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}{exclusaoConcluida && <ExclusaoContaConcluida onClose={() => setExclusaoConcluida(false)} />}</>;
 }
 
 export default App;
