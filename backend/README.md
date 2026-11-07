@@ -35,6 +35,11 @@ Settings > API > JWT Keys). Sem `.env`, cai de volta para SQLite local
 (`instance/clubinho.db`) — útil só para testar a API sem depender de rede,
 mas login não funciona sem o `SUPABASE_JWKS_URL` configurado.
 
+Para a exclusão automática da conta, configure também `SUPABASE_URL` e
+`SUPABASE_SECRET_KEY`. A chave secreta é obtida nas configurações de API do
+projeto, deve existir somente no back-end e nunca pode ser exposta no
+front-end ou enviada ao GitHub.
+
 ## Como rodar
 
 ### Windows (PowerShell)

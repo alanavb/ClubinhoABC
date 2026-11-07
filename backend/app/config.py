@@ -17,6 +17,11 @@ class Config:
     # Usados para validar o token JWT emitido pelo Supabase Auth nas rotas protegidas.
     SUPABASE_JWKS_URL = os.environ.get('SUPABASE_JWKS_URL')
 
+    # Exclusão automática da conta no Supabase Auth. A chave secreta é usada
+    # somente pelo back-end e nunca deve ser enviada ao navegador ou ao Git.
+    SUPABASE_URL = os.environ.get('SUPABASE_URL')
+    SUPABASE_SECRET_KEY = os.environ.get('SUPABASE_SECRET_KEY')
+
     # Proteção contra força bruta e excesso de requisições (app/limite_tentativas.py).
     LIMITE_REQUISICOES_POR_MINUTO = 120
     LIMITE_FALHAS_AUTENTICACAO = 5

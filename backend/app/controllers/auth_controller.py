@@ -6,6 +6,7 @@ import unicodedata
 from app import db
 from app.controllers.auditoria_controller import registrar_log
 from app.models import Crianca, Etapa, LogAuditoria, Responsavel, Resultado
+from app.supabase_admin import excluir_usuario as excluir_usuario_supabase
 
 
 class DadosInvalidosError(Exception):
@@ -189,3 +190,32 @@ def excluir_crianca(responsavel, crianca_id, confirmacao):
     LogAuditoria.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
     db.session.delete(crianca)
     db.session.commit()
+
+
+def excluir_conta(responsavel, confirmacao):
+    """Remove a conta autenticada, as crianças e os dados de aprendizagem."""
+    if ' '.join((confirmacao or '').split()) != 'EXCLUIR MINHA CONTA':
+        raise DadosInvalidosError(
+            'Digite "EXCLUIR MINHA CONTA" para confirmar a exclusão.'
+        )
+
+    crianca_ids = [crianca.id for crianca in responsavel.criancas]
+    try:
+        if crianca_ids:
+            Resultado.query.filter(Resultado.crianca_id.in_(crianca_ids)).delete(
+                synchronize_session=False
+            )
+            LogAuditoria.query.filter(LogAuditoria.crianca_id.in_(crianca_ids)).delete(
+                synchronize_session=False
+            )
+            for crianca in list(responsavel.criancas):
+                db.session.delete(crianca)
+
+        db.session.delete(responsavel)
+        # Verifica as restrições do banco antes de remover a identidade no Auth.
+        db.session.flush()
+        excluir_usuario_supabase(responsavel.supabase_user_id)
+        db.session.commit()
+    except Exception:
+        db.session.rollback()
+        raise

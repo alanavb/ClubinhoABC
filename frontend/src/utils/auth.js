@@ -201,6 +201,31 @@ export async function excluirCrianca({ criancaId, confirmacao }) {
   avisarOuvintes();
 }
 
+export async function excluirConta(confirmacao) {
+  const resposta = await fetch(`${API_BASE_URL}/auth/conta`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessaoSupabase?.access_token}`,
+    },
+    body: JSON.stringify({ confirmacao }),
+  });
+  const dados = await resposta.json().catch(() => ({}));
+  if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível excluir a conta.');
+
+  // O usuário já foi removido no servidor. Limpamos também todo o estado local
+  // para que nenhuma informação da antiga sessão permaneça no navegador.
+  await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
+  sessaoSupabase = null;
+  perfil = null;
+  try {
+    localStorage.removeItem(CHAVE_CRIANCA_SELECIONADA);
+  } catch {
+    // O encerramento da conta não depende da disponibilidade do localStorage.
+  }
+  avisarOuvintes();
+}
+
 export function obterPerfil() {
   return perfil;
 }
