@@ -4,6 +4,7 @@ from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller
 from app.controllers.auditoria_controller import registrar_log
 from app.controllers.auth_controller import DadosInvalidosError
+from app.supabase_admin import SupabaseAdminError
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -150,5 +151,26 @@ def excluir_crianca(crianca_id):
         return jsonify({'erro': str(erro)}), 400
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
+
+    return '', 204
+
+
+@auth_bp.route('/auth/conta', methods=['DELETE'])
+@requer_autenticacao
+def excluir_conta():
+    """Exclui definitivamente a conta autenticada e seus dados vinculados."""
+    responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
+    if not responsavel:
+        return jsonify({'erro': 'Cadastro não encontrado para este usuário.'}), 404
+
+    dados = request.get_json(silent=True) or {}
+    try:
+        auth_controller.excluir_conta(responsavel, dados.get('confirmacao'))
+    except DadosInvalidosError as erro:
+        return jsonify({'erro': str(erro)}), 400
+    except SupabaseAdminError:
+        return jsonify({
+            'erro': 'Não foi possível excluir a conta agora. Tente novamente em instantes.'
+        }), 503
 
     return '', 204

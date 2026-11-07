@@ -16,7 +16,7 @@ function TermosDeUso({ onClose }) {
       <section className="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="terms-title">
         <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar termos de uso">×</button>
         <h1 id="terms-title">Termos e Condições de Uso - Clubinho ABC</h1>
-        <p><strong>Versão 2.0 - última revisão: 25 de setembro de 2026</strong></p>
+        <p><strong>Versão 2.1 - última revisão: 6 de novembro de 2026</strong></p>
         <p>Bem-vindo(a) ao Clubinho ABC. Estes Termos regulam o acesso e o uso da plataforma educacional Clubinho ABC.</p>
         <p>O Clubinho ABC é um projeto acadêmico de apoio à alfabetização, voltado principalmente a crianças de 6 a 7 anos e destinado ao uso com acompanhamento de seus pais ou responsáveis legais. Leia também a <strong>Política de Privacidade</strong>, que explica como os dados pessoais são tratados.</p>
 
@@ -64,8 +64,8 @@ function TermosDeUso({ onClose }) {
         <p>Dúvidas, relatos de falhas e solicitações de suporte podem ser enviados ao e-mail informado na seção 11. Nenhuma disposição destes Termos exclui direitos garantidos por lei nem afasta responsabilidades que não possam ser legalmente limitadas.</p>
 
         <h2>9. Encerramento da conta</h2>
-        <p>O responsável pode solicitar o encerramento da conta pelo canal de contato indicado nestes Termos. Como a versão atual ainda não possui exclusão automática pela interface, a solicitação será tratada pela equipe, com confirmação da identidade e da legitimidade do solicitante.</p>
-        <p>O encerramento poderá tornar indisponíveis o perfil, o histórico e o progresso da criança. A eliminação, anonimização ou conservação temporária dos dados seguirá os critérios descritos na Política de Privacidade e as obrigações legais aplicáveis.</p>
+        <p>O responsável pode encerrar a conta pela área protegida da plataforma, após confirmação expressa. A exclusão remove a conta de autenticação e os dados vinculados no Clubinho ABC. O canal de contato indicado nestes Termos permanece disponível para suporte e para solicitações de quem não consiga acessar a conta.</p>
+        <p>O encerramento remove os perfis, resultados e progresso vinculados à conta. A eliminação, anonimização ou eventual conservação permitida por lei seguirá os critérios descritos na Política de Privacidade e as obrigações legais aplicáveis.</p>
 
         <h2>10. Alterações e vigência</h2>
         <p>Estes Termos vigoram a partir da data indicada no início do documento e poderão ser atualizados para refletir mudanças na plataforma, nos prestadores utilizados ou na legislação.</p>

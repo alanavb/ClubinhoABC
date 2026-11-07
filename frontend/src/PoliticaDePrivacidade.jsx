@@ -16,7 +16,7 @@ function PoliticaDePrivacidade({ onClose }) {
       <section className="terms-dialog" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
         <button className="terms-close" type="button" onClick={onClose} aria-label="Fechar política de privacidade">×</button>
         <h1 id="privacy-title">Política de Privacidade - Clubinho ABC</h1>
-        <p><strong>Versão 2.0 - última revisão: 25 de setembro de 2026</strong></p>
+        <p><strong>Versão 2.1 - última revisão: 6 de novembro de 2026</strong></p>
         <p>O Clubinho ABC é um projeto acadêmico de apoio à alfabetização voltado principalmente a crianças de 6 a 7 anos, para uso acompanhado por seus pais ou responsáveis legais.</p>
         <p>Esta Política descreve o tratamento efetivamente realizado na versão atual da plataforma, incluindo cadastro, autenticação, recuperação de senha, perfil da criança, atividades, progresso e registros de segurança.</p>
 
@@ -76,7 +76,7 @@ function PoliticaDePrivacidade({ onClose }) {
           <li><strong>Solicitações enviadas por e-mail:</strong> são mantidas durante o atendimento e pelo período necessário para demonstrar a resposta e resguardar direitos.</li>
           <li><strong>Cópias de segurança:</strong> podem permanecer até sua substituição pelas rotinas técnicas do prestador, com acesso restrito.</li>
         </ul>
-        <p>O responsável pode excluir definitivamente, pela área da conta, o perfil de uma criança e seus resultados e progresso vinculados, após confirmação expressa. Para encerrar a conta inteira, solicitar eliminação ou anonimização de outros dados, deve usar o canal da seção 1. Após a confirmação da legitimidade do pedido, a equipe realizará o procedimento nos ambientes de autenticação e banco de dados, ressalvada a conservação permitida ou exigida por lei.</p>
+        <p>O responsável pode excluir definitivamente, pela área protegida da conta e após confirmação expressa, tanto o perfil de uma criança quanto a conta inteira. Na exclusão da conta inteira, são removidos o acesso no serviço de autenticação e os perfis, resultados e progressos vinculados no Clubinho ABC. O canal da seção 1 permanece disponível para suporte, para quem não consiga acessar a conta e para os demais direitos previstos nesta Política, ressalvada a conservação permitida ou exigida por lei.</p>
 
         <h2>9. Direitos do responsável e da criança</h2>
         <p>O responsável pode exercer, em nome próprio ou da criança e conforme a LGPD:</p>
