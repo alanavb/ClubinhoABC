@@ -103,7 +103,6 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
         acao='cadastro_responsavel',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'responsavel={responsavel.email} crianca={crianca.nome}',
     )
 
     return responsavel
@@ -129,7 +128,6 @@ def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianc
         acao='cadastro_crianca',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'crianca={crianca.nome}',
     )
 
     return crianca
@@ -164,7 +162,6 @@ def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nasciment
         acao='edicao_crianca',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'crianca={crianca.nome}',
     )
 
     return crianca

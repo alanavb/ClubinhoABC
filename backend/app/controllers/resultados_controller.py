@@ -54,8 +54,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
         acao='atividade_realizada' if correta else 'atividade_tentativa',
         responsavel_id=responsavel_id,
         crianca_id=crianca_id,
-        detalhes=f'atividade={atividade.chave} resposta_enviada={resposta_enviada}'
-                    f'resposta_esperada={resposta_esperada} correta={correta}',
+        detalhes=f'atividade={atividade.chave} correta={correta}',
     )
 
     return resultado
