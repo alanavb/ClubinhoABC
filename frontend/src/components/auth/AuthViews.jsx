@@ -3,6 +3,11 @@ import TermosDeUso from '../../TermosDeUso';
 import PoliticaDePrivacidade from '../../PoliticaDePrivacidade';
 import { atualizarSenha, cadastrar, entrar, enviarRecuperacaoSenha, reenviarConfirmacao } from '../../utils/auth';
 
+const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
+const hojeLocal = () => new Date().toLocaleDateString('sv-SE');
+const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
+const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
+
 function senhaAtendeRequisitos(senha) {
   return senha.length >= 8
     && /[a-z]/.test(senha)
