@@ -17,6 +17,22 @@ def _buscar_crianca(crianca_id, responsavel_id=None):
     return crianca
 
 
+def _atividades_acertadas(crianca_id):
+    """IDs das atividades em que a criança tem ao menos um acerto, numa única consulta.
+
+    Antes era feita uma consulta por atividade (problema de "N+1 consultas"); como o
+    banco fica em outro servidor, cada consulta a mais somava o tempo de ida e volta.
+    """
+    linhas = (
+        Resultado.query
+        .filter_by(crianca_id=crianca_id, correta=True)
+        .with_entities(Resultado.atividade_id)
+        .distinct()
+        .all()
+    )
+    return {atividade_id for (atividade_id,) in linhas}
+
+
 def pode_acessar_atividade(crianca_id, atividade_id):
     # RN1: a criança só pode acessar atividades da etapa em que se encontra
     crianca = _buscar_crianca(crianca_id)
@@ -56,15 +72,10 @@ def resumo_progresso(crianca_id, responsavel_id=None):
     atividades_concluidas = 0
     concluidas_ids = set()
     bonus_concluido = False
+    acertadas = _atividades_acertadas(crianca.id)
 
     for atividade in Atividade.query.order_by(Atividade.ordem).all():
-        foi_concluida = (
-            Resultado.query
-            .filter_by(crianca_id=crianca.id, atividade_id=atividade.id, correta=True)
-            .first()
-            is not None
-        )
-        if foi_concluida:
+        if atividade.id in acertadas:
             atividades_concluidas += 1
             concluidas_ids.add(atividade.id)
             estrelas += 1 if atividade.obrigatoria else 2
@@ -122,20 +133,15 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     if not atividades:
         raise ValueError('Etapa não encontrada ou sem atividades')
 
+    acertadas = _atividades_acertadas(crianca.id)
     detalhes = []
     for atividade in atividades:
-        realizada = (
-            Resultado.query
-            .filter_by(crianca_id=crianca.id, atividade_id=atividade.id, correta=True)
-            .first()
-            is not None
-        )
         detalhes.append({
             'activity_id': atividade.id,
             'chave': getattr(atividade, 'chave', None),
             'nome': atividade.nome,
             'obrigatoria': atividade.obrigatoria,
-            'realizada': realizada,
+            'realizada': atividade.id in acertadas,
         })
 
     obrigatorias = [item for item in detalhes if item['obrigatoria']]
