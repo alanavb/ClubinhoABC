@@ -1,6 +1,6 @@
 import unittest
 from types import SimpleNamespace
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from app.controllers import etapas_controller
 from app.controllers.etapas_controller import AcessoNegadoError
@@ -58,15 +58,9 @@ class EtapasControllerTest(unittest.TestCase):
             SimpleNamespace(id=3, nome='Prova bônus', obrigatoria=False),
         ]
         self.atividade_model.query.filter_by.return_value.order_by.return_value.all.return_value = atividades
-        atividades_com_acerto = {1, 3}
-
-        def buscar_resultado(**filtros):
-            consulta = MagicMock()
-            acerto = filtros['atividade_id'] in atividades_com_acerto
-            consulta.first.return_value = SimpleNamespace(id=100) if acerto else None
-            return consulta
-
-        self.resultado_model.query.filter_by.side_effect = buscar_resultado
+        # Uma única consulta devolve os ids das atividades com acerto da criança.
+        consulta = self.resultado_model.query.filter_by.return_value
+        consulta.with_entities.return_value.distinct.return_value.all.return_value = [(1,), (3,)]
 
         status = etapas_controller.status_etapa(1, 5, responsavel_id=10)
 
