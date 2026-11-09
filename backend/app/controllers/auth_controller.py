@@ -4,7 +4,7 @@ import datetime
 import unicodedata
 
 from app import db
-from app.controllers.auditoria_controller import registrar_log
+from app.controllers.auditoria_controller import registrar_exclusao, registrar_log
 from app.models import Crianca, Etapa, LogAuditoria, Responsavel, Resultado
 from app.supabase_admin import excluir_usuario as excluir_usuario_supabase
 
@@ -103,7 +103,6 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
         acao='cadastro_responsavel',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'responsavel={responsavel.email} crianca={crianca.nome}',
     )
 
     return responsavel
@@ -129,7 +128,6 @@ def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianc
         acao='cadastro_crianca',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'crianca={crianca.nome}',
     )
 
     return crianca
@@ -164,7 +162,6 @@ def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nasciment
         acao='edicao_crianca',
         responsavel_id=responsavel.id,
         crianca_id=crianca.id,
-        detalhes=f'crianca={crianca.nome}',
     )
 
     return crianca
@@ -189,6 +186,7 @@ def excluir_crianca(responsavel, crianca_id, confirmacao):
     Resultado.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
     LogAuditoria.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
     db.session.delete(crianca)
+    registrar_exclusao('crianca_excluida')
     db.session.commit()
 
 
@@ -212,7 +210,8 @@ def excluir_conta(responsavel, confirmacao):
                 db.session.delete(crianca)
 
         db.session.delete(responsavel)
-        # Verifica as restrições do banco antes de remover a identidade no Auth.
+        registrar_exclusao('conta_excluida')
+        #Verifica as restrições do banco antes de remover a identidade no Auth.
         db.session.flush()
         excluir_usuario_supabase(responsavel.supabase_user_id)
         db.session.commit()

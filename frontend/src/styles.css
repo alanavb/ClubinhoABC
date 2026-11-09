@@ -305,3 +305,13 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
 .painel-vazio { margin: 22px 0 0; color: var(--texto-suave); font-weight: 800; }.painel-recomendacoes .painel-vazio { margin-bottom: 14px; }.painel-sem-dados { display: grid; justify-items: center; gap: 14px; text-align: center; font-weight: 800; }
 @media (max-width: 1000px) { .painel-numeros { grid-template-columns: repeat(2, 1fr); }.painel-grade { grid-template-columns: 1fr; } }
 @media (max-width: 520px) { .painel-card { padding: 20px 16px; }.painel-numero { padding: 14px; gap: 12px; }.painel-numero-icone { width: 40px; height: 40px; border-radius: 12px; }.painel-numero strong { font-size: 28px; }.painel-numero small { font-size: 12px; }.painel-grafico { height: 170px; }.painel-colunas, .painel-eixo-x { gap: 6px; padding: 0; } }
+
+/*Materiais: botões de baixar e imprimir (links para os PDFs de public/materiais) e nota de referência.*/
+.material-link, .material-download, .material-print { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; text-decoration: none; font-weight: 900; cursor: pointer; }
+.activity-feature .material-link { min-height: 49px; padding: 0 22px; border-radius: 26px; color: #ed1766; background: white; }
+.activity-feature .material-link.outline { margin-left: 8px; border: 2px solid rgb(255 255 255 / 40%); color: white; background: transparent; }
+.activity-card .material-download { position: absolute; left: 24px; bottom: 25px; width: calc(100% - 100px); height: 43px; border-radius: 22px; color: #6d3551; background: #f4b8d3; }
+.activity-card .material-print { position: absolute; right: 24px; bottom: 25px; width: 43px; height: 43px; border: 2px solid #efd3b0; border-radius: 22px; background: white; }
+.material-download:focus-visible, .material-print:focus-visible, .material-link:focus-visible { outline: 3px solid #4296c6; outline-offset: 2px; }
+.materials-source { max-width: 760px; margin: 34px 0 0; color: #845f4d; font-size: 13px; line-height: 1.5; }
+.materials-source a { color: #ed1766; font-weight: 800; }

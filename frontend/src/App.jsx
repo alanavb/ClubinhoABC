@@ -26,6 +26,7 @@ import {
   selecionarCrianca,
 } from './utils/auth';
 import { useResumoProgresso } from './utils/etapas';
+import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from './utils/materiais';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
@@ -1274,17 +1275,16 @@ function Stories({ onNavigate }) {
   </main>;
 }
 
-const activities = [['▤', 'Caligrafia das vogais', 'Ficha para imprimir · 8 páginas', 'orange', 'Para imprimir'], ['✂', 'Recorte e cole: sílabas', 'Atividade manual · 6 páginas', 'blue', 'Recortar'], ['🎨', 'Pinte a letra inicial', 'Colorir · 12 páginas', 'yellow', 'Colorir'], ['▤', 'Cruzadinha de animais', 'Ficha para imprimir · 4 páginas', 'blue', 'Para imprimir'], ['✂', 'Alfabeto móvel', 'Atividade manual · 3 páginas', 'orange', 'Recortar']];
-const EM_BREVE = 'Download disponível em breve';
 function Activities({ onNavigate }) {
-  const [filter, setFilter] = useState('Todas');
+  const [filter, setFilter] =  useState('Todas');
   const nomeCrianca = obterCriancaSelecionada()?.nome || 'criança';
-  const visiveis = activities.filter(([, , , , categoria]) => filter === 'Todas' || categoria === filter);
+  const visiveis = materiais.filter((material) => filter === 'Todas' || material.categoria === filter);
   return <main className="app-shell"><AppHeader active="atividades" onNavigate={onNavigate} />
-    <section className="page-content activities-page"><span className="eyebrow">Para fazer junto</span><h1>Atividades e materiais</h1><p className="page-intro">Selecionadas por professoras alfabetizadoras. Os materiais para baixar e imprimir estão em produção.</p>
-      <section className="activity-feature"><div><span>Kit da semana</span><h2>Caderno BA-BE-BI completo</h2><p>22 páginas com traçado, colagem e leitura em voz alta, no ritmo da trilha de {nomeCrianca}.</p><button disabled title={EM_BREVE}>⇩ &nbsp; Em breve</button></div><b>✏️</b></section>
-      <div className="filter-row">{['Todas', 'Para imprimir', 'Colorir', 'Recortar'].map(item => <button className={filter === item ? 'selected' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
-      <div className="activity-grid">{visiveis.map(([icon, title, desc, tone]) => <article className="activity-card" key={title}><span className={`activity-icon ${tone}`}>{icon}</span><h2>{title}</h2><p>{desc}</p><button disabled title={EM_BREVE}>⇩ &nbsp; Em breve</button></article>)}</div>
+    <section className="page-content activities-page"><span className="eyebrow">Para fazer junto</span><h1>Atividades e materiais</h1><p className="page-intro">Materiais originais para baixar e imprimir em folha A4, organizados por eixo de conteúdo, na ordem em que a criança avança na trilha.</p>
+      <section className="activity-feature"><div><span>Kit da semana</span><h2>{kitDaSemana.titulo}</h2><p>{kitDaSemana.paginas} {kitDaSemana.descricao} {nomeCrianca}.</p><a className="material-link" href={kitDaSemana.arquivo} download>⇩ &nbsp; Baixar</a><a className="material-link outline" href={kitDaSemana.arquivo} target="_blank" rel="noreferrer">🖨 &nbsp; Imprimir</a></div><b>✏️</b></section>
+      <div className="filter-row">{CATEGORIAS.map(item => <button className={filter === item ? 'selected' : ''} aria-pressed={filter === item} onClick={() => setFilter(item)} type="button" key={item}>{item}</button>)}</div>
+      <div className="activity-grid">{visiveis.map((material) => <article className="activity-card" key={material.id}><span className={`activity-icon ${material.tom}`}>{material.icone}</span><h2>{material.titulo}</h2><p>{material.eixo} · {material.paginas} páginas</p><a className="material-download" href={material.arquivo} download>⇩ &nbsp; Baixar</a><a className="material-print" href={material.arquivo} target="_blank" rel="noreferrer" title="Abrir para imprimir" aria-label={`Imprimir ${material.titulo}`}>🖨</a></article>)}</div>
+      <p className="materials-source">Os materiais são originais, produzidos para o Clubinho ABC. A organização por eixos de conteúdo segue como referência o guia <a href={REFERENCIA.url} target="_blank" rel="noreferrer">{REFERENCIA.titulo}</a>, do {REFERENCIA.veiculo}.</p>
     </section>
     <AppFooter />
   </main>;
