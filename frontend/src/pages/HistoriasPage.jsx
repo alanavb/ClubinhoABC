@@ -252,5 +252,3 @@ export default function StoriesPage({ onNavigate }) {
     <AppFooter />
   </main>;
 }
-
-
