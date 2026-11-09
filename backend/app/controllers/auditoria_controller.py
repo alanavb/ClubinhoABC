@@ -1,5 +1,5 @@
 from app import db
-from app.models import LogAuditoria
+from app.models import LogAuditoria, RegistroExclusao
 
 def registrar_log(acao, responsavel_id=None, crianca_id=None, detalhes=None):
     log = LogAuditoria(
@@ -11,6 +11,12 @@ def registrar_log(acao, responsavel_id=None, crianca_id=None, detalhes=None):
     db.session.add(log)
     db.session.commit()
     return log
+
+def registrar_exclusao(acao):
+    """Acrescenta o registro mínimo (ação e horário) à transação em andamento, SEM commit:
+    ele só é gravado se a exclusão também for confirmada, e some junto com ela se houver rollback."""
+    db.session.add(RegistroExclusao(acao=acao))
+
 
 def listar_logs(responsavel_id=None, crianca_id=None):
     query = LogAuditoria.query
