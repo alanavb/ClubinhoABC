@@ -8,7 +8,7 @@ import HomePage from './pages/HomePage';
 import AtividadesPage from './pages/AtividadesPage';
 import ProgressoPage from './pages/ProgressoPage';
 import HistoriasPage from './pages/HistoriasPage';
-import { Brand, CampoSenha, ConfirmeSeuEmail, Login, RedefinirSenha, Signup } from './components/auth/AuthViews';
+import { Brand, CampoSenha, CamposCrianca, ConfirmeSeuEmail, Login, RedefinirSenha, Signup } from './components/auth/AuthViews';
 import {
   adicionarCrianca,
   aoMudarSessao,
