@@ -2,11 +2,13 @@
 
 
 import { API_BASE_URL } from './api';
-import { supabase } from './supabaseClient';
+import { supabase, voltouDaConfirmacaoDeEmail } from './supabaseClient';
 
 let sessaoSupabase = null;
 let perfil = null; // { responsavel_id, nome, email, criancas: [...] } — vem do nosso back-end
 let redefinicaoPendente = false; // true quando a pessoa chegou pelo link de "esqueci a senha"
+let confirmacaoPendente = voltouDaConfirmacaoDeEmail;
+let emailAcabouDeSerConfirmado = false;
 const ouvintes = new Set();
 
 function avisarOuvintes() {
@@ -66,6 +68,16 @@ async function completarCadastroSePendente() {
 
 const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, session) => {
   sessaoSupabase = session;
+  if (session && confirmacaoPendente) {
+    // O link de confirmação já abre uma sessão; encerramos para a pessoa entrar
+    // pelo login com e-mail e senha. O perfil é criado nesse primeiro login.
+    confirmacaoPendente = false;
+    emailAcabouDeSerConfirmado = true;
+    sessaoSupabase = null;
+    setTimeout(() => supabase.auth.signOut({ scope: 'local' }), 0); // o Supabase não permite chamá-lo dentro deste callback
+    avisarOuvintes();
+    return;
+  }
   if (event === 'PASSWORD_RECOVERY') {
     redefinicaoPendente = true;
   }
@@ -88,6 +100,10 @@ const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, se
 
 if (import.meta.hot) {
   import.meta.hot.dispose(() => inscricaoAuth.subscription.unsubscribe());
+}
+
+export function emailFoiConfirmado() {
+  return emailAcabouDeSerConfirmado;
 }
 
 export function precisaRedefinirSenha() {
@@ -243,6 +259,7 @@ function mensagemAmigavel(erro) {
 export async function entrar(email, senha) {
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
   if (error) throw new Error(mensagemAmigavel(error));
+  emailAcabouDeSerConfirmado = false;
 }
 
 // Confirma que quem está usando uma sessão já aberta conhece a senha do

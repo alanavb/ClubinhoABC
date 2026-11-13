@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import TermosDeUso from '../../TermosDeUso';
 import PoliticaDePrivacidade from '../../PoliticaDePrivacidade';
-import { atualizarSenha, cadastrar, entrar, enviarRecuperacaoSenha, reenviarConfirmacao } from '../../utils/auth';
+import { atualizarSenha, cadastrar, emailFoiConfirmado, entrar, enviarRecuperacaoSenha, reenviarConfirmacao } from '../../utils/auth';
 
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE');
@@ -320,6 +320,7 @@ export function Login({ onCreateAccount, onLogin }) {
             <EsqueciSenha emailInicial={email} onVoltar={() => setShowForgot(false)} />
           ) : (
             <form onSubmit={submitLogin}>
+              {emailFoiConfirmado() && <p className="form-message" role="status">E-mail confirmado! Agora entre com seu e-mail e senha.</p>}
               <label htmlFor="email">E-mail do responsável</label>
               <input id="email" type="email" placeholder="voce@email.com" value={email} onChange={(event) => setEmail(event.target.value)} required />
               <label htmlFor="password">Senha</label>
