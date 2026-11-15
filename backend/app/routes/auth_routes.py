@@ -1,6 +1,6 @@
 from flask import Blueprint, g, jsonify, request, url_for
 
-from app.auth_utils import requer_autenticacao
+from app.auth_utils import requer_autenticacao, requer_autenticacao_de_novo_login
 from app.controllers import auth_controller
 from app.controllers.auditoria_controller import registrar_log
 from app.controllers.auth_controller import DadosInvalidosError
@@ -28,6 +28,21 @@ def _responsavel_para_json(responsavel):
         'email': responsavel.email,
         'criancas': [_crianca_para_json(crianca) for crianca in responsavel.criancas],
     }
+
+
+@auth_bp.route('/auth/sessao', methods=['POST'])
+@requer_autenticacao_de_novo_login
+def registrar_sessao():
+    """Chamado logo depois do login: esta passa a ser a única sessão aceita da conta."""
+    auth_controller.registrar_sessao_ativa(g.supabase_user_id, g.supabase_session_id)
+    return '', 204
+
+
+@auth_bp.route('/auth/sessao', methods=['GET'])
+@requer_autenticacao
+def conferir_sessao():
+    """O front chama de tempos em tempos; o decorador responde 401 se a sessão foi substituída."""
+    return '', 204
 
 
 @auth_bp.route('/auth/me', methods=['GET'])

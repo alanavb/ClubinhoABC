@@ -21,6 +21,15 @@ def buscar_por_supabase_id(supabase_user_id):
     return Responsavel.query.filter_by(supabase_user_id=supabase_user_id).first()
 
 
+def registrar_sessao_ativa(supabase_user_id, session_id):
+    """Guarda a sessão do último login; as anteriores deixam de ser aceitas."""
+    responsavel = buscar_por_supabase_id(supabase_user_id)
+    if not responsavel:  # cadastro ainda não concluído: não há onde guardar
+        return
+    responsavel.sessao_ativa_id = session_id
+    db.session.commit()
+
+
 def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=True):
     crianca_nome = ' '.join((crianca_nome or '').split())
     if not crianca_nome:

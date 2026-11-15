@@ -9,6 +9,7 @@ let perfil = null; // { responsavel_id, nome, email, criancas: [...] } — vem d
 let redefinicaoPendente = false; // true quando a pessoa chegou pelo link de "esqueci a senha"
 let confirmacaoPendente = voltouDaConfirmacaoDeEmail;
 let emailAcabouDeSerConfirmado = false;
+let loginAcabouDeAcontecer = false; // o próximo SIGNED_IN veio de entrar(), não de recarregar a página
 const ouvintes = new Set();
 
 function avisarOuvintes() {
@@ -37,6 +38,14 @@ async function sincronizarPerfil() {
     return;
   }
   perfil = await resposta.json();
+}
+
+// Sessão única: depois do login, esta passa a ser a única sessão aceita pelo back-end.
+async function registrarSessaoAtiva() {
+  await fetch(`${API_BASE_URL}/auth/sessao`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${sessaoSupabase.access_token}` },
+  });
 }
 
 // Se a pessoa acabou de confirmar o e-mail e ainda não existe perfil no
@@ -83,6 +92,10 @@ const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, se
   }
   if (session) {
     try {
+      if (loginAcabouDeAcontecer) {
+        loginAcabouDeAcontecer = false;
+        await registrarSessaoAtiva();
+      }
       await sincronizarPerfil();
       await completarCadastroSePendente();
     } catch (erro) {
@@ -104,6 +117,22 @@ if (import.meta.hot) {
 
 export function emailFoiConfirmado() {
   return emailAcabouDeSerConfirmado;
+}
+
+// false só quando o back-end avisa que a conta entrou em outro computador;
+// falha de rede não derruba ninguém.
+export async function sessaoContinuaAtiva() {
+  if (!sessaoSupabase?.access_token) return true;
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/auth/sessao`, {
+      headers: { Authorization: `Bearer ${sessaoSupabase.access_token}` },
+    });
+    if (resposta.status !== 401) return true;
+    const dados = await resposta.json().catch(() => ({}));
+    return dados.codigo !== 'sessao_encerrada';
+  } catch {
+    return true;
+  }
 }
 
 export function precisaRedefinirSenha() {
@@ -257,8 +286,12 @@ function mensagemAmigavel(erro) {
 }
 
 export async function entrar(email, senha) {
+  loginAcabouDeAcontecer = true;
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-  if (error) throw new Error(mensagemAmigavel(error));
+  if (error) {
+    loginAcabouDeAcontecer = false;
+    throw new Error(mensagemAmigavel(error));
+  }
   emailAcabouDeSerConfirmado = false;
 }
 
@@ -268,8 +301,13 @@ export async function confirmarSenhaResponsavel(senha) {
   const email = perfil?.email || sessaoSupabase?.user?.email;
   if (!email) throw new Error('Não foi possível identificar a conta do responsável.');
 
+  // Entrar de novo cria outra sessão no Supabase, então ela também precisa ser registrada.
+  loginAcabouDeAcontecer = true;
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
-  if (error) throw new Error(mensagemAmigavel(error));
+  if (error) {
+    loginAcabouDeAcontecer = false;
+    throw new Error(mensagemAmigavel(error));
+  }
 }
 
 export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNascimento, criancaAvatar }) {
