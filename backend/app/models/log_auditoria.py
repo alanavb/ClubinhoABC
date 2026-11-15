@@ -5,9 +5,7 @@ from app import db
 
 class LogAuditoria(db.Model):
 
-    """Registro rastreável de ações no sistema:
-    acessos, alterações de cadastro, exclusões e atividades realizadas
-    ou tentadas pelas crianças."""
+    """Acessos, cadastros, exclusões e atividades feitas ou tentadas."""
 
     __tablename__ = 'log_auditoria'
 

@@ -1,8 +1,6 @@
-"""Migração: criancas.idade -> criancas.data_nascimento.
+"""Ajustes de colunas em bancos que já existem. Só acrescenta e pode rodar várias vezes.
 
-Só acrescenta: cria a coluna data_nascimento e tira a obrigatoriedade de idade
-(o código novo não grava mais idade). Nenhum dado é apagado e pode rodar várias vezes.
-O seeds.py chama esta função, então quem roda o seeds já fica com o banco atualizado.
+O seeds.py chama migrar(), então rodar o seeds já atualiza o banco.
 """
 
 from sqlalchemy import inspect, text
@@ -17,15 +15,18 @@ def migrar():
         db.session.execute(text('ALTER TABLE criancas ADD COLUMN data_nascimento DATE'))
         print('Coluna data_nascimento criada.')
 
-    # SQLite não tem ALTER COLUMN; um banco SQLite antigo com idade obrigatória
-    # deve ser apagado (instance/clubinho.db) e recriado pelo seeds.py.
+    # SQLite não tem ALTER COLUMN: banco SQLite antigo precisa ser recriado
     if 'idade' in colunas and db.engine.dialect.name == 'postgresql':
         db.session.execute(text('ALTER TABLE criancas ALTER COLUMN idade DROP NOT NULL'))
 
-    # resultados.resposta passou de 50 para 255 caracteres: a Etapa 3 envia frases
-    # inteiras (até 65). O SQLite não impõe o limite do VARCHAR; o PostgreSQL impõe.
+    # frases da Etapa 3 chegam a 65 caracteres; só o Postgres impõe o tamanho
     if db.engine.dialect.name == 'postgresql':
         db.session.execute(text('ALTER TABLE resultados ALTER COLUMN resposta TYPE VARCHAR(255)'))
+
+    colunas_responsavel = {coluna['name'] for coluna in inspect(db.engine).get_columns('responsaveis')}
+    if 'sessao_ativa_id' not in colunas_responsavel:
+        db.session.execute(text('ALTER TABLE responsaveis ADD COLUMN sessao_ativa_id VARCHAR(36)'))
+        print('Coluna sessao_ativa_id criada.')
 
     db.session.commit()
 

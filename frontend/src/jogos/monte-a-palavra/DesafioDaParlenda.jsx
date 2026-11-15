@@ -3,6 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// A parlenda é apresentada antes do desafio, para a criança ouvi-la e conhecê-la.
 const parlendas = [
   {
     titulo: 'Feijão com arroz', icone: '🍚', decoracoes: ['🥄', '🫘', '🍽️'],

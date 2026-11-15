@@ -88,7 +88,7 @@ class ConsultasDoProgressoTest(unittest.TestCase):
         com_muitas = self._consultas_ao_chamar(url)
 
         self.assertEqual(com_poucas, com_muitas)
-        self.assertLessEqual(com_muitas, 8)
+        self.assertLessEqual(com_muitas, 9)  # inclui a consulta da sessão ativa (sessão única)
 
     def test_get_statusDaEtapa_naoDeveAumentarAsConsultasComMaisAtividades(self):
         url = f'/api/criancas/{self.crianca.id}/etapas/{self.etapa1.id}/status'

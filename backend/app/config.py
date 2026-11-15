@@ -14,15 +14,14 @@ class Config:
         'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
     ).split(',')
 
-    # Usados para validar o token JWT emitido pelo Supabase Auth nas rotas protegidas.
+    # chave pública para validar o JWT do Supabase
     SUPABASE_JWKS_URL = os.environ.get('SUPABASE_JWKS_URL')
 
-    # Exclusão automática da conta no Supabase Auth. A chave secreta é usada
-    # somente pelo back-end e nunca deve ser enviada ao navegador ou ao Git.
+    # só para excluir a conta no Supabase Auth; nunca vai para o front nem para o Git
     SUPABASE_URL = os.environ.get('SUPABASE_URL')
     SUPABASE_SECRET_KEY = os.environ.get('SUPABASE_SECRET_KEY')
 
-    # Proteção contra força bruta e excesso de requisições (app/limite_tentativas.py).
+    # ver app/limite_tentativas.py
     LIMITE_REQUISICOES_POR_MINUTO = 120
     LIMITE_FALHAS_AUTENTICACAO = 5
     JANELA_FALHAS_SEGUNDOS = 15 * 60

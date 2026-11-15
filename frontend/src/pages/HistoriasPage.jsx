@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AppFooter, AppHeader } from '../components/layout/AppLayout';
+import { criarFala } from '../utils/voz';
 
 const stories = [{
   id: 'baleia-bela',
@@ -119,8 +120,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     window.speechSynthesis.cancel();
 
     const inicio = palavras[indiceInicial].inicio;
-    const fala = new SpeechSynthesisUtterance(historia.texto.slice(inicio));
-    fala.lang = 'pt-BR';
+    const fala = criarFala(historia.texto.slice(inicio));
     fala.rate = 0.84;
     fala.onboundary = (evento) => {
       if (evento.name !== 'word') return;
@@ -187,8 +187,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     setPausada(true);
     setRepetindoPalavra(true);
     setMensagem(`Ouvindo novamente: ${palavras[indice].texto}.`);
-    const fala = new SpeechSynthesisUtterance(palavras[indice].texto);
-    fala.lang = 'pt-BR';
+    const fala = criarFala(palavras[indice].texto);
     fala.rate = 0.78;
     fala.onend = () => {
       setRepetindoPalavra(false);

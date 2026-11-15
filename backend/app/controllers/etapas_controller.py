@@ -4,8 +4,7 @@ from app.models import Atividade, Crianca, Etapa, Resultado
 
 
 class AcessoNegadoError(Exception):
-    """RN1: a criança tentou acessar uma atividade fora da sua etapa atual,
-    ou o responsável logado não é o responsável por essa criança."""
+    """Atividade fora da etapa atual (RN1) ou criança de outra família."""
 
 
 def _buscar_crianca(crianca_id, responsavel_id=None):
@@ -18,11 +17,7 @@ def _buscar_crianca(crianca_id, responsavel_id=None):
 
 
 def _atividades_acertadas(crianca_id):
-    """IDs das atividades em que a criança tem ao menos um acerto, numa única consulta.
-
-    Antes era feita uma consulta por atividade (problema de "N+1 consultas"); como o
-    banco fica em outro servidor, cada consulta a mais somava o tempo de ida e volta.
-    """
+    """Uma consulta só, em vez de uma por atividade: o banco fica em outro servidor."""
     linhas = (
         Resultado.query
         .filter_by(crianca_id=crianca_id, correta=True)
@@ -34,18 +29,18 @@ def _atividades_acertadas(crianca_id):
 
 
 def pode_acessar_atividade(crianca_id, atividade_id):
-    # RN1: a criança só pode acessar atividades da etapa em que se encontra
+    # RN1: a criança acessa a etapa atual e as já concluídas (revisão), nunca as futuras
     crianca = _buscar_crianca(crianca_id)
 
     atividade = Atividade.query.get(atividade_id)
     if not atividade:
         raise ValueError('Atividade não encontrada')
 
-    return atividade.etapa_id == crianca.etapa_atual_id
+    return atividade.etapa.ordem <= crianca.etapa_atual.ordem
 
 
 def listar_atividades_acessiveis(crianca_id, responsavel_id=None):
-    #RN1: lista só as atividades da etapa atual da criança
+    # RN1: lista só as atividades da etapa atual da criança
     crianca = _buscar_crianca(crianca_id, responsavel_id)
 
     atividades = (
@@ -81,8 +76,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             estrelas += 1 if atividade.obrigatoria else 2
             bonus_concluido = bonus_concluido or not atividade.obrigatoria
 
-    # Mapa da aventura: etapas antes da atual estão concluídas, depois estão bloqueadas,
-    # e a atual mostra quanto das atividades obrigatórias a criança já acertou.
+    # antes da atual: concluída; depois: bloqueada; a atual mostra o % das obrigatórias
     ordem_atual = crianca.etapa_atual.ordem
     etapas = []
     for etapa in Etapa.query.order_by(Etapa.ordem).all():
@@ -100,7 +94,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             'situacao': situacao, 'percentual': percentual,
         })
 
-    # A última etapa não tem "próxima" para onde avançar: com 100% ela já está concluída.
+    # a última etapa não tem para onde avançar: 100% já conta como concluída
     if etapas and etapas[-1]['situacao'] == 'atual' and etapas[-1]['percentual'] == 100:
         etapas[-1]['situacao'] = 'concluida'
 
@@ -127,7 +121,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
     }
 
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):
-    crianca = _buscar_crianca(crianca_id, responsavel_id) #A etapa só concluí quando todas as atividades obrigatórias tiverem ao menos um resultado correto.
+    crianca = _buscar_crianca(crianca_id, responsavel_id)  # RN3: conclui com acerto em todas as obrigatórias
 
     atividades = Atividade.query.filter_by(etapa_id=etapa_id).order_by(Atividade.ordem).all()
     if not atividades:

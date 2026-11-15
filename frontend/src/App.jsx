@@ -29,6 +29,7 @@ import {
   reenviarConfirmacao,
   sair,
   selecionarCrianca,
+  sessaoContinuaAtiva,
 } from './utils/auth';
 import { useResumoProgresso } from './utils/etapas';
 import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from './utils/materiais';
@@ -572,13 +573,26 @@ function App() {
 
   useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
 
-  // Cobre dois casos: sessão já existia (F5) e clique no link do e-mail
-  // (o Supabase autentica sozinho e cai aqui com a conta já confirmada).
+  // F5 com sessão aberta vai direto para o início
   useEffect(() => {
     if (estaAutenticado() && perfilCompleto() && VIEWS_PRE_LOGIN.includes(view)) {
       setView('home');
     }
   }, [authTick, view]);
+
+  // sessão única: confere a cada 30 s se a conta entrou em outro computador
+  const logado = estaAutenticado() && perfilCompleto();
+  useEffect(() => {
+    if (!logado) return undefined;
+    const intervalo = setInterval(async () => {
+      if (await sessaoContinuaAtiva()) return;
+      await sair();
+      window.dispatchEvent(new CustomEvent('clubinho:aviso', {
+        detail: { mensagem: 'Sua conta foi acessada em outro computador. Entre novamente para continuar.' },
+      }));
+    }, 30000);
+    return () => clearInterval(intervalo);
+  }, [logado]);
 
   const navigate = (page) => {
     const destino = page === 'início' || page === 'inicio' ? 'home' : page;

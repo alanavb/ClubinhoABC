@@ -3,8 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-//As frases de cada história estão escritas na ordem CERTA.
-//O número de cada frase (1, 2, 3) é a posição dela nessa ordem.
+// frases já na ordem certa; o número de cada uma é a posição
 const rodadas = [
   { titulo: 'A florzinha', frases: ['Duda plantou uma semente.', 'Duda regou a terra.', 'Nasceu uma flor.'] },
   { titulo: 'A manhã do João', frases: ['O dia amanheceu.', 'João escovou os dentes.', 'João foi para a escola.'] },
@@ -17,7 +16,7 @@ const ordemCerta = (rodada) => rodada.frases.map((_, indice) => indice + 1).join
 export default function ColoqueEmOrdem({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [opcoes, setOpcoes] = useState(() => frasesEmbaralhadas(rodadas[0]));
-  const [escolhidas, setEscolhidas] = useState([]); // números das frases, na ordem em que a criança tocou
+  const [escolhidas, setEscolhidas] = useState([]); // na ordem em que a criança tocou
   const [retorno, setRetorno] = useState('');
   const rodada = rodadas[indice];
   const ultima = indice === rodadas.length - 1;
@@ -31,7 +30,7 @@ function escolher({ numero, frase }) {
       setRetorno('');
       return;
     }
-    //Todas as frases foram escolhidas: confere a ordem.
+    // todas escolhidas: confere a ordem
     const resposta = proximas.join('-');
     if (resposta === ordemCerta(rodada)) {
       setEscolhidas(proximas);

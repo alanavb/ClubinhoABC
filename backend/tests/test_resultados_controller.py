@@ -22,8 +22,8 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.avanco_mock = self._substituir('avancar_etapa_se_concluida')
 
         # Cenário base: criança de um responsável, na etapa 5, com atividade da etapa 5.
-        self.crianca = SimpleNamespace(id=1, responsavel_id=10, etapa_atual_id=5)
-        self.atividade = SimpleNamespace(id=2, etapa_id=5, chave='ouvir')
+        self.crianca = SimpleNamespace(id=1, responsavel_id=10, etapa_atual_id=5, etapa_atual=SimpleNamespace(ordem=5))
+        self.atividade = SimpleNamespace(id=2, etapa_id=5, chave='ouvir', etapa=SimpleNamespace(ordem=5))
         self.crianca_model.query.get.return_value = self.crianca
         self.atividade_model.query.get.return_value = self.atividade
 
@@ -64,14 +64,26 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.atividade_model.query.get.assert_not_called()
         self._assert_nada_foi_gravado()
 
-    # TESTE 3 - violação: atividade de outra etapa (RN1)
-    def test_deve_negar_acesso_quando_atividade_nao_pertence_a_etapa_atual(self):
+    # TESTE 3 - violação: atividade de etapa futura (RN1)
+    def test_deve_negar_acesso_quando_atividade_e_de_etapa_futura(self):
         self.atividade.etapa_id = 9
+        self.atividade.etapa = SimpleNamespace(ordem=9)
 
-        with self.assertRaisesRegex(AcessoNegadoError, 'etapa atual da criança'):
+        with self.assertRaisesRegex(AcessoNegadoError, 'ainda não foi liberada'):
             resultados_controller.registrar_resultado(1, 2, 'A', 'A', responsavel_id=10)
 
         self._assert_nada_foi_gravado()
+
+    # TESTE 3b - revisão: etapa já concluída grava o resultado, mas não mexe na trilha (RN1)
+    def test_deve_registrar_revisao_de_etapa_concluida_sem_avancar_etapa(self):
+        self.atividade.etapa_id = 3
+        self.atividade.etapa = SimpleNamespace(ordem=3)
+
+        resultados_controller.registrar_resultado(1, 2, 'A', 'A', responsavel_id=10)
+
+        self.resultado_model.assert_called_once_with(crianca_id=1, atividade_id=2, resposta='A', correta=True)
+        self.db_mock.session.commit.assert_called_once()
+        self.avanco_mock.assert_not_called()
 
     # TESTE 4 - parametrizado (subTest) e casos-limite: iguais, diferentes, maiúscula, vazias
     def test_deve_marcar_correta_conforme_comparacao_das_respostas(self):

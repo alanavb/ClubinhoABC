@@ -5,7 +5,7 @@ import JogoDaMemoria from './caca-as-letras/JogoDaMemoria';
 import Prova from './caca-as-letras/Prova';
 import { useEtapa } from './useEtapa';
 
-// requisito: chave da fase anterior que precisa estar concluída (null = sempre liberada)
+// requisito: fase que precisa estar feita antes (null = sempre liberada)
 const fases = [
   { chave: 'ouvir', icone: '🎧', titulo: 'Qual é a letra?', rotulo: 'FASE 1', requisito: null, obrigatoria: true, Jogo: OuvirEEscolher },
   { chave: 'palavra', icone: '⚽', titulo: 'Com qual letra começa?', rotulo: 'FASE 2', requisito: 'ouvir', obrigatoria: true, Jogo: ComQualLetraComeca },
@@ -28,7 +28,8 @@ export default function CacaAsLetras({ jogavel }) {
       const liberada = jogavel && (bonusLiberado || (obrigatoria && (!requisito || concluidas.includes(requisito))));
       const feita = concluidas.includes(chave);
       let acao;
-      if (feita) acao = <small>⭐ Feito!</small>;
+      // fase feita continua jogável para treinar (revisão)
+      if (feita) acao = <><small>⭐ Feito!</small>{jogavel && atividadeId(chave) && <button type="button" className="jogar-de-novo" onClick={() => setFaseAberta(chave)}>↻ Jogar de novo</button>}</>;
       else if (!liberada) acao = <small className="activity-locked">🔒</small>;
       else if (!atividadeId(chave)) acao = <small className="activity-locked">Carregando...</small>;
       else acao = <button type="button" onClick={() => setFaseAberta(chave)}>▶ &nbsp; Jogar</button>;

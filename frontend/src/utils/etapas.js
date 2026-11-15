@@ -1,7 +1,6 @@
-// RN1 — Atividade pertence a uma etapa (controle de acesso)
-// RN3 — Atividade obrigatória (conclusão da etapa)
-// Consulta o back-end (Flask), que é quem sabe em qual etapa a criança está
-// e quais atividades obrigatórias já foram realizadas.
+// RN1: atividade pertence a uma etapa (controle de acesso)
+// RN3: atividade obrigatória (conclusão da etapa)
+// a etapa atual e as obrigatórias feitas vêm sempre do back-end
 
 import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL } from './api';
@@ -20,7 +19,7 @@ export async function buscarResumoProgresso(criancaId = obterCriancaId()) {
   return resposta.json(); // { child_id, estrelas, atividades_concluidas, tentativas, etapas }
 }
 
-// Progresso real da criança, recarregado a cada resultado correto ou mudança de etapa.
+// recarrega no evento 'progresso-atualizado'
 export function useResumoProgresso(criancaId) {
   const [resumo, setResumo] = useState(null);
   const [erro, setErro] = useState(false);
@@ -34,7 +33,7 @@ export function useResumoProgresso(criancaId) {
   }, [criancaId]);
 
   useEffect(() => {
-    setResumo(null); // ao trocar de criança, não mostra o progresso da anterior
+    setResumo(null); // não mostra o progresso da criança anterior
     recarregar();
     window.addEventListener('progresso-atualizado', recarregar);
     return () => window.removeEventListener('progresso-atualizado', recarregar);

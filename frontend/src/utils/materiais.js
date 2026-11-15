@@ -1,9 +1,6 @@
-// Área de Materiais: PDFs originais, produzidos para este projeto e guardados em public/materiais/.
-// Para acrescentar um material: coloque o PDF em public/materiais/ e inclua uma linha em "materiais".
-//
-// A lista segue a progressão da trilha (letras, sílabas, palavras, frases e textos curtos) e cada
-// material pertence a um "eixo" de conteúdo. Os eixos e essa progressão tomam como referência o guia
-// citado abaixo. Os PDFs NÃO são cópia nem adaptação das fichas desse site.
+// PDFs feitos para o projeto, em public/materiais/. Material novo: PDF na pasta + linha em "materiais".
+// A ordem segue a trilha (letras, sílabas, palavras, frases, textos). O guia abaixo foi só referência
+// para os eixos; os PDFs não são cópia nem adaptação das fichas dele.
 
 export const REFERENCIA = {
     titulo: 'Atividades de alfabetização para imprimir em PDF',
@@ -11,7 +8,7 @@ export const REFERENCIA = {
     url: 'https://viacarreira.com/atividades-de-alfabetizacao-para-imprimir-em-pdf/'
 };
 
-// "categoria" é o tipo de atividade (filtros da página); "eixo" é o conteúdo trabalhado.
+// categoria = filtro da página; eixo = conteúdo trabalhado
 export const CATEGORIAS = ['Todas', 'Para Imprimir', 'Colorir','Recortar'];
 
 export const kitDaSemana = {

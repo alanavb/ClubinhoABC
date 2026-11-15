@@ -39,7 +39,8 @@ export default function OucaEEscolha({ jogavel }) {
     {erro && <p className="form-message" role="alert">{erro} <button className="text-link" type="button" onClick={carregar}>Tentar de novo</button></p>}
     <div className="sentence-world-activities">{fases.map(({ chave, numero, icone, titulo, obrigatoria }, indice) => {
       let acao;
-      if (concluidas.includes(chave)) acao = <b className="phase-done">⭐ Feito!</b>;
+      // fase feita continua jogável para treinar (revisão)
+      if (concluidas.includes(chave)) acao = <><b className="phase-done">⭐ Feito!</b>{jogavel && atividadeId(chave) && <button type="button" className="jogar-de-novo" onClick={() => setFaseAberta(chave)}>↻ Jogar de novo</button>}</>;
       else if (!faseDisponivel(indice)) acao = <small className="phase-locked">🔒</small>;
       else if (!atividadeId(chave)) acao = <small className="phase-locked">Carregando...</small>;
       else acao = <button type="button" onClick={() => setFaseAberta(chave)}>▶ &nbsp; Jogar</button>;

@@ -6,7 +6,7 @@ import LeiaEDescubra from './LeiaEDescubra';
 import { obterCriancaId } from '../utils/auth';
 import { useResumoProgresso } from '../utils/etapas';
 
-// Cada etapa cadastrada no banco (pela chave) tem a sua tela de jogos.
+// chave da etapa no banco -> tela de jogos
 const telasDasEtapas = {
   'caca-as-letras': { Tela: CacaAsLetras, icone: '🔤', legenda: 'A · B · C' },
   'monte-a-palavra': { Tela: MonteAPalavra, icone: '🧩', legenda: 'BA + LA' },
@@ -20,11 +20,9 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
 
   const etapas = (resumo?.etapas ?? []).filter((etapa) => telasDasEtapas[etapa.chave]);
   const atual = etapas.find((etapa) => etapa.situacao === 'atual');
-  // Quando a última etapa é concluída, não existe uma próxima como "atual".
-  // Mantemos a última visível para a criança acessar seu desafio bônus.
+  // trilha completa não tem etapa "atual": mostra a última, por causa do bônus
   const visualizada = etapas.find((etapa) => etapa.chave === selecionada) ?? atual ?? etapas[etapas.length - 1];
-  // Fixa a etapa aberta na tela. Ao concluir as obrigatórias, a trilha avança no
-  // back-end, mas a criança continua na etapa que jogou para ver o bônus liberado.
+  // a trilha avança no back-end, mas a tela fica na etapa jogada para mostrar o bônus
   useEffect(() => {
     if (!selecionada && visualizada) setSelecionada(visualizada.chave);
   }, [selecionada, visualizada]);
@@ -71,12 +69,12 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
           </button>;
         })}
       </section>
-      {/* key: ao trocar de etapa, a tela recomeça do zero */}
+      {/* key: trocar de etapa recomeça a tela */}
       {Tela && <Tela key={visualizada.chave} jogavel={visualizada.situacao !== 'bloqueada'} />}
       <p className="games-journey-note">
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>
         {visualizada?.situacao === 'concluida'
-          ? 'Etapa concluída! Jogue o desafio bônus ou toque na próxima etapa da trilha.'
+          ? 'Etapa concluída! Jogue qualquer fase de novo para treinar ou toque na próxima etapa da trilha.'
           : visualizada?.percentual === 100
             ? 'Ótimo! Estamos liberando a próxima etapa.'
           : 'Complete as atividades obrigatórias para abrir a próxima etapa!'}
