@@ -3,6 +3,7 @@ import FormeAPalavra from './monte-a-palavra/FormeAPalavra';
 import SilabaQueFalta from './monte-a-palavra/SilabaQueFalta';
 import PalavraEFigura from './monte-a-palavra/PalavraEFigura';
 import ContarSilabas from './monte-a-palavra/ContarSilabas';
+import DesafioDaParlenda from './monte-a-palavra/DesafioDaParlenda';
 import { useEtapa } from './useEtapa';
 
 const fases = [
@@ -10,6 +11,7 @@ const fases = [
   { chave: 'silaba-que-falta', numero: 2, icone: '🔍', titulo: 'Qual sílaba falta?', obrigatoria: true, Jogo: SilabaQueFalta },
   { chave: 'palavra-e-figura', numero: 3, icone: '📖', titulo: 'Leia e encontre', obrigatoria: true, Jogo: PalavraEFigura },
   { chave: 'bonus-monte', numero: 'BÔNUS', icone: '💎', titulo: 'Conte as sílabas', obrigatoria: false, Jogo: ContarSilabas },
+  { chave: 'bonus-parlenda', numero: 'BÔNUS', icone: '🎵', titulo: 'Desafio da Parlenda', obrigatoria: false, Jogo: DesafioDaParlenda },
 ];
 
 const obrigatorias = fases.filter((fase) => fase.obrigatoria);

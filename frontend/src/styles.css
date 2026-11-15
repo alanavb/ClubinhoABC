@@ -221,6 +221,8 @@ button, input { font: inherit; } button { cursor: pointer; }
 .syllable-slots { margin: 6px auto 18px; max-width: 420px; }
 .syllable-slots b { min-width: 46px; font-size: 30px; }
 .written-word b { font-size: 42px; letter-spacing: 4px; }
+.parlenda-session { max-width: 690px; }.parlenda-texto { margin: 23px auto 17px; padding: 18px 25px; border: 2px dashed #efb95a; border-radius: 26px; color: #6e4934; background: #fff8dd; font: 800 24px/1.55 'Baloo 2', sans-serif; white-space: pre-line; }.parlenda-start { margin-top: 20px; }.parlenda-verso { gap: 8px; margin-top: 22px; padding: 15px 20px; }.parlenda-verso i { font-size: 37px; font-style: normal; }.parlenda-verso b { font-size: 25px; letter-spacing: 0; line-height: 1.35; }.parlenda-options button { width: auto; min-width: 112px; padding: 0 18px; font-size: 24px; }
+@media (max-width: 620px) { .parlenda-texto { padding: 15px; font-size: 20px; }.parlenda-verso b { font-size: 21px; }.parlenda-options button { min-width: 88px; padding: 0 12px; font-size: 19px; } }
 /* Histórias e materiais: cards clicáveis e botões ainda indisponíveis. */
 button.story-card { width: 100%; border: 3px solid transparent; color: #4b2c1f; font: inherit; cursor: pointer; }
 button.story-card:hover, button.story-card:focus-visible { border-color: #f28b45; outline: 0; }
