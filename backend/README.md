@@ -130,3 +130,29 @@ curl http://localhost:5000/api/criancas/1/etapas/1/status -H "Authorization: Bea
 Depois do `seeds.py`, ele imprime os IDs de cada etapa/atividade para usar
 nesses exemplos. O `crianca_id` só existe depois que alguém se cadastra pelo
 front (cadastro real, com confirmação por e-mail via Supabase).
+
+## Teste de carga
+
+`teste_carga.py` simula vários responsáveis abrindo a aba Progresso ao mesmo
+tempo (`/auth/me`, `/progresso` e `/dashboard`) e mede o tempo de resposta de
+cada nível de usuários. Usa só a biblioteca padrão do Python.
+
+```powershell
+.venv\Scripts\python.exe teste_carga.py
+```
+
+No modo padrão, a API sobe no próprio computador com um banco SQLite
+temporário, então mede o código do projeto sem a rede no meio. O resultado
+diz até quantos usuários simultâneos 95% das respostas ficam em até 3 segundos
+(RNF08).
+
+Para medir a versão publicada, use o token de uma conta de teste e o id de uma
+criança dela:
+
+```powershell
+.venv\Scripts\python.exe teste_carga.py --url https://clubinhoabc.onrender.com/api --token TOKEN --crianca ID --usuarios 1,5,10
+```
+
+Na versão publicada vale o limite de 120 requisições por minuto por IP: como
+todos os usuários simulados saem do mesmo computador, as requisições acima
+disso voltam com 429.
