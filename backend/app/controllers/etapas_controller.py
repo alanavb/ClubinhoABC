@@ -29,14 +29,14 @@ def _atividades_acertadas(crianca_id):
 
 
 def pode_acessar_atividade(crianca_id, atividade_id):
-    # RN1: a criança só pode acessar atividades da etapa em que se encontra
+    # RN1: a criança acessa a etapa atual e as já concluídas (revisão), nunca as futuras
     crianca = _buscar_crianca(crianca_id)
 
     atividade = Atividade.query.get(atividade_id)
     if not atividade:
         raise ValueError('Atividade não encontrada')
 
-    return atividade.etapa_id == crianca.etapa_atual_id
+    return atividade.etapa.ordem <= crianca.etapa_atual.ordem
 
 
 def listar_atividades_acessiveis(crianca_id, responsavel_id=None):

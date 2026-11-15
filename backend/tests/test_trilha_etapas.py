@@ -113,14 +113,18 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(403, resposta.status_code)
         self.assertEqual(0, Resultado.query.count(), 'nada pode ser gravado quando o acesso é negado')
 
-    #teste 2 - ao avançar, as atividades obrigatórias da etapa anterior deixam de ser acessíveis
-    def test_deve_bloquear_atividade_obrigatoria_de_etapa_ja_concluida(self):
+    #teste 2 - etapa concluída fica aberta para revisão, sem fazer a criança voltar de etapa
+    def test_deve_permitir_revisar_atividade_de_etapa_ja_concluida(self):
         self._concluir_obrigatorias('caca-as-letras')
         self.assertEqual('monte-a-palavra', self._etapa_atual())
 
-        resposta = self._acertar('ouvir')
+        acerto = self._acertar('ouvir')
+        erro = self._responder('ouvir', 'B', 'A')
 
-        self.assertEqual(403, resposta.status_code)
+        self.assertEqual(201, acerto.status_code)
+        self.assertEqual(201, erro.status_code)
+        self.assertEqual('monte-a-palavra', self._etapa_atual())
+        self.assertEqual(2, Resultado.query.filter_by(atividade_id=self.atividades['ouvir'], correta=True).count())
 
     #RN2: tentativas corretas e incorretas
 

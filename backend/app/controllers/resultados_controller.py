@@ -3,7 +3,7 @@
 from app import db
 from app.controllers.auditoria_controller import registrar_log
 from app.controllers.etapas_controller import AcessoNegadoError, avancar_etapa_se_concluida
-from app.models import Atividade, Crianca, Etapa, Resultado
+from app.models import Atividade, Crianca, Resultado
 
 
 def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada, responsavel_id=None):
@@ -17,15 +17,9 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     if not atividade:
         raise ValueError('Atividade não encontrada')
 
-    if atividade.etapa_id != crianca.etapa_atual_id:  # RN1: atividade fora da etapa atual é recusada
-        if getattr(atividade, 'obrigatoria', True):
-            raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
-        etapa_atividade = Etapa.query.get(atividade.etapa_id)
-        bonus_de_etapa_concluida = (
-            etapa_atividade.ordem < crianca.etapa_atual.ordem
-        )
-        if not bonus_de_etapa_concluida:
-            raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
+    # RN1: etapa futura continua bloqueada; etapas concluídas ficam abertas para revisão
+    if atividade.etapa.ordem > crianca.etapa_atual.ordem:
+        raise AcessoNegadoError('Esta atividade ainda não foi liberada para a criança')
 
     correta = resposta_enviada == resposta_esperada  # RN2: o sistema verifica a resposta
 
@@ -38,8 +32,8 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     db.session.add(resultado)
     db.session.flush()
 
-    # só obrigatória libera etapa; bônus feito depois não mexe na trilha
-    if correta and getattr(atividade, 'obrigatoria', True):
+    # só obrigatória da etapa atual libera a próxima; revisão e bônus não mexem na trilha
+    if correta and getattr(atividade, 'obrigatoria', True) and atividade.etapa_id == crianca.etapa_atual_id:
         avancar_etapa_se_concluida(
             crianca_id,
             atividade.etapa_id,

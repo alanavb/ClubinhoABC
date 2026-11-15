@@ -74,7 +74,7 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
       <p className="games-journey-note">
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>
         {visualizada?.situacao === 'concluida'
-          ? 'Etapa concluída! Jogue o desafio bônus ou toque na próxima etapa da trilha.'
+          ? 'Etapa concluída! Jogue qualquer fase de novo para treinar ou toque na próxima etapa da trilha.'
           : visualizada?.percentual === 100
             ? 'Ótimo! Estamos liberando a próxima etapa.'
           : 'Complete as atividades obrigatórias para abrir a próxima etapa!'}
