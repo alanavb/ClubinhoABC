@@ -36,10 +36,23 @@ function prepararTextoParaFala(texto) {
   return minusculo.replace(vogais[0], vogaisAcentuadas[vogais[0]]);
 }
 
-export function falar(texto) {
+export function falar(texto, velocidade = 1, aoTerminar = null) {
   if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(criarFala(prepararTextoParaFala(texto)));
+  const sintetizador = window.speechSynthesis;
+  // Cancelar sem haver fala em curso pode causar uma pausa desnecessária em
+  // alguns navegadores. Só interrompemos quando realmente há algo para parar.
+  if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();
+  sintetizador.resume();
+  // Mantém a voz brasileira preferida da main e os controles de ritmo/finalização
+  // usados pelos jogos de sílabas e parlendas.
+  const fala = criarFala(prepararTextoParaFala(texto));
+  fala.rate = velocidade;
+  if (aoTerminar) {
+    fala.onend = aoTerminar;
+    fala.onerror = aoTerminar;
+  }
+  sintetizador.speak(fala);
+  sintetizador.resume();
 }
 
 // falar() duas vezes seguidas cortaria a primeira fala

@@ -3,6 +3,7 @@ import FraseECena from './ouca-e-escolha/FraseECena';
 import CompleteAFrase from './ouca-e-escolha/CompleteAFrase';
 import FrasesSonoras from './ouca-e-escolha/FrasesSonoras';
 import DesafioBonus from './ouca-e-escolha/DesafioBonus';
+import DesafioDaParlenda from './monte-a-palavra/DesafioDaParlenda';
 import { useEtapa } from './useEtapa';
 
 const fases = [
@@ -10,6 +11,7 @@ const fases = [
   { chave: 'complete-frase', numero: 2, icone: '🎈', titulo: 'Balões de Palavras', obrigatoria: true, Jogo: CompleteAFrase },
   { chave: 'frases-sonoras', numero: 3, icone: '🚂', titulo: 'Frases Sonoras', obrigatoria: true, Jogo: FrasesSonoras },
   { chave: 'bonus-ouca', numero: 'BÔNUS', icone: '💎', titulo: 'Desafio Bônus', obrigatoria: false, Jogo: DesafioBonus },
+  { chave: 'bonus-parlenda', numero: 'BÔNUS', icone: '🎵', titulo: 'Desafio da Parlenda', obrigatoria: false, Jogo: DesafioDaParlenda },
 ];
 
 export default function OucaEEscolha({ jogavel }) {
