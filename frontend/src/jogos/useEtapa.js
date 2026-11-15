@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buscarAtividadesDaEtapa, buscarResumoProgresso, buscarStatusEtapa, concluirEtapa } from '../utils/etapas';
 
-// Carrega do banco as atividades de uma etapa e quais a criança já acertou (RN3).
-// Os IDs vêm da API pela chave da atividade, então não ficam fixos no front.
+// RN3: atividades da etapa e quais a criança já acertou; ids vêm da API pela chave
 export function useEtapa(chaveEtapa) {
   const [etapaId, setEtapaId] = useState(null);
   const [atividades, setAtividades] = useState(null);
@@ -18,9 +17,7 @@ export function useEtapa(chaveEtapa) {
         setAtividades(dados.atividades);
         setConcluidas(status.atividades.filter((atividade) => atividade.realizada).map((atividade) => atividade.chave));
 
-        // Recupera etapas concluídas antes desta correção: elas já têm todos
-        // os acertos salvos, mas podem ter ficado como "atual" se a requisição
-        // de avanço aconteceu antes do último resultado chegar ao servidor.
+        // destrava etapa que ficou em 100% sem avançar (avanço pedido antes do último acerto chegar)
         if (status.concluida) {
           const resumo = await buscarResumoProgresso();
           const etapa = resumo.etapas.find((item) => item.etapa_id === dados.etapa_id);
@@ -43,9 +40,8 @@ export function useEtapa(chaveEtapa) {
     const concluidasAgora = concluidas.includes(chave) ? concluidas : [...concluidas, chave];
     setConcluidas(concluidasAgora);
 
-    // A última resposta pode ainda estar viajando até a API quando o jogo chama
-    // esta função. Só pedimos o avanço quando o próprio servidor já confirma
-    // todas as obrigatórias; isso evita deixar a etapa em 100% sem liberar a próxima.
+    // a última resposta pode ainda não ter chegado: só pede o avanço depois que o
+    // servidor confirma todas as obrigatórias
     const obrigatorias = (atividades ?? []).filter((atividade) => atividade.obrigatoria);
     const terminouObrigatorias = obrigatorias.length > 0
       && obrigatorias.every((atividade) => concluidasAgora.includes(atividade.chave));
@@ -57,8 +53,7 @@ export function useEtapa(chaveEtapa) {
         const resumo = await buscarResumoProgresso();
         const etapa = resumo.etapas.find((item) => item.etapa_id === etapaId);
 
-        // O back-end mais recente já pode ter avançado automaticamente ao
-        // gravar a resposta final. Nesse caso, apenas atualizamos a tela.
+        // o back-end já pode ter avançado ao gravar a resposta: só atualiza a tela
         if (etapa?.situacao === 'concluida') {
           window.dispatchEvent(new Event('progresso-atualizado'));
           return;
@@ -72,7 +67,7 @@ export function useEtapa(chaveEtapa) {
           return;
         }
 
-        // Dá tempo para a requisição que registrou a última resposta terminar.
+        // espera a requisição da última resposta terminar
         await new Promise((resolve) => window.setTimeout(resolve, 350));
       }
       throw new Error('A resposta final não foi confirmada a tempo.');

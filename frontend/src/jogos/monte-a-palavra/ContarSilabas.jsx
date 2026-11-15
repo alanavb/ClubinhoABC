@@ -3,7 +3,7 @@ import { falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-// Consciência silábica: a criança ouve a palavra e conta quantos pedacinhos ela tem.
+// consciência silábica: ouvir a palavra e contar as sílabas
 const rodadas = [
   { palavra: 'PATO', separada: 'PA - TO', silabas: '2', icone: '🦆' },
   { palavra: 'MACACO', separada: 'MA - CA - CO', silabas: '3', icone: '🐒' },

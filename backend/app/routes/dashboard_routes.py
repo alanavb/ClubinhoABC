@@ -11,7 +11,7 @@ dashboard_bp = Blueprint('dashboard', __name__)
 @dashboard_bp.route('/criancas/<int:crianca_id>/dashboard', methods=['GET'])
 @requer_autenticacao
 def dashboard_da_crianca(crianca_id):
-    """RF06 — indicadores de desempenho da criança para o responsável."""
+    """RF06: indicadores de desempenho da criança."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404

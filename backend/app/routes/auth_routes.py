@@ -33,7 +33,7 @@ def _responsavel_para_json(responsavel):
 @auth_bp.route('/auth/sessao', methods=['POST'])
 @requer_autenticacao_de_novo_login
 def registrar_sessao():
-    """Chamado logo depois do login: esta passa a ser a única sessão aceita da conta."""
+    """Sessão única: o front chama logo depois do login."""
     auth_controller.registrar_sessao_ativa(g.supabase_user_id, g.supabase_session_id)
     return '', 204
 
@@ -41,7 +41,7 @@ def registrar_sessao():
 @auth_bp.route('/auth/sessao', methods=['GET'])
 @requer_autenticacao
 def conferir_sessao():
-    """O front chama de tempos em tempos; o decorador responde 401 se a sessão foi substituída."""
+    """Consultado a cada 30 s pelo front; o 401 de sessão trocada vem do decorador."""
     return '', 204
 
 
@@ -52,8 +52,7 @@ def me():
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
-    # O log exige uma criança; o acesso é da família, então registra a primeira cadastrada.
-    # A conta pode ficar sem crianças depois de uma exclusão: nesse caso não há o que registrar.
+    # o log exige uma criança; conta sem criança (depois de excluir todas) fica sem registro
     if responsavel.criancas:
         registrar_log(
             acao='acesso_responsavel',
@@ -66,8 +65,7 @@ def me():
 @auth_bp.route('/auth/completar-cadastro', methods=['POST'])
 @requer_autenticacao
 def completar_cadastro():
-    """Chamado pelo front assim que o Supabase confirma o e-mail e autentica o usuário
-    pela primeira vez — só então o perfil (responsável + criança) é criado de fato."""
+    """Primeiro login depois de confirmar o e-mail: cria responsável + criança."""
     dados = request.get_json(silent=True) or {}
 
     try:

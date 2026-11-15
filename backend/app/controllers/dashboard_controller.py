@@ -1,8 +1,4 @@
-"""RF06 — Dashboard de desempenho da criança para o responsável.
-
-Junta os resultados registrados (RN2) por etapa, por atividade e por dia, e aponta
-as atividades com mais erros como o que a criança deveria praticar mais.
-"""
+"""RF06: indicadores do dashboard (totais, por etapa, por dia e maiores dificuldades)."""
 
 import datetime
 from zoneinfo import ZoneInfo
@@ -13,7 +9,7 @@ from app.models import Atividade, Etapa, Resultado
 DIAS_DA_EVOLUCAO = 7
 MAXIMO_DE_DIFICULDADES = 3
 
-# Habilidade trabalhada em cada etapa da trilha, usada no texto da recomendação.
+# texto da recomendação de cada etapa
 HABILIDADES = {
     'caca-as-letras': 'reconhecer as letras e o som de cada uma',
     'monte-a-palavra': 'juntar sílabas para formar palavras',
@@ -79,7 +75,7 @@ def resumo_dashboard(crianca_id, responsavel_id=None, hoje=None):
                 })
         por_etapa.append({'etapa_id': etapa.id, 'nome': etapa.nome, **_contagem(resultados_da_etapa)})
 
-    # Maiores dificuldades: atividades com erro, da menor para a maior taxa de acerto.
+    # só entra atividade com erro; pior taxa de acerto primeiro
     com_erros = [atividade for atividade in por_atividade if atividade['erros'] > 0]
     com_erros.sort(key=lambda atividade: (atividade['taxa_acerto'], -atividade['erros']))
     dificuldades = com_erros[:MAXIMO_DE_DIFICULDADES]

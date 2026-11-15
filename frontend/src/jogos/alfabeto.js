@@ -24,10 +24,8 @@ export function criarAlternativas(resposta, quantidade = 4) {
 
 const vogaisAcentuadas = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
 
-// Palavras curtas em maiúsculas (CA, MA, UVA) são lidas como siglas por algumas
-// vozes do navegador, que soletram as letras ("cê, á"). Por isso o texto vai em
-// minúsculas e, quando é uma sílaba (só uma vogal), a vogal recebe acento:
-// "cá" é lido como um som só.
+// algumas vozes leem CA, MA e UVA como sigla ("cê, á"); em minúsculas e com acento
+// na única vogal ("cá"), a sílaba sai como um som só
 function prepararTextoParaFala(texto) {
   if (!/^[A-ZÀ-ÖØ-Þ]{2,3}$/.test(texto)) return texto;
   const minusculo = texto.toLowerCase();
@@ -44,8 +42,7 @@ export function falar(texto) {
   window.speechSynthesis.speak(fala);
 }
 
-// Mantém a pronúncia de cada pedaço: chamar falar() duas vezes cancelaria a
-// primeira fala antes que ela fosse ouvida.
+// falar() duas vezes seguidas cortaria a primeira fala
 export function falarEmSequencia(textos) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();

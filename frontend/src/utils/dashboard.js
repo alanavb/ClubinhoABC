@@ -1,4 +1,4 @@
-// RF06 — Dashboard de desempenho: busca no back-end (Flask) os indicadores da criança.
+// RF06: indicadores do dashboard
 
 import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL } from './api';
@@ -13,7 +13,7 @@ export async function buscarDashboard(criancaId) {
   return resposta.json(); // { totais, por_etapa, evolucao, dificuldades, recomendacoes }
 }
 
-// Recarrega sozinho quando a criança acerta uma atividade (mesmo evento do progresso).
+// recarrega no evento 'progresso-atualizado' (acerto de atividade)
 export function useDashboard(criancaId) {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(false);
@@ -27,7 +27,7 @@ export function useDashboard(criancaId) {
   }, [criancaId]);
 
   useEffect(() => {
-    setDados(null); // ao trocar de criança, não mostra os dados da anterior
+    setDados(null); // não mostra dados da criança anterior
     recarregar();
     window.addEventListener('progresso-atualizado', recarregar);
     return () => window.removeEventListener('progresso-atualizado', recarregar);

@@ -573,15 +573,14 @@ function App() {
 
   useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
 
-  // Cobre dois casos: sessão já existia (F5) e clique no link do e-mail
-  // (o Supabase autentica sozinho e cai aqui com a conta já confirmada).
+  // F5 com sessão aberta vai direto para o início
   useEffect(() => {
     if (estaAutenticado() && perfilCompleto() && VIEWS_PRE_LOGIN.includes(view)) {
       setView('home');
     }
   }, [authTick, view]);
 
-  // Sessão única: a cada 30 s confere se a conta não entrou em outro computador.
+  // sessão única: confere a cada 30 s se a conta entrou em outro computador
   const logado = estaAutenticado() && perfilCompleto();
   useEffect(() => {
     if (!logado) return undefined;

@@ -6,7 +6,7 @@ app = create_app()
 
 
 def garantir_atividades(etapa, atividades):
-    """Cria apenas as atividades que ainda não existem, sem alterar dados já cadastrados."""
+    """Só cria o que falta; atividade existente não é alterada."""
     criadas = []
     for chave, nome, ordem, obrigatoria in atividades:
         atividade = Atividade.query.filter_by(chave=chave).first()
@@ -30,7 +30,7 @@ def garantir_atividades(etapa, atividades):
 
 with app.app_context():
     db.create_all()
-    migrar()  # create_all só cria tabelas novas; colunas novas em tabelas existentes vêm daqui
+    migrar()  # create_all não mexe em tabela que já existe
 
     etapa1 = Etapa.query.filter_by(chave='caca-as-letras').first()
     if not etapa1:
@@ -97,10 +97,7 @@ with app.app_context():
         ('bonus-leia', 'Tesouro da leitura', 4, False),
     ])
 
-    # Responsável e criança não são mais fabricados aqui: a conta agora nasce
-    # no Supabase Auth (cadastro real, com confirmação por e-mail) e o perfil
-    # local (responsável + criança) é criado automaticamente pelo back-end
-    # assim que a pessoa confirma o e-mail e entra pela primeira vez.
+    # responsável e criança nascem no cadastro real (Supabase), não aqui
     print('\nPara testar de ponta a ponta, crie uma conta pela tela de cadastro do front-end.')
 
     print('\nIDs para testar:')

@@ -3,7 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-// Cada parlenda é apresentada antes do desafio: a criança não precisa já conhecê-la.
+// a parlenda é mostrada antes do desafio: a criança não precisa conhecê-la
 const rodadas = [
   {
     texto: 'Hoje é domingo,\npede cachimbo.\nCachimbo é de barro,\nbate no jarro.',

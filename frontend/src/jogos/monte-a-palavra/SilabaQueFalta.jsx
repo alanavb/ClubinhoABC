@@ -21,8 +21,7 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
     const correta = silaba === rodada.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      // A sílaba que completa a palavra vem primeiro; depois a criança ouve a
-      // palavra toda e percebe como os pedacinhos formam o som final.
+      // primeiro a sílaba, depois a palavra inteira
       falarEmSequencia([silaba, rodada.palavra]);
       if (ultima) registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
       window.setTimeout(avancar, 800);

@@ -3,11 +3,7 @@ import datetime
 from app import db
 
 class RegistroExclusao(db.Model):
-    """Registro mínimo de que uma exclusão aconteceu: apenas a ação e o horário.
-
-    Não guarda ids, nome, nem e-mail e não tem chave estrangeira, de propósito:
-    a exclusão apaga os dados da criança e da família, e este registro não pode
-    reter nada que permita identificá-las."""
+    """Só ação e horário. Sem ids nem FK: depois da exclusão nada pode identificar a família (LGPD)."""
 
     __tablename__ = 'registro_exclusao'
 

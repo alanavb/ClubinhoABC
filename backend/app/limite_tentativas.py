@@ -1,15 +1,10 @@
-"""Proteção contra força bruta e excesso de requisições, por endereço IP.
+"""Proteção por IP contra força bruta e excesso de requisições (limites em config.py).
 
-Duas regras, com os limites definidos em config.py:
-- Excesso de requisições: mais de LIMITE_REQUISICOES_POR_MINUTO pedidos do mesmo
-  IP em 1 minuto recebem 429 até o minuto passar.
-- Bloqueio de tentativas: LIMITE_FALHAS_AUTENTICACAO falhas de autenticação
-  (token ausente ou inválido) dentro de JANELA_FALHAS_SEGUNDOS bloqueiam o IP por
-  TEMPO_BLOQUEIO_SEGUNDOS. Uma autenticação bem-sucedida zera as falhas.
+- mais de LIMITE_REQUISICOES_POR_MINUTO pedidos em 1 minuto: 429 até o minuto passar;
+- LIMITE_FALHAS_AUTENTICACAO falhas de login em JANELA_FALHAS_SEGUNDOS: IP bloqueado por
+  TEMPO_BLOQUEIO_SEGUNDOS. Um login válido zera as falhas.
 
-A resposta é sempre a mesma mensagem genérica, sem dizer qual regra foi atingida.
-Os contadores ficam na memória do servidor e são zerados quando ele reinicia, o
-que é suficiente para um único servidor Flask, como o projeto roda hoje.
+Os contadores ficam em memória e zeram quando o servidor reinicia.
 """
 
 import time
@@ -43,8 +38,8 @@ def _resposta_de_espera(segundos):
 
 
 def verificar_limites():
-    """Executada antes de cada requisição da API (before_request)."""
-    # OPTIONS é a consulta automática de CORS feita pelo navegador, não um pedido da pessoa.
+    """before_request de toda a API."""
+    # OPTIONS é o preflight de CORS do navegador, não conta
     if request.method == 'OPTIONS' or not request.path.startswith('/api/'):
         return None
 

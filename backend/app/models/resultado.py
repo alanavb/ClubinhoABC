@@ -4,7 +4,7 @@ from app import db
 
 
 class Resultado(db.Model):
-    """RN2 — registro do resultado de uma tentativa da criança numa atividade."""
+    """RN2: uma tentativa da criança numa atividade."""
 
     __tablename__ = 'resultados'
 

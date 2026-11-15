@@ -15,12 +15,11 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    # Limite de requisições e bloqueio de tentativas por IP, antes de qualquer rota.
+    # limite por IP roda antes de qualquer rota
     app.extensions['contadores_por_ip'] = ContadoresPorIp()
     app.before_request(verificar_limites)
 
-    # 404 e 405 são erros do cliente, não falhas do servidor: têm resposta própria
-    # e não podem cair no tratador de erro inesperado (500) logo abaixo.
+    # sem estes dois, 404 e 405 cairiam no handler genérico e virariam 500
     @app.errorhandler(404)
     def tratar_endereco_nao_encontrado(erro):
         return jsonify({'erro': 'Endereço não encontrado.'}), 404

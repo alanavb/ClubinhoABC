@@ -12,10 +12,10 @@ class Crianca(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     responsavel_id = db.Column(db.Integer, db.ForeignKey('responsaveis.id'), nullable=False)
     nome = db.Column(db.String(120), nullable=False)
-    # A idade não é guardada: muda com o tempo. É calculada a partir da data de nascimento.
-    data_nascimento = db.Column(db.Date, nullable=True)  # nullable só para cadastros antigos, sem a data
+    # idade não é guardada: sai da data de nascimento
+    data_nascimento = db.Column(db.Date, nullable=True)  # nulo só em cadastros antigos
     avatar = db.Column(db.String(10), nullable=True)
-    etapa_atual_id = db.Column(db.Integer, db.ForeignKey('etapas.id'), nullable=False)  # RN1
+    etapa_atual_id = db.Column(db.Integer, db.ForeignKey('etapas.id'), nullable=False)  # RN1: a criança só acessa atividades desta etapa
     criado_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     etapa_atual = db.relationship('Etapa')

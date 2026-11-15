@@ -30,8 +30,7 @@ def excluir_usuario(user_id):
             if resposta.status not in (200, 204):
                 raise SupabaseAdminError('O Supabase recusou a exclusão da conta.')
     except HTTPError as erro:
-        # Se o usuário já não existe no Auth, a limpeza dos dados locais ainda
-        # deve ser concluída para que a operação seja repetível com segurança.
+        # 404: já apagado no Auth; segue para a exclusão poder ser repetida
         if erro.code != 404:
             raise SupabaseAdminError('O Supabase recusou a exclusão da conta.') from erro
     except (URLError, TimeoutError) as erro:

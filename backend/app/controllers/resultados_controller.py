@@ -1,5 +1,4 @@
-"""RN2 — Registro do resultado da atividade.
-"""
+"""RN2: registro de cada tentativa da criança."""
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log
@@ -18,7 +17,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     if not atividade:
         raise ValueError('Atividade não encontrada')
 
-    if atividade.etapa_id != crianca.etapa_atual_id:  # RN1
+    if atividade.etapa_id != crianca.etapa_atual_id:  # RN1: atividade fora da etapa atual é recusada
         if getattr(atividade, 'obrigatoria', True):
             raise AcessoNegadoError('Esta atividade não pertence à etapa atual da criança')
         etapa_atividade = Etapa.query.get(atividade.etapa_id)
@@ -39,8 +38,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     db.session.add(resultado)
     db.session.flush()
 
-    # Apenas atividades obrigatórias podem liberar uma nova etapa. Um bônus
-    # concluído depois da etapa permanece disponível, mas não altera a trilha.
+    # só obrigatória libera etapa; bônus feito depois não mexe na trilha
     if correta and getattr(atividade, 'obrigatoria', True):
         avancar_etapa_se_concluida(
             crianca_id,
@@ -68,7 +66,7 @@ def listar_resultados(crianca_id=None, atividade_id=None, responsavel_id=None):
 
     query = Resultado.query
     if responsavel_id is not None:
-        # Sem filtro de criança, a lista não pode trazer resultados de outras famílias.
+        # sem crianca_id, não pode vazar resultado de outra família
         query = query.join(Crianca).filter(Crianca.responsavel_id == responsavel_id)
     if crianca_id is not None:
         query = query.filter(Resultado.crianca_id == crianca_id)
