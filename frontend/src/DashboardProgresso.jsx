@@ -1,10 +1,8 @@
-// RF06 — Dashboard de desempenho para o responsável.
-// Os gráficos são feitos só com HTML e CSS (larguras, alturas e conic-gradient
-// calculados a partir dos números da API), sem biblioteca de gráficos.
+// RF06: dashboard do responsável. Gráficos só com CSS (larguras, alturas e conic-gradient).
 
 import { useDashboard } from './utils/dashboard';
 
-// Ícones de linha simples, desenhados em SVG (mesmo estilo dos ícones da Minha Conta).
+// mesmo estilo dos ícones da Minha Conta
 const caminhosDosIcones = {
   respostas: 'M5 7h14M5 12h14M5 17h9',
   acertos: 'M5 12.5l4.5 4.5L19 7.5',
@@ -21,7 +19,7 @@ function Icone({ nome }) {
 }
 
 function diaDaSemana(data) {
-  // Meio-dia evita que o fuso do navegador mude o dia.
+  // meio-dia: o fuso do navegador não troca o dia
   return new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
 }
 
@@ -82,7 +80,7 @@ function GraficoPorEtapa({ etapas }) {
 
 function GraficoEvolucao({ dias }) {
   const maior = Math.max(1, ...dias.map((dia) => dia.tentativas));
-  // Linhas de referência do eixo vertical: máximo, metade e zero (sem repetir valores).
+  // eixo: máximo, metade e zero; o Set tira repetidos quando o máximo é baixo
   const marcas = [...new Set([maior, Math.round(maior / 2), 0])];
   return (
     <section className="painel-card painel-evolucao">

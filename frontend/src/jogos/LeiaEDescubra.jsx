@@ -5,7 +5,7 @@ import ColoqueEmOrdem from './leia-e-descubra/ColoqueEmOrdem';
 import TesouroDaLeitura from './leia-e-descubra/TesouroDaLeitura';
 import { useEtapa } from './useEtapa';
 
-//As chaves são as mesmas das atividades cadastradas no banco (seeds.py).
+// chaves iguais às do seeds.py
 const fases = [
   { chave: 'bilhete', numero: 1, icone: '📝', titulo: 'Leia o bilhete', obrigatoria: true, Jogo: LeiaOBilhete },
   { chave: 'quem-sou-eu', numero: 2, icone: '🕵️', titulo: 'Quem sou eu?', obrigatoria: true, Jogo: QuemSouEu },
@@ -27,7 +27,7 @@ export default function LeiaEDescubra({ jogavel }) {
 
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;
 
-  //RN3: as obrigatórias abrem em sequência; o bônus só abre depois de todas elas.
+  // RN3: as obrigatórias abrem em sequência; o bônus só abre depois de todas elas
   function faseDisponivel(indice) {
     const fase = fases[indice];
     if (!jogavel) return false;

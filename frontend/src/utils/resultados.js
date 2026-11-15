@@ -1,7 +1,5 @@
-// RN2 — Registro do resultado da atividade
-// Envia cada tentativa da criança para o back-end (Flask), que verifica se a
-// resposta enviada bate com a esperada e persiste o resultado associado à
-// criança e à atividade.
+// RN2: registro do resultado da atividade
+// envia cada tentativa; quem decide se acertou e grava é o back-end
 
 import { API_BASE_URL } from './api';
 import { obterCriancaId, obterToken } from './auth';

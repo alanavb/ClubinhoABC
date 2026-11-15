@@ -28,7 +28,7 @@ export default function MonteAPalavra({ jogavel }) {
 
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;
 
-  // RN3: as obrigatórias abrem em sequência; o bônus só abre depois de todas elas.
+  // RN3: as obrigatórias abrem em sequência; o bônus só abre depois de todas elas
   function liberada(indice) {
     if (!fases[indice].obrigatoria) return obrigatoriasFeitas === obrigatorias.length;
     return indice === 0 || concluidas.includes(fases[indice - 1].chave);

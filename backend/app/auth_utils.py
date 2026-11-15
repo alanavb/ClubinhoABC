@@ -52,7 +52,7 @@ def _autenticar(funcao, verificar_sessao):
 
         limpar_falhas_de_autenticacao()
 
-        # Token válido, mas de uma sessão antiga: não conta como tentativa de invasão.
+        # sessão antiga não é ataque: não conta como falha de login
         if verificar_sessao and _sessao_foi_substituida(claims):
             return jsonify({'erro': MENSAGEM_SESSAO_ENCERRADA, 'codigo': 'sessao_encerrada'}), 401
 
@@ -70,5 +70,5 @@ def requer_autenticacao(funcao):
 
 
 def requer_autenticacao_de_novo_login(funcao):
-    """Só para a rota que registra um login: aceita o token da sessão que ainda vai ser registrada."""
+    """Só para POST /auth/sessao: o token do login novo ainda não está registrado."""
     return _autenticar(funcao, verificar_sessao=False)

@@ -5,7 +5,7 @@ import JogoDaMemoria from './caca-as-letras/JogoDaMemoria';
 import Prova from './caca-as-letras/Prova';
 import { useEtapa } from './useEtapa';
 
-// requisito: chave da fase anterior que precisa estar concluída (null = sempre liberada)
+// requisito: fase que precisa estar feita antes (null = sempre liberada)
 const fases = [
   { chave: 'ouvir', icone: '🎧', titulo: 'Qual é a letra?', rotulo: 'FASE 1', requisito: null, obrigatoria: true, Jogo: OuvirEEscolher },
   { chave: 'palavra', icone: '⚽', titulo: 'Com qual letra começa?', rotulo: 'FASE 2', requisito: 'ouvir', obrigatoria: true, Jogo: ComQualLetraComeca },

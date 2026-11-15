@@ -13,8 +13,7 @@ def registrar_log(acao, responsavel_id=None, crianca_id=None, detalhes=None):
     return log
 
 def registrar_exclusao(acao):
-    """Acrescenta o registro mínimo (ação e horário) à transação em andamento, SEM commit:
-    ele só é gravado se a exclusão também for confirmada, e some junto com ela se houver rollback."""
+    """Sem commit de propósito: grava junto com a exclusão e some no rollback."""
     db.session.add(RegistroExclusao(acao=acao))
 
 

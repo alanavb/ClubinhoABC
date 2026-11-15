@@ -22,7 +22,7 @@ export default function LeiaOBilhete({ atividadeId, aoConcluir, aoFechar }) {
         const correta = opcao === rodada.resposta;
         setRetorno(correta ? 'correct' : 'incorret');
         if (correta) {
-        //A atividade só é registrada como feita quando a criança acerta a última rodada.
+        // acerto só é gravado na última rodada
         if (ultima) registrarResultadoPorId(atividadeId, opcao, rodada.resposta);
       window.setTimeout(avancar, 800);
         } else {

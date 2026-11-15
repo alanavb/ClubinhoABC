@@ -9,6 +9,6 @@ class Atividade(db.Model):
     chave = db.Column(db.String(50), unique=True, nullable=False)  
     nome = db.Column(db.String(120), nullable=False)
     ordem = db.Column(db.Integer, nullable=False, default=1)
-    obrigatoria = db.Column(db.Boolean, nullable=False, default=True)  # RN3
+    obrigatoria = db.Column(db.Boolean, nullable=False, default=True)  # RN3: só as obrigatórias contam para concluir a etapa
 
     resultados = db.relationship('Resultado', backref='atividade', lazy=True)
