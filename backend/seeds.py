@@ -28,6 +28,29 @@ def garantir_atividades(etapa, atividades):
         print(f'Atividades criadas na etapa "{etapa.nome}": {", ".join(criadas)}.')
 
 
+def mover_atividade(chave, etapa, nome, ordem, obrigatoria=False):
+    """Atualiza uma atividade já existente quando ela muda de etapa."""
+    atividade = Atividade.query.filter_by(chave=chave).first()
+    if not atividade:
+        return
+
+    alterada = (
+        atividade.etapa_id != etapa.id
+        or atividade.nome != nome
+        or atividade.ordem != ordem
+        or atividade.obrigatoria != obrigatoria
+    )
+    if not alterada:
+        return
+
+    atividade.etapa_id = etapa.id
+    atividade.nome = nome
+    atividade.ordem = ordem
+    atividade.obrigatoria = obrigatoria
+    db.session.commit()
+    print(f'Atividade "{nome}" movida para a etapa "{etapa.nome}".')
+
+
 with app.app_context():
     db.create_all()
     migrar()  # create_all só cria tabelas novas; colunas novas em tabelas existentes vêm daqui
@@ -62,7 +85,7 @@ with app.app_context():
         ('silaba-que-falta', 'Qual sílaba falta?', 2, True),
         ('palavra-e-figura', 'Leia e encontre', 3, True),
         ('bonus-monte', 'Conte as sílabas', 4, False),
-        ('bonus-parlenda', 'Desafio da Parlenda', 5, False),
+        ('bonus-rimas', 'Palavras que rimam', 5, False),
     ])
 
     etapa3 = Etapa.query.filter_by(chave='ouca-e-escolha').first()
@@ -74,11 +97,16 @@ with app.app_context():
     else:
         print('Etapa "Ouça e Escolha" já existia, nada foi criado.')
 
+    # O desafio de parlendas pertence à etapa de escuta. Esta atualização também
+    # preserva a atividade já criada em bancos de desenvolvimento existentes.
+    mover_atividade('bonus-parlenda', etapa3, 'Desafio da Parlenda', 5, False)
+
     garantir_atividades(etapa3, [
         ('frase-cena', 'Rádio das Histórias', 1, True),
         ('complete-frase', 'Balões de Palavras', 2, True),
         ('frases-sonoras', 'Frases Sonoras', 3, True),
         ('bonus-ouca', 'Detetive de Histórias', 4, False),
+        ('bonus-parlenda', 'Desafio da Parlenda', 5, False),
     ])
 
     etapa4 = Etapa.query.filter_by(chave='leia-e-descubra').first()

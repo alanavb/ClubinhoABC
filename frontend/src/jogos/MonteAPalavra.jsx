@@ -3,7 +3,7 @@ import FormeAPalavra from './monte-a-palavra/FormeAPalavra';
 import SilabaQueFalta from './monte-a-palavra/SilabaQueFalta';
 import PalavraEFigura from './monte-a-palavra/PalavraEFigura';
 import ContarSilabas from './monte-a-palavra/ContarSilabas';
-import DesafioDaParlenda from './monte-a-palavra/DesafioDaParlenda';
+import RimasDePalavras from './monte-a-palavra/RimasDePalavras';
 import { useEtapa } from './useEtapa';
 
 const fases = [
@@ -11,7 +11,7 @@ const fases = [
   { chave: 'silaba-que-falta', numero: 2, icone: '🔍', titulo: 'Qual sílaba falta?', obrigatoria: true, Jogo: SilabaQueFalta },
   { chave: 'palavra-e-figura', numero: 3, icone: '📖', titulo: 'Leia e encontre', obrigatoria: true, Jogo: PalavraEFigura },
   { chave: 'bonus-monte', numero: 'BÔNUS', icone: '💎', titulo: 'Conte as sílabas', obrigatoria: false, Jogo: ContarSilabas },
-  { chave: 'bonus-parlenda', numero: 'BÔNUS', icone: '🎵', titulo: 'Desafio da Parlenda', obrigatoria: false, Jogo: DesafioDaParlenda },
+  { chave: 'bonus-rimas', numero: 'BÔNUS', icone: '🎶', titulo: 'Palavras que rimam', obrigatoria: false, Jogo: RimasDePalavras },
 ];
 
 const obrigatorias = fases.filter((fase) => fase.obrigatoria);
@@ -23,7 +23,7 @@ export default function MonteAPalavra({ jogavel }) {
   const aberta = fases.find((fase) => fase.chave === faseAberta);
   if (aberta) {
     const { Jogo, chave } = aberta;
-    return <Jogo atividadeId={atividadeId(chave)} aoConcluir={() => { concluir(chave); setFaseAberta(null); }} aoFechar={() => setFaseAberta(null)} />;
+    return <Jogo atividadeId={atividadeId(chave)} aoConcluir={() => { concluir(chave); if (chave !== 'bonus-rimas') setFaseAberta(null); }} aoFechar={() => setFaseAberta(null)} />;
   }
 
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;

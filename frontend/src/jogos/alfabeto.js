@@ -36,11 +36,16 @@ function prepararTextoParaFala(texto) {
   return minusculo.replace(vogais[0], vogaisAcentuadas[vogais[0]]);
 }
 
-export function falar(texto) {
+export function falar(texto, velocidade = 1, aoTerminar = null) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   const fala = new SpeechSynthesisUtterance(prepararTextoParaFala(texto));
   fala.lang = 'pt-BR';
+  fala.rate = velocidade;
+  if (aoTerminar) {
+    fala.onend = aoTerminar;
+    fala.onerror = aoTerminar;
+  }
   window.speechSynthesis.speak(fala);
 }
 
