@@ -38,7 +38,11 @@ function prepararTextoParaFala(texto) {
 
 export function falar(texto, velocidade = 1, aoTerminar = null) {
   if (!('speechSynthesis' in window)) return;
-  window.speechSynthesis.cancel();
+  const sintetizador = window.speechSynthesis;
+  // Cancelar sem haver fala em curso pode causar uma pausa desnecessária em
+  // alguns navegadores. Só interrompemos quando realmente há algo para parar.
+  if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();
+  sintetizador.resume();
   // Mantém a voz brasileira preferida da main e os controles de ritmo/finalização
   // usados pelos jogos de sílabas e parlendas.
   const fala = criarFala(prepararTextoParaFala(texto));
@@ -47,7 +51,8 @@ export function falar(texto, velocidade = 1, aoTerminar = null) {
     fala.onend = aoTerminar;
     fala.onerror = aoTerminar;
   }
-  window.speechSynthesis.speak(fala);
+  sintetizador.speak(fala);
+  sintetizador.resume();
 }
 
 // falar() duas vezes seguidas cortaria a primeira fala
