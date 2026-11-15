@@ -1,3 +1,5 @@
+import { criarFala } from '../utils/voz';
+
 export const palavrasDoAlfabeto = [
   ['A', 'Abelha', '🐝'], ['B', 'Bola', '⚽'], ['C', 'Casa', '🏠'], ['D', 'Dado', '🎲'],
   ['E', 'Elefante', '🐘'], ['F', 'Foca', '🦭'], ['G', 'Gato', '🐱'], ['H', 'Hipopótamo', '🦛'],
@@ -37,9 +39,7 @@ function prepararTextoParaFala(texto) {
 export function falar(texto) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
-  const fala = new SpeechSynthesisUtterance(prepararTextoParaFala(texto));
-  fala.lang = 'pt-BR';
-  window.speechSynthesis.speak(fala);
+  window.speechSynthesis.speak(criarFala(prepararTextoParaFala(texto)));
 }
 
 // falar() duas vezes seguidas cortaria a primeira fala
@@ -47,8 +47,6 @@ export function falarEmSequencia(textos) {
   if (!('speechSynthesis' in window)) return;
   window.speechSynthesis.cancel();
   textos.forEach((texto) => {
-    const fala = new SpeechSynthesisUtterance(prepararTextoParaFala(texto));
-    fala.lang = 'pt-BR';
-    window.speechSynthesis.speak(fala);
+    window.speechSynthesis.speak(criarFala(prepararTextoParaFala(texto)));
   });
 }
