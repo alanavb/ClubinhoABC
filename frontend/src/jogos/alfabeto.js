@@ -43,3 +43,15 @@ export function falar(texto) {
   fala.lang = 'pt-BR';
   window.speechSynthesis.speak(fala);
 }
+
+// Mantém a pronúncia de cada pedaço: chamar falar() duas vezes cancelaria a
+// primeira fala antes que ela fosse ouvida.
+export function falarEmSequencia(textos) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  textos.forEach((texto) => {
+    const fala = new SpeechSynthesisUtterance(prepararTextoParaFala(texto));
+    fala.lang = 'pt-BR';
+    window.speechSynthesis.speak(fala);
+  });
+}

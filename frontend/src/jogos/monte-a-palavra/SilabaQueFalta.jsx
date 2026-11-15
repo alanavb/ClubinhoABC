@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { embaralhar, falar } from '../alfabeto';
+import { embaralhar, falar, falarEmSequencia } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
@@ -18,13 +18,16 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
 
   function responder(silaba) {
     if (retorno === 'correct') return;
-    falar(silaba);
     const correta = silaba === rodada.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
+      // A sílaba que completa a palavra vem primeiro; depois a criança ouve a
+      // palavra toda e percebe como os pedacinhos formam o som final.
+      falarEmSequencia([silaba, rodada.palavra]);
       if (ultima) registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
       window.setTimeout(avancar, 800);
     } else {
+      falar(silaba);
       registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
     }
   }
