@@ -315,3 +315,6 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
 .material-download:focus-visible, .material-print:focus-visible, .material-link:focus-visible { outline: 3px solid #4296c6; outline-offset: 2px; }
 .materials-source { max-width: 760px; margin: 34px 0 0; color: #845f4d; font-size: 13px; line-height: 1.5; }
 .materials-source a { color: #ed1766; font-weight: 800; }
+
+/* Fase já feita: botão discreto para jogar de novo e treinar (revisão). */
+.activity-tile button.jogar-de-novo, .sentence-phase-card button.jogar-de-novo { margin-top: 10px; min-width: 0; padding: 8px 16px; border: 2px solid #f2ddbd; border-radius: 22px; color: #4b2c1f; background: #fff; box-shadow: 0 3px 0 #e5d0ac; font-weight: 900; cursor: pointer; }
