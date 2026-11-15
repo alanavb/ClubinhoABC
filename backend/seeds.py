@@ -62,6 +62,7 @@ with app.app_context():
         ('silaba-que-falta', 'Qual sílaba falta?', 2, True),
         ('palavra-e-figura', 'Leia e encontre', 3, True),
         ('bonus-monte', 'Conte as sílabas', 4, False),
+        ('bonus-parlenda', 'Desafio da Parlenda', 5, False),
     ])
 
     etapa3 = Etapa.query.filter_by(chave='ouca-e-escolha').first()

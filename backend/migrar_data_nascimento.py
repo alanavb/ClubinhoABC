@@ -27,6 +27,11 @@ def migrar():
     if db.engine.dialect.name == 'postgresql':
         db.session.execute(text('ALTER TABLE resultados ALTER COLUMN resposta TYPE VARCHAR(255)'))
 
+    colunas_responsavel = {coluna['name'] for coluna in inspect(db.engine).get_columns('responsaveis')}
+    if 'sessao_ativa_id' not in colunas_responsavel:
+        db.session.execute(text('ALTER TABLE responsaveis ADD COLUMN sessao_ativa_id VARCHAR(36)'))
+        print('Coluna sessao_ativa_id criada.')
+
     db.session.commit()
 
 

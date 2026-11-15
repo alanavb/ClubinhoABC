@@ -13,5 +13,7 @@ class Responsavel(db.Model):
     nome = db.Column(db.String(120), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    # session_id do token do último login: só essa sessão é aceita (uma conta, um computador).
+    sessao_ativa_id = db.Column(db.String(36), nullable=True)
 
     criancas = db.relationship('Crianca', backref='responsavel', lazy=True)

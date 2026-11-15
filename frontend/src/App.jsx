@@ -29,6 +29,7 @@ import {
   reenviarConfirmacao,
   sair,
   selecionarCrianca,
+  sessaoContinuaAtiva,
 } from './utils/auth';
 import { useResumoProgresso } from './utils/etapas';
 import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from './utils/materiais';
@@ -579,6 +580,20 @@ function App() {
       setView('home');
     }
   }, [authTick, view]);
+
+  // Sessão única: a cada 30 s confere se a conta não entrou em outro computador.
+  const logado = estaAutenticado() && perfilCompleto();
+  useEffect(() => {
+    if (!logado) return undefined;
+    const intervalo = setInterval(async () => {
+      if (await sessaoContinuaAtiva()) return;
+      await sair();
+      window.dispatchEvent(new CustomEvent('clubinho:aviso', {
+        detail: { mensagem: 'Sua conta foi acessada em outro computador. Entre novamente para continuar.' },
+      }));
+    }, 30000);
+    return () => clearInterval(intervalo);
+  }, [logado]);
 
   const navigate = (page) => {
     const destino = page === 'início' || page === 'inicio' ? 'home' : page;

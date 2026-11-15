@@ -16,7 +16,7 @@ from app.models import Atividade, Etapa, Crianca, Resultado, Responsavel
 #(chave da etapa, [(chave da atividade, é obrigatória?), ...]) na ordem da trilha
 TRILHA = [
     ('caca-as-letras', [('ouvir', True), ('palavra', True), ('memoria', True), ('bonus', False)]),
-    ('monte-a-palavra', [('formar-palavra', True), ('silaba-que-falta', True), ('palavra-e-figura', True), ('bonus-monte', False)]),
+    ('monte-a-palavra', [('formar-palavra', True), ('silaba-que-falta', True), ('palavra-e-figura', True), ('bonus-monte', False), ('bonus-parlenda', False)]),
     ('ouca-e-escolha', [('frase-cena', True), ('complete-frase', True), ('frases-sonoras', True), ('bonus-ouca', False)]),
     ('leia-e-descubra', [('bilhete', True), ('quem-sou-eu', True), ('ordene-historia', True), ('bonus-leia', False)]),
 ]
@@ -210,6 +210,15 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(201, resposta.status_code)
         self.assertEqual('ouca-e-escolha', self._etapa_atual())
 
+    def test_deve_permitir_o_bonus_da_parlenda_sem_alterar_a_etapa_atual(self):
+        for chave_etapa in ['caca-as-letras', 'monte-a-palavra']:
+            self._concluir_obrigatorias(chave_etapa)
+
+        resposta = self._acertar('bonus-parlenda')
+
+        self.assertEqual(201, resposta.status_code)
+        self.assertEqual('ouca-e-escolha', self._etapa_atual())
+
     #regressão: tamanho da resposta
 
     #teste 10 - a Etapa 3 envia frases inteiras (até 65 caracteres); o PostgreSQL rejeita
@@ -223,4 +232,3 @@ class TrilhaDeEtapasTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-                        

@@ -50,8 +50,10 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
               : 'progress-start';
           const textoProgresso = bloqueada
             ? 'A descobrir'
-            : etapa.percentual === 100
+            : etapa.situacao === 'concluida'
               ? 'Concluída'
+              : etapa.percentual === 100
+                ? 'Liberando...'
               : etapa.percentual > 0
                 ? 'Em andamento'
                 : 'Ainda não iniciada';
@@ -75,6 +77,8 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>
         {visualizada?.situacao === 'concluida'
           ? 'Etapa concluída! Jogue o desafio bônus ou toque na próxima etapa da trilha.'
+          : visualizada?.percentual === 100
+            ? 'Ótimo! Estamos liberando a próxima etapa.'
           : 'Complete as atividades obrigatórias para abrir a próxima etapa!'}
       </p>
     </>;
