@@ -102,16 +102,16 @@ const stories = [{
   tema: 'parlenda',
   texto: 'Lila viu a lua lá no céu. Pegou sua lanterna e fez um papel. Dobrou uma estrela, pintou de azul. E deixou o desenho perto do baú. A lua brilhou, Lila sorriu. Boa noite, lua! E assim dormiu.',
 }, {
-  id: 'gato-sapato',
+  id: 'gato-rato',
   icon: '🐱',
-  title: 'O Gato e o Sapato',
+  title: 'O Gato e o Rato',
   nivel: 'Nível 4',
   nivelClasse: 'rimas',
   objetivo: 'Acompanhar uma história curta em versos, percebendo palavras com sons parecidos.',
   tag: 'HISTÓRIA RIMADA',
   time: '2 min',
   tema: 'parlenda',
-  texto: 'Guto, o gato, achou um sapato. Era amarelo e muito engraçado. Ele pôs uma pata, depois a outra. Deu um pulinho e chamou a lontra. O sapato saiu voando no ar. Guto riu muito e voltou a brincar.',
+  texto: 'Guto, o gato, viu Tito, o rato. Tito usava um pequeno sapato. Os dois foram ao quintal brincar. Depois sentaram para conversar. Quando a lua começou a brilhar, voltaram felizes para descansar.',
 }];
 
 const metodologiaHistorias = {
