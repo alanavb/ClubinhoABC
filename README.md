@@ -64,6 +64,24 @@ frontend/src/
 backend/             API Flask (detalhes em backend/README.md)
 ```
 
+## Materiais para imprimir
+
+Os materiais (RF07) ficam em `public/materiais/`, em PDF, e são baixados pela tela de Atividades. São originais do projeto, organizados por eixo da alfabetização:
+
+| Material | Páginas |
+|---|---|
+| Caligrafia das vogais | 8 |
+| Pinte a letra inicial | 12 |
+| Alfabeto móvel | 3 |
+| Recorte e cole sílabas | 6 |
+| Rimas e sílabas | 5 |
+| Monte a frase | 5 |
+| Leia e responda | 5 |
+| Cruzadinha de animais | 4 |
+| Caderno BA-BE-BI | 22 |
+
+**Ilustrações:** as imagens que ilustram as palavras (abelha, bola, casa etc.) são do conjunto Twemoji (© Twitter, Inc. e colaboradores), licença [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), usadas sem alteração e apenas redimensionadas. Os desenhos de bico, bigode, boneca, buzina e cola foram feitos pela equipe. O crédito aparece no rodapé das páginas que têm imagens. A cruzadinha não usa imagens, para a criança resolver só pelas pistas.
+
 ## Configuração de ambiente
 
 Os arquivos `.env` não vão para o Git. Peça os valores reais do Supabase para a equipe.
