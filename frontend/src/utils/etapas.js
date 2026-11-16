@@ -1,16 +1,16 @@
-// RN1: atividade pertence a uma etapa (controle de acesso)
-// RN3: atividade obrigatória (conclusão da etapa)
-// a etapa atual e as obrigatórias feitas vêm sempre do back-end
+// RN1 e RN3: etapas e atividades vêm do back-end
 
 import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL } from './api';
 import { obterCriancaId, obterToken } from './auth';
 
+// Cabeçalhos de requisições autenticadas
 function cabecalhosAutenticados() {
   const token = obterToken();
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
+// Consulta do resumo de progresso da criança
 export async function buscarResumoProgresso(criancaId = obterCriancaId()) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}/progresso`, {
     headers: cabecalhosAutenticados(),
@@ -19,7 +19,8 @@ export async function buscarResumoProgresso(criancaId = obterCriancaId()) {
   return resposta.json(); // { child_id, estrelas, atividades_concluidas, tentativas, etapas }
 }
 
-// recarrega no evento 'progresso-atualizado'
+// Atualiza o resumo após registrar progresso
+// Atualização reativa do resumo de progresso
 export function useResumoProgresso(criancaId) {
   const [resumo, setResumo] = useState(null);
   const [erro, setErro] = useState(false);
@@ -33,7 +34,7 @@ export function useResumoProgresso(criancaId) {
   }, [criancaId]);
 
   useEffect(() => {
-    setResumo(null); // não mostra o progresso da criança anterior
+    setResumo(null); // Limpa o resumo da criança anterior
     recarregar();
     window.addEventListener('progresso-atualizado', recarregar);
     return () => window.removeEventListener('progresso-atualizado', recarregar);
@@ -42,6 +43,7 @@ export function useResumoProgresso(criancaId) {
   return { resumo, erro, recarregar };
 }
 
+// Consulta do status de uma etapa
 export async function buscarStatusEtapa(etapaId) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/etapas/${etapaId}/status`, {
     headers: cabecalhosAutenticados(),
@@ -50,6 +52,7 @@ export async function buscarStatusEtapa(etapaId) {
   return resposta.json();
 }
 
+// Consulta das atividades de uma etapa
 export async function buscarAtividadesDaEtapa(chaveEtapa) {
   const resposta = await fetch(`${API_BASE_URL}/etapas/${chaveEtapa}/atividades`, {
     headers: cabecalhosAutenticados(),
@@ -58,6 +61,7 @@ export async function buscarAtividadesDaEtapa(chaveEtapa) {
   return resposta.json();
 }
 
+// Solicitação de avanço após concluir uma etapa
 export async function concluirEtapa(etapaId) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${obterCriancaId()}/etapas/${etapaId}/concluir`, {
     method: 'POST',

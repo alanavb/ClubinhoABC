@@ -13,7 +13,7 @@ from unittest.mock import patch
 from app import create_app, db
 from app.models import Atividade, Etapa, Crianca, Resultado, Responsavel
 
-#(chave da etapa, [(chave da atividade, é obrigatória?), ...]) na ordem da trilha
+# Dados da trilha usados nos testes
 TRILHA = [
     ('caca-as-letras', [('ouvir', True), ('palavra', True), ('memoria', True), ('bonus', False)]),
     ('monte-a-palavra', [('formar-palavra', True), ('silaba-que-falta', True), ('palavra-e-figura', True), ('bonus-monte', False), ('bonus-parlenda', False)]),
@@ -34,8 +34,9 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.context.push()
         db.create_all()
 
-        self.etapas = {}   #chave da etapa -> id
-        self.atividades = {} #chave da atividade -> id
+        # Mapeamento entre chaves e ids criados no teste
+        self.etapas = {}
+        self.atividades = {}
         for ordem, (chave_etapa,atividades) in enumerate(TRILHA, start=1):
             etapa = Etapa(chave=chave_etapa, nome=chave_etapa, ordem=ordem)
             db.session.add(etapa)
@@ -68,7 +69,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         db.drop_all()
         self.context.pop()
 
-    #auxiliar: envia a resposta da criança para a atividade usando o token de teste.
+    # Envio de resposta para uma atividade
 
     def _responder(self, chave_atividade, enviada, esperada):
         return self.client.post('/api/resultados', headers=CABECALHO, json={
@@ -83,13 +84,13 @@ class TrilhaDeEtapasTest(unittest.TestCase):
 
     
     def _concluir_obrigatorias(self, chave_etapa):
-        atividades = dict(TRILHA)[chave_etapa]  #[(chave da atividade, obrigatória?), ...]
+        atividades = dict(TRILHA)[chave_etapa]
         for chave_atividade, obrigatoria in atividades:
             if obrigatoria:
                 self.assertEqual(201, self._acertar(chave_atividade).status_code)
 
     def _etapa_atual(self):
-        db.session.expire_all()  #a criança foi alterada por outra sessão (a da requisição)
+        db.session.expire_all()  # Atualiza dados gravados pela requisição
         crianca = db.session.get(Crianca, self.crianca_id)
         return db.session.get(Etapa, crianca.etapa_atual_id).chave
 
@@ -104,16 +105,16 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(200, resposta.status_code)
         return resposta.get_json()
 
-    #RN1: bloqueio fora da etapa atual
+    # RN1: acesso às etapas
 
-    #teste 1 - a Etapa 4 é inacessível para quem ainda está na Etapa 1
+    # Bloqueio de atividade futura
     def test_deve_bloquear_atividade_da_etapa_4_para_crianca_na_etapa_1(self):
         resposta = self._acertar('bilhete')
 
         self.assertEqual(403, resposta.status_code)
         self.assertEqual(0, Resultado.query.count(), 'nada pode ser gravado quando o acesso é negado')
 
-    #teste 2 - etapa concluída fica aberta para revisão, sem fazer a criança voltar de etapa
+    # Revisão de atividade concluída
     def test_deve_permitir_revisar_atividade_de_etapa_ja_concluida(self):
         self._concluir_obrigatorias('caca-as-letras')
         self.assertEqual('monte-a-palavra', self._etapa_atual())
@@ -126,9 +127,9 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual('monte-a-palavra', self._etapa_atual())
         self.assertEqual(2, Resultado.query.filter_by(atividade_id=self.atividades['ouvir'], correta=True).count())
 
-    #RN2: tentativas corretas e incorretas
+    # RN2: registro de tentativas
 
-    #teste 3 - resposta errada é gravada como tentativa, mas não conclui a atividade
+    # Resposta incorreta não conclui a atividade
     def test_deve_registrar_resposta_errada_sem_concluir_a_atividade(self):
         resposta = self._responder('ouvir', 'B', 'A')
 
@@ -137,7 +138,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
         self.assertFalse(realizadas['ouvir'])
 
-    #teste 4 - resposta certa é gravada e a atividade passa a contar como realizada
+    # Resposta correta conclui a atividade
     def test_deve_registrar_resposta_certa_e_concluir_a_atividade(self):
         resposta = self._responder('ouvir', 'A', 'A')
 
@@ -146,7 +147,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
         self.assertTrue(realizadas['ouvir'])
 
-    #teste 5 - na Etapa 4, a ordem da história errada não conclui e a certa conclui
+    # Ordem da história da Etapa 4
     def test_deve_avaliar_a_ordem_da_historia_da_etapa_4(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra', 'ouca-e-escolha']:
             self._concluir_obrigatorias(chave_etapa)
@@ -160,31 +161,31 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('leia-e-descubra')['atividades']}
         self.assertTrue(realizadas['ordene-historia'])
 
-    #RN3: obrigatórias e avanço automático
+    # RN3: avanço da trilha
 
-    #teste 6 - falta uma obrigatória (mesmo com o bônus feito): a criança continua na etapa
+    # Bônus não substitui atividade obrigatória
     def test_nao_deve_avancar_quando_falta_uma_atividade_obrigatoria(self):
         self._acertar('ouvir')
         self._acertar('palavra')
-        self._acertar('bonus')  #o bônus não substitui a obrigatória 'memoria'
+        self._acertar('bonus')
 
         self.assertEqual('caca-as-letras', self._etapa_atual())
         self.assertFalse(self._status('caca-as-letras')['concluida'])
 
-    #teste 7 - todas as obrigatórias feitas: avança sozinha para a etapa seguinte
+    # Avanço após concluir obrigatórias
     def test_deve_avancar_para_a_proxima_etapa_ao_concluir_as_obrigatorias(self):
         self._concluir_obrigatorias('caca-as-letras')
 
         self.assertEqual('monte-a-palavra', self._etapa_atual())
 
-    #teste 8 - trilha inteira: 1 -> 2 -> 3 -> 4, sem exigir nenhum bônus
+    # Conclusão da trilha completa
     def test_deve_percorrer_a_trilha_completa_ate_a_etapa_4(self):
         proximas = ['monte-a-palavra', 'ouca-e-escolha', 'leia-e-descubra']
         for chave_etapa, esperada in zip(['caca-as-letras', 'monte-a-palavra', 'ouca-e-escolha'], proximas):
             self._concluir_obrigatorias(chave_etapa)
             self.assertEqual(esperada, self._etapa_atual())
 
-        #Etapa 4 é a última: não há próxima para onde avançar, mas ela fica concluída.
+        # A última etapa permanece concluída
         self._concluir_obrigatorias('leia-e-descubra')
         self.assertEqual('leia-e-descubra', self._etapa_atual())
         self.assertTrue(self._status('leia-e-descubra')['concluida'])
@@ -195,7 +196,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertTrue(conquistas['trilha-completa'])
         self.assertTrue(conquistas['etapa-leia-e-descubra'])
 
-    #teste 9 - o desafio bônus da última etapa continua disponível depois de concluí-la
+    # Bônus da última etapa permanece disponível
     def test_deve_permitir_o_bonus_da_etapa_4_depois_de_concluir_a_trilha(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra', 'ouca-e-escolha', 'leia-e-descubra']:
             self._concluir_obrigatorias(chave_etapa)
@@ -204,7 +205,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
 
         self.assertEqual(201, resposta.status_code)
 
-    #o bônus da Etapa 2 pode ser feito depois que a criança já passou para a Etapa 3, sem mudar a etapa atual
+    # Bônus da Etapa 2 não altera a etapa atual
     def test_deve_permitir_o_bonus_da_etapa_2_sem_alterar_a_etapa_atual(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra']:
             self._concluir_obrigatorias(chave_etapa)
@@ -223,10 +224,9 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(201, resposta.status_code)
         self.assertEqual('ouca-e-escolha', self._etapa_atual())
 
-    #regressão: tamanho da resposta
+    # Regressão: tamanho da resposta
 
-    #teste 10 - a Etapa 3 envia frases inteiras (até 65 caracteres); o PostgreSQL rejeita
-    #texto maior que o VARCHAR da coluna, e o SQLite (usado nos testes) não. Por isso o tamanho é conferido direto no modelo.
+    # Coluna comporta a maior resposta enviada pelo front-end
     def test_coluna_resposta_comporta_a_maior_resposta_enviada_pelo_front(self):
         maior_resposta = 'Depois da chuva, a menina encontrou uma borboleta azul no jardim.'
 

@@ -2,25 +2,29 @@ import datetime
 
 from app import db
 
+# Faixa etária atendida pelo sistema
 IDADE_MINIMA = 6
 IDADE_MAXIMA = 7
 
 
+# Modelo de perfil da criança
 class Crianca(db.Model):
     __tablename__ = 'criancas'
 
+    # Dados de identificação e vínculo familiar
     id = db.Column(db.Integer, primary_key=True)
     responsavel_id = db.Column(db.Integer, db.ForeignKey('responsaveis.id'), nullable=False)
     nome = db.Column(db.String(120), nullable=False)
-    # idade não é guardada: sai da data de nascimento
-    data_nascimento = db.Column(db.Date, nullable=True)  # nulo só em cadastros antigos
+    data_nascimento = db.Column(db.Date, nullable=True)
     avatar = db.Column(db.String(10), nullable=True)
-    etapa_atual_id = db.Column(db.Integer, db.ForeignKey('etapas.id'), nullable=False)  # RN1: a criança só acessa atividades desta etapa
+    etapa_atual_id = db.Column(db.Integer, db.ForeignKey('etapas.id'), nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+    # Relacionamentos com etapa e resultados
     etapa_atual = db.relationship('Etapa')
     resultados = db.relationship('Resultado', backref='crianca', lazy=True)
 
+    # Cálculo da idade pela data de nascimento
     def idade(self, hoje=None):
         if not self.data_nascimento:
             return None
@@ -28,6 +32,7 @@ class Crianca(db.Model):
         nascimento = self.data_nascimento
         return hoje.year - nascimento.year - ((hoje.month, hoje.day) < (nascimento.month, nascimento.day))
 
+    # Verificação da faixa etária atendida
     def fora_da_faixa_etaria(self, hoje=None):
         idade = self.idade(hoje)
         return idade is not None and not IDADE_MINIMA <= idade <= IDADE_MAXIMA

@@ -1,4 +1,4 @@
-"""RF06: indicadores do dashboard (totais, por etapa, por dia e maiores dificuldades)."""
+# RF06: indicadores de desempenho do painel
 
 import datetime
 from zoneinfo import ZoneInfo
@@ -9,7 +9,7 @@ from app.models import Atividade, Etapa, Resultado
 DIAS_DA_EVOLUCAO = 7
 MAXIMO_DE_DIFICULDADES = 3
 
-# texto da recomendação de cada etapa
+# Recomendações por etapa
 HABILIDADES = {
     'caca-as-letras': 'reconhecer as letras e o som de cada uma',
     'monte-a-palavra': 'juntar sílabas para formar palavras',
@@ -18,6 +18,7 @@ HABILIDADES = {
 }
 
 
+# Contagem de acertos e erros
 def _contagem(resultados):
     acertos = sum(1 for resultado in resultados if resultado.correta)
     erros = len(resultados) - acertos
@@ -25,11 +26,13 @@ def _contagem(resultados):
     return {'tentativas': len(resultados), 'acertos': acertos, 'erros': erros, 'taxa_acerto': taxa}
 
 
+# Conversão de data para o fuso brasileiro
 def _data_no_brasil(momento_utc):
     momento = momento_utc.replace(tzinfo=datetime.timezone.utc)
     return momento.astimezone(ZoneInfo('America/Sao_Paulo')).date()
 
 
+# Cálculo da evolução recente
 def _evolucao(resultados, hoje):
     dias = [hoje - datetime.timedelta(days=atras) for atras in range(DIAS_DA_EVOLUCAO - 1, -1, -1)]
     por_dia = {dia: [] for dia in dias}
@@ -40,6 +43,7 @@ def _evolucao(resultados, hoje):
     return [{'data': dia.isoformat(), **_contagem(por_dia[dia])} for dia in dias]
 
 
+# Texto de recomendação por dificuldade
 def _recomendacao(dificuldade):
     habilidade = HABILIDADES.get(dificuldade['etapa_chave'], 'praticar esta atividade')
     return {
@@ -49,6 +53,7 @@ def _recomendacao(dificuldade):
     }
 
 
+# Dados do painel de progresso
 def resumo_dashboard(crianca_id, responsavel_id=None, hoje=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id)
     hoje = hoje or _data_no_brasil(datetime.datetime.utcnow())
@@ -75,7 +80,7 @@ def resumo_dashboard(crianca_id, responsavel_id=None, hoje=None):
                 })
         por_etapa.append({'etapa_id': etapa.id, 'nome': etapa.nome, **_contagem(resultados_da_etapa)})
 
-    # só entra atividade com erro; pior taxa de acerto primeiro
+    # Prioriza atividades com menor taxa de acerto
     com_erros = [atividade for atividade in por_atividade if atividade['erros'] > 0]
     com_erros.sort(key=lambda atividade: (atividade['taxa_acerto'], -atividade['erros']))
     dificuldades = com_erros[:MAXIMO_DE_DIFICULDADES]

@@ -3,11 +3,12 @@ import datetime
 from app import db
 
 
+# RN2: modelo de tentativa em uma atividade
 class Resultado(db.Model):
-    """RN2: uma tentativa da criança numa atividade."""
 
     __tablename__ = 'resultados'
 
+    # Dados da resposta enviada pela criança
     id = db.Column(db.Integer, primary_key=True)
     crianca_id = db.Column(db.Integer, db.ForeignKey('criancas.id'), nullable=False)
     atividade_id = db.Column(db.Integer, db.ForeignKey('atividades.id'), nullable=False)
@@ -15,6 +16,7 @@ class Resultado(db.Model):
     correta = db.Column(db.Boolean, nullable=False)
     criado_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
+    # Conversão do resultado para resposta da API
     def to_dict(self):
         return {
             'child_id': self.crianca_id,

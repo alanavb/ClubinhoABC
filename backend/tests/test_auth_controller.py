@@ -7,10 +7,10 @@ from app.controllers import auth_controller
 from app.controllers.auth_controller import DadosInvalidosError
 
 
+# Testes da conclusão de cadastro familiar
 class AuthControllerTest(unittest.TestCase):
-    #Aqui vou estar incluindo os 3 testes unitários da conclusão de cadastro do responsável e da criança.
 
-    #TESTE 1
+    # Criação da família na etapa inicial
     @patch.object(auth_controller, 'registrar_log')
     @patch.object(auth_controller, 'Crianca')
     @patch.object(auth_controller, 'Responsavel')
@@ -45,7 +45,7 @@ class AuthControllerTest(unittest.TestCase):
         db_mock.session.commit.assert_called_once()
         log_mock.assert_called_once()
 
-    #TESTE 2
+    # Validação dos dados obrigatórios
     @patch.object(auth_controller, 'Etapa')
     @patch.object(auth_controller, 'buscar_por_supabase_id', return_value=None)
 
@@ -54,7 +54,7 @@ class AuthControllerTest(unittest.TestCase):
             auth_controller.completar_cadastro('user-1', 'ana@gmail.com', 'Ana', '', None)
         etapa_model.query.order_by.assert_not_called()
 
-    #TESTE 3
+    # Reutilização de cadastro já existente
     @patch.object(auth_controller, 'db')
     @patch.object(auth_controller, 'buscar_por_supabase_id')
 

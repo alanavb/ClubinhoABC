@@ -573,14 +573,14 @@ function App() {
 
   useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
 
-  // F5 com sessão aberta vai direto para o início
+  // Restaura a página inicial em sessão ativa
   useEffect(() => {
     if (estaAutenticado() && perfilCompleto() && VIEWS_PRE_LOGIN.includes(view)) {
       setView('home');
     }
   }, [authTick, view]);
 
-  // sessão única: confere a cada 30 s se a conta entrou em outro computador
+  // Confere sessão única a cada 30 segundos
   const logado = estaAutenticado() && perfilCompleto();
   useEffect(() => {
     if (!logado) return undefined;

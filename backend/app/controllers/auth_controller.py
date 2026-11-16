@@ -1,4 +1,4 @@
-"""Cadastro, crianças e conta do responsável. Senha e e-mail ficam no Supabase Auth."""
+# Cadastro de famílias, crianças e conta do responsável
 
 import datetime
 import unicodedata
@@ -9,20 +9,23 @@ from app.models import Crianca, Etapa, LogAuditoria, Responsavel, Resultado
 from app.supabase_admin import excluir_usuario as excluir_usuario_supabase
 
 
+# Erro de validação dos dados de cadastro
 class DadosInvalidosError(Exception):
-    """Dados de cadastro faltando ou inválidos."""
+    pass
 
 
+# Erro de criança duplicada na mesma conta
 class CriancaDuplicadaError(DadosInvalidosError):
-    """A conta já possui uma criança com o mesmo nome e data de nascimento."""
+    pass
 
 
+# Busca do responsável pelo id do Supabase
 def buscar_por_supabase_id(supabase_user_id):
     return Responsavel.query.filter_by(supabase_user_id=supabase_user_id).first()
 
 
+# Registro da sessão única ativa
 def registrar_sessao_ativa(supabase_user_id, session_id):
-    """Sessão única: só o último login vale."""
     responsavel = buscar_por_supabase_id(supabase_user_id)
     if not responsavel:  # cadastro ainda não concluído
         return
@@ -30,6 +33,7 @@ def registrar_sessao_ativa(supabase_user_id, session_id):
     db.session.commit()
 
 
+# Validação dos dados da criança
 def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=True):
     crianca_nome = ' '.join((crianca_nome or '').split())
     if not crianca_nome:
@@ -47,8 +51,8 @@ def _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=Tru
     return crianca_nome, data_nascimento
 
 
+# Verificação de criança duplicada
 def _crianca_ja_cadastrada(responsavel_id, nome, data_nascimento, ignorar_crianca_id=None):
-    """O avatar não entra: trocar o bichinho não faz outra criança."""
     nome_normalizado = _normalizar_nome_para_comparacao(nome)
     criancas_da_conta = Crianca.query.filter_by(responsavel_id=responsavel_id).all()
     return any(
@@ -59,8 +63,8 @@ def _crianca_ja_cadastrada(responsavel_id, nome, data_nascimento, ignorar_crianc
     )
 
 
+# Normalização de nome para comparação
 def _normalizar_nome_para_comparacao(nome):
-    """Ignora espaços, maiúsculas e acentos."""
     nome_sem_acentos = ''.join(
         caractere
         for caractere in unicodedata.normalize('NFD', nome)
@@ -69,6 +73,7 @@ def _normalizar_nome_para_comparacao(nome):
     return ' '.join(nome_sem_acentos.split()).casefold()
 
 
+# Consulta da primeira etapa da trilha
 def _etapa_inicial():
     etapa = Etapa.query.order_by(Etapa.ordem).first()
     if not etapa:
@@ -76,11 +81,8 @@ def _etapa_inicial():
     return etapa
 
 
+# Conclusão do cadastro da família
 def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
-    """Cria responsável + primeira criança no primeiro login após confirmar o e-mail.
-
-    Idempotente: duas abas abertas ao mesmo tempo não duplicam o perfil.
-    """
     existente = buscar_por_supabase_id(supabase_user_id)
     if existente:
         return existente
@@ -88,7 +90,7 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
     nome = (nome or '').strip()
     if not nome:
         raise DadosInvalidosError('Preencha o nome do responsável.')
-    # contas antigas só têm a idade no Supabase: aceita sem data para não travar o cadastro
+    # Mantém compatibilidade com cadastros antigos
     crianca_nome, data_nascimento = _validar_crianca(crianca_nome, crianca_data_nascimento, data_obrigatoria=False)
     etapa_inicial = _etapa_inicial()
 
@@ -115,8 +117,8 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
     return responsavel
 
 
+# Inclusão de uma criança no perfil
 def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
-    """RF01: um responsável, várias crianças."""
     crianca_nome, data_nascimento = _validar_crianca(crianca_nome, crianca_data_nascimento)
     if _crianca_ja_cadastrada(responsavel.id, crianca_nome, data_nascimento):
         raise CriancaDuplicadaError('Esta criança já está cadastrada nesta conta.')
@@ -139,16 +141,16 @@ def adicionar_crianca(responsavel, crianca_nome, crianca_data_nascimento, crianc
 
     return crianca
 
+# Busca de criança vinculada ao responsável
 def buscar_crianca(responsavel,crianca_id): 
-    """Criança de outra família também dá 404, para não confirmar que o id existe."""
     crianca = Crianca.query.get(crianca_id)
     if not crianca or crianca.responsavel_id != responsavel.id:
         raise ValueError('Criança não encontrada')
     
     return crianca
 
+# Atualização dos dados da criança
 def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
-    """Mesmas validações do cadastro, inclusive a de criança duplicada."""
     crianca = Crianca.query.get(crianca_id)
     if not crianca or crianca.responsavel_id != responsavel.id:
         raise ValueError('Criança não encontrada')
@@ -174,8 +176,8 @@ def editar_crianca(responsavel, crianca_id, crianca_nome, crianca_data_nasciment
     return crianca
 
 
+# Exclusão confirmada de uma criança
 def excluir_crianca(responsavel, crianca_id, confirmacao):
-    """Apaga a criança com os resultados e logs dela. Não tem volta."""
     crianca = Crianca.query.get(crianca_id)
     if not crianca or crianca.responsavel_id != responsavel.id:
         raise ValueError('Criança não encontrada')
@@ -188,7 +190,7 @@ def excluir_crianca(responsavel, crianca_id, confirmacao):
             f'Digite "{frase_esperada}" para confirmar a exclusão.'
         )
 
-    # dependentes primeiro por causa das FKs
+    # Exclui dependências antes da conta
     Resultado.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
     LogAuditoria.query.filter_by(crianca_id=crianca.id).delete(synchronize_session=False)
     db.session.delete(crianca)
@@ -196,8 +198,8 @@ def excluir_crianca(responsavel, crianca_id, confirmacao):
     db.session.commit()
 
 
+# Exclusão confirmada da conta familiar
 def excluir_conta(responsavel, confirmacao):
-    """Apaga a família inteira no banco e o usuário no Supabase Auth."""
     if ' '.join((confirmacao or '').split()) != 'EXCLUIR MINHA CONTA':
         raise DadosInvalidosError(
             'Digite "EXCLUIR MINHA CONTA" para confirmar a exclusão.'
@@ -217,7 +219,7 @@ def excluir_conta(responsavel, confirmacao):
 
         db.session.delete(responsavel)
         registrar_exclusao('conta_excluida')
-        # flush antes do Supabase: se o banco recusar, o usuário no Auth fica intacto
+        # Confirma o banco antes de excluir no Supabase
         db.session.flush()
         excluir_usuario_supabase(responsavel.supabase_user_id)
         db.session.commit()

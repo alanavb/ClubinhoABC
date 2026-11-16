@@ -97,8 +97,7 @@ with app.app_context():
     else:
         print('Etapa "Ouça e Escolha" já existia, nada foi criado.')
 
-    # O desafio de parlendas pertence à etapa de escuta. Esta atualização também
-    # preserva a atividade já criada em bancos de desenvolvimento existentes.
+    # Migração da parlenda para a etapa de escuta
     mover_atividade('bonus-parlenda', etapa3, 'Desafio da Parlenda', 5, False)
 
     garantir_atividades(etapa3, [
@@ -125,7 +124,7 @@ with app.app_context():
         ('bonus-leia', 'Tesouro da leitura', 4, False),
     ])
 
-    # responsável e criança nascem no cadastro real (Supabase), não aqui
+    # Cadastro de teste é feito pela tela inicial
     print('\nPara testar de ponta a ponta, crie uma conta pela tela de cadastro do front-end.')
 
     print('\nIDs para testar:')

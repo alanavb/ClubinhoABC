@@ -10,6 +10,7 @@ resultados_bp = Blueprint('resultados', __name__)
 CAMPOS_OBRIGATORIOS = ['crianca_id', 'atividade_id', 'resposta_enviada', 'resposta_esperada']
 
 
+# Identificação do responsável autenticado
 def _responsavel_atual():
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
@@ -19,6 +20,7 @@ def _responsavel_atual():
 
 @resultados_bp.route('/resultados', methods=['POST'])
 @requer_autenticacao
+# Rota de registro de resultado
 def criar_resultado():
     dados = request.get_json(silent=True) or {}
 
@@ -48,6 +50,7 @@ def criar_resultado():
 
 @resultados_bp.route('/resultados', methods=['GET'])
 @requer_autenticacao
+# Rota de consulta de resultados
 def listar_resultados():
     crianca_id = request.args.get('crianca_id', type=int)
     atividade_id = request.args.get('atividade_id', type=int)

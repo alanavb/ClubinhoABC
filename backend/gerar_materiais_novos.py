@@ -1,4 +1,4 @@
-"""Três materiais que completam os eixos de conteúdo da trilha."""
+# Geração de materiais complementares da trilha
 
 import random
 
@@ -12,8 +12,8 @@ from gerar_materiais import (AMARELO, AZUL, AZUL_CLARO, BASE, BOLD, CINZA, CREME
                              linha_escrita, pauta, quadradinho, texto_contorno)
 
 
+# Inclusão do gabarito no rodapé
 def nota_adulto(c, texto):
-    """Nota/gabarito para o adulto, quebrada em linhas para caber na margem."""
     c.setFont(NORMAL, 10)
     c.setFillColor(TEXTO)
     linhas = simpleSplit(texto, NORMAL, 10, W - 2 * M)
@@ -21,13 +21,14 @@ def nota_adulto(c, texto):
         c.drawString(M, BASE + 4 + k * 13, linha)
 
 
-#7) RIMAS E SÍLABAS (5 págs)
-#(palavra, sílabas)
+# Material 7: rimas e sílabas
+# Dados de palavras e separação silábica
 PALAVRAS_CONTAR = [('BOLA', 'BO-LA'), ('SOL', 'SOL'), ('CASA', 'CA-SA'), ('MACACO', 'MA-CA-CO'),
                    ('BANANA', 'BA-NA-NA'), ('ELEFANTE', 'E-LE-FAN-TE'), ('PATO', 'PA-TO'), ('BORBOLETA', 'BOR-BO-LE-TA')]
 PARES_RIMA = [('PATO', 'GATO'), ('BOLA', 'COLA'), ('PÃO', 'MÃO'), ('ASA', 'CASA'), ('FOCA', 'TOCA'), ('LUA', 'RUA')]
 
 
+# Geração do PDF de rimas e sílabas
 def rimas_silabas():
     doc = Documento('rimas-e-silabas.pdf', 'Rimas e sílabas', 'Consciência fonológica')
 
@@ -154,7 +155,7 @@ def rimas_silabas():
     return doc.salvar()
 
 
-#8) MONTE A FRASE (5 págs)
+# Material 8: monte a frase
 FRASES_RECORTE = [['O', 'gato', 'dorme', 'no', 'sofá.'], ['A', 'menina', 'come', 'uma', 'maçã.'],
                   ['O', 'pato', 'nada', 'no', 'lago.'], ['Eu', 'gosto', 'de', 'ler.']]
 FRASES_ORDENAR = [(['bola', 'A', 'é', 'redonda.'], 'A bola é redonda.'),
@@ -166,6 +167,7 @@ COMPLETAR = [('O', 'nada no lago.', 'pato'), ('O', 'brilha de dia.', 'sol'), ('A
 DITADO = ['A bola é azul.', 'O gato come peixe.', 'Eu vi a lua.', 'Mamãe fez um bolo.']
 
 
+# Geração do PDF de formação de frases
 def monte_a_frase():
     doc = Documento('monte-a-frase.pdf', 'Monte a frase', 'Formação de frases e escrita')
     palavras = [p for frase in FRASES_RECORTE for p in frase]
@@ -272,7 +274,7 @@ def monte_a_frase():
     return doc.salvar()
 
 
-#9) LEIA E RESPONDA (5 págs)
+# Material 9: leia e responda
 TEXTOS = [
     ('A joaninha Lia',
      'Lia é uma joaninha vermelha. Ela mora em uma flor amarela. De manhã, Lia voa até a horta para ver as folhas verdes.',
@@ -304,6 +306,7 @@ VERDADEIRO_FALSO = [('Lia é uma joaninha azul.', False), ('Lia mora em uma flor
                     ('Leo ficou em casa porque choveu.', True), ('Leo jogou futebol.', False)]
 
 
+# Geração do PDF de leitura e interpretação
 def leia_responda():
     doc = Documento('leia-e-responda.pdf', 'Leia e responda', 'Leitura e interpretação de textos curtos')
     for numero, (titulo, texto, perguntas, escreva, resposta_escrita) in enumerate(TEXTOS, start=1):

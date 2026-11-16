@@ -9,6 +9,7 @@ from app.supabase_admin import SupabaseAdminError
 auth_bp = Blueprint('auth', __name__)
 
 
+# Conversão dos dados da criança para JSON
 def _crianca_para_json(crianca):
     return {
         'crianca_id': crianca.id,
@@ -21,6 +22,7 @@ def _crianca_para_json(crianca):
     }
 
 
+# Conversão dos dados do responsável para JSON
 def _responsavel_para_json(responsavel):
     return {
         'responsavel_id': responsavel.id,
@@ -32,21 +34,22 @@ def _responsavel_para_json(responsavel):
 
 @auth_bp.route('/auth/sessao', methods=['POST'])
 @requer_autenticacao_de_novo_login
+# Rota de registro da sessão ativa
 def registrar_sessao():
-    """Sessão única: o front chama logo depois do login."""
     auth_controller.registrar_sessao_ativa(g.supabase_user_id, g.supabase_session_id)
     return '', 204
 
 
 @auth_bp.route('/auth/sessao', methods=['GET'])
 @requer_autenticacao
+# Rota de verificação da sessão ativa
 def conferir_sessao():
-    """Consultado a cada 30 s pelo front; o 401 de sessão trocada vem do decorador."""
     return '', 204
 
 
 @auth_bp.route('/auth/me', methods=['GET'])
 @requer_autenticacao
+# Rota do perfil autenticado
 def me():
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
@@ -64,8 +67,8 @@ def me():
 
 @auth_bp.route('/auth/completar-cadastro', methods=['POST'])
 @requer_autenticacao
+# Rota de conclusão de cadastro
 def completar_cadastro():
-    """Primeiro login depois de confirmar o e-mail: cria responsável + criança."""
     dados = request.get_json(silent=True) or {}
 
     try:
@@ -85,8 +88,8 @@ def completar_cadastro():
 
 @auth_bp.route('/criancas', methods=['POST'])
 @requer_autenticacao
+# Rota de inclusão de criança
 def adicionar_crianca():
-    """Cadastra mais uma criança na conta do responsável autenticado."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
@@ -109,8 +112,8 @@ def adicionar_crianca():
 
 @auth_bp.route('/criancas/<int:crianca_id>', methods=['GET'])
 @requer_autenticacao
+# Rota de consulta de criança
 def buscar_crianca(crianca_id):
-    """Devolve uma criança da conta autenticada."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
@@ -124,8 +127,8 @@ def buscar_crianca(crianca_id):
 
 @auth_bp.route('/criancas/<int:crianca_id>', methods=['PUT'])
 @requer_autenticacao
+# Rota de atualização de criança
 def editar_crianca(crianca_id):
-    """Atualiza os dados de uma criança da conta autenticada."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
@@ -149,8 +152,8 @@ def editar_crianca(crianca_id):
 
 @auth_bp.route('/criancas/<int:crianca_id>', methods=['DELETE'])
 @requer_autenticacao
+# Rota de exclusão de criança
 def excluir_crianca(crianca_id):
-    """Exclui uma criança da conta autenticada após confirmação expressa."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
@@ -170,8 +173,8 @@ def excluir_crianca(crianca_id):
 
 @auth_bp.route('/auth/conta', methods=['DELETE'])
 @requer_autenticacao
+# Rota de exclusão da conta
 def excluir_conta():
-    """Exclui definitivamente a conta autenticada e seus dados vinculados."""
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
         return jsonify({'erro': 'Cadastro não encontrado para este usuário.'}), 404

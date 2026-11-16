@@ -1,9 +1,6 @@
-// Voz da Web Speech API usada no site inteiro (jogos e histórias).
-// Sem escolher a voz, o navegador usa a do idioma do sistema: num Windows em
-// inglês, o português sai com sotaque inglês.
+// Voz em português usada nos jogos e nas histórias
 
-// femininas em pt-BR, da mais natural para a mais simples; Google por último
-// porque não marca as palavras durante a leitura das histórias
+// Prioridade de vozes femininas em português do Brasil
 const VOZES_PREFERIDAS = ['Francisca', 'Thalita', 'Maria', 'Luciana', 'Google'];
 
 let vozEscolhida = null;
@@ -22,12 +19,12 @@ function escolherVoz() {
 
 if ('speechSynthesis' in window) {
   vozEscolhida = escolherVoz();
-  // a lista de vozes chega depois do carregamento da página em alguns navegadores
+  // Atualiza a lista quando o navegador termina de carregá-la
   window.speechSynthesis.addEventListener('voiceschanged', () => { vozEscolhida = escolherVoz(); });
 }
 
 function avisarSemVozEmPortugues() {
-  // lista ainda vazia = vozes não carregaram, não quer dizer que falta português
+  // Evita aviso antes de as vozes carregarem
   if (avisouSemVoz || window.speechSynthesis.getVoices().length === 0) return;
   avisouSemVoz = true;
   window.dispatchEvent(new CustomEvent('clubinho:aviso', {

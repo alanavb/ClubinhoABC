@@ -1,4 +1,4 @@
-// Login, cadastro e sessão (Supabase Auth) + perfil da família (nossa API).
+// Login, cadastro e sessão da família
 
 
 import { API_BASE_URL } from './api';
@@ -40,7 +40,7 @@ async function sincronizarPerfil() {
   perfil = await resposta.json();
 }
 
-// sessão única: só este login passa a valer no back-end
+// Sessão única registrada no back-end
 async function registrarSessaoAtiva() {
   await fetch(`${API_BASE_URL}/auth/sessao`, {
     method: 'POST',
@@ -48,7 +48,7 @@ async function registrarSessaoAtiva() {
   });
 }
 
-// primeiro login: cria o perfil com os dados da criança guardados no user_metadata do cadastro
+// Criação do perfil no primeiro login
 async function completarCadastroSePendente() {
   if (perfil || !sessaoSupabase?.access_token) return;
 
@@ -76,7 +76,7 @@ async function completarCadastroSePendente() {
 const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, session) => {
   sessaoSupabase = session;
   if (session && confirmacaoPendente) {
-    // o link de confirmação já abre sessão; fecha para a pessoa entrar pelo login
+    // Fecha a sessão aberta pelo link de confirmação
     confirmacaoPendente = false;
     emailAcabouDeSerConfirmado = true;
     sessaoSupabase = null;
@@ -96,7 +96,7 @@ const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, se
       await sincronizarPerfil();
       await completarCadastroSePendente();
     } catch (erro) {
-      // back-end fora do ar: tenta de novo na próxima mudança de sessão
+      // Tenta registrar a sessão na próxima alteração
       console.error('Falha ao sincronizar perfil com o back-end.', erro);
     }
   } else {
@@ -114,7 +114,7 @@ export function emailFoiConfirmado() {
   return emailAcabouDeSerConfirmado;
 }
 
-// false só quando a API diz que a sessão foi trocada; erro de rede não derruba ninguém
+// Só encerra quando a API confirma a troca de sessão
 export async function sessaoContinuaAtiva() {
   if (!sessaoSupabase?.access_token) return true;
   try {
@@ -155,7 +155,7 @@ function lerCriancaSelecionada() {
   }
 }
 
-// jogos, estrelas e progresso usam a criança selecionada
+// Criança usada em jogos, estrelas e progresso
 export function obterCriancaSelecionada() {
   const criancas = perfil?.criancas ?? [];
   const id = lerCriancaSelecionada();
@@ -170,7 +170,7 @@ export function selecionarCrianca(criancaId) {
   try {
     localStorage.setItem(CHAVE_CRIANCA_SELECIONADA, String(criancaId));
   } catch {
-    // sem localStorage a escolha só se perde ao recarregar
+    // Mantém a escolha apenas até recarregar sem localStorage
   }
   avisarOuvintes();
 }
@@ -234,7 +234,7 @@ export async function excluirCrianca({ criancaId, confirmacao }) {
     try {
       localStorage.removeItem(CHAVE_CRIANCA_SELECIONADA);
     } catch {
-      // sem localStorage, segue com a primeira criança
+      // Usa a primeira criança sem localStorage
     }
   }
   avisarOuvintes();
@@ -252,14 +252,14 @@ export async function excluirConta(confirmacao) {
   const dados = await resposta.json().catch(() => ({}));
   if (!resposta.ok) throw new Error(dados.erro || 'Não foi possível excluir a conta.');
 
-  // conta já apagada no servidor: nada da sessão antiga fica no navegador
+  // Remove dados locais de conta excluída
   await supabase.auth.signOut({ scope: 'local' }).catch(() => {});
   sessaoSupabase = null;
   perfil = null;
   try {
     localStorage.removeItem(CHAVE_CRIANCA_SELECIONADA);
   } catch {
-    // localStorage indisponível não impede o encerramento
+    // Prossegue sem localStorage
   }
   avisarOuvintes();
 }
@@ -270,7 +270,7 @@ export function obterPerfil() {
 
 function mensagemAmigavel(erro) {
   const texto = erro?.message || '';
-  // 429: limites de tentativas e de e-mail do Supabase Auth
+  // Trata limites de tentativas e e-mail do Supabase
   if (erro?.code === 'over_email_send_rate_limit') return 'Muitos e-mails enviados em pouco tempo. Aguarde alguns minutos e tente novamente.';
   if (erro?.status === 429) return 'Muitas tentativas. Aguarde alguns minutos e tente novamente.';
   if (texto.includes('Invalid login credentials')) return 'E-mail ou senha inválidos.';
@@ -288,12 +288,12 @@ export async function entrar(email, senha) {
   emailAcabouDeSerConfirmado = false;
 }
 
-// pede a senha de novo antes de abrir a Minha Conta
+// Reautenticação antes de abrir Minha Conta
 export async function confirmarSenhaResponsavel(senha) {
   const email = perfil?.email || sessaoSupabase?.user?.email;
   if (!email) throw new Error('Não foi possível identificar a conta do responsável.');
 
-  // entrar de novo cria outra sessão: também precisa ser registrada
+  // Registra a nova sessão após a reautenticação
   loginAcabouDeAcontecer = true;
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
   if (error) {
@@ -316,7 +316,7 @@ export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNa
     },
   });
   if (error) throw new Error(mensagemAmigavel(error));
-  // e-mail já cadastrado não dá erro: o Supabase não revela quais e-mails têm conta
+  // Evita revelar se o e-mail já possui conta
 }
 
 export async function reenviarConfirmacao(email) {

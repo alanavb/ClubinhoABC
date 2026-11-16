@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { falar } from '../alfabeto';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-// Cada linha traz uma rima clara para comparar o final das palavras.
+// Dados das palavras que rimam
 const rodadas = [
   [
     { palavra: 'GATO', icone: '🐱', resposta: 'PATO', opcoes: ['PATO', 'BARCO', 'BOLA'] },
@@ -50,8 +50,7 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
     const chave = `${indice}-${opcao}`;
     const jaTocou = opcaoTocada.current === chave;
     opcaoTocada.current = '';
-    // Depois de acertar, a linha vira um espaço de prática: qualquer opção
-    // ainda pode ser ouvida sem mudar o resultado já registrado.
+    // Mantém opções disponíveis para prática após o acerto
     if (concluido || acertos.includes(indice)) {
       if (!jaTocou) falar(opcao);
       return;

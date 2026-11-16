@@ -6,6 +6,7 @@ from app.controllers.etapas_controller import AcessoNegadoError, avancar_etapa_s
 from app.models import Atividade, Crianca, Resultado
 
 
+# Registro de uma tentativa da criança
 def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada, responsavel_id=None):
     crianca = Crianca.query.get(crianca_id)
     if not crianca:
@@ -17,7 +18,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     if not atividade:
         raise ValueError('Atividade não encontrada')
 
-    # RN1: etapa futura continua bloqueada; etapas concluídas ficam abertas para revisão
+    # RN1: bloqueia etapas futuras e permite revisão
     if atividade.etapa.ordem > crianca.etapa_atual.ordem:
         raise AcessoNegadoError('Esta atividade ainda não foi liberada para a criança')
 
@@ -32,7 +33,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     db.session.add(resultado)
     db.session.flush()
 
-    # só obrigatória da etapa atual libera a próxima; revisão e bônus não mexem na trilha
+    # RN3: apenas obrigatórias liberam a próxima etapa
     if correta and getattr(atividade, 'obrigatoria', True) and atividade.etapa_id == crianca.etapa_atual_id:
         avancar_etapa_se_concluida(
             crianca_id,
@@ -52,6 +53,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     return resultado
 
 
+# Consulta de resultados com filtros de acesso
 def listar_resultados(crianca_id=None, atividade_id=None, responsavel_id=None):
     if crianca_id is not None and responsavel_id is not None:
         crianca = Crianca.query.get(crianca_id)
@@ -60,7 +62,7 @@ def listar_resultados(crianca_id=None, atividade_id=None, responsavel_id=None):
 
     query = Resultado.query
     if responsavel_id is not None:
-        # sem crianca_id, não pode vazar resultado de outra família
+        # Restringe resultados à família autenticada
         query = query.join(Crianca).filter(Crianca.responsavel_id == responsavel_id)
     if crianca_id is not None:
         query = query.filter(Resultado.crianca_id == crianca_id)

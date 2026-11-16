@@ -1,15 +1,12 @@
-"""Verifica que o frontend não insere HTML não confiável diretamente no DOM.
-
-O React escapa valores exibidos com {valor}. Por isso, os dados do responsável
-e da criança devem continuar sendo renderizados por interpolação JSX, sem APIs
-que interpretem esses valores como HTML.
-"""
+# Proteção contra inserção direta de HTML no frontend
 
 from pathlib import Path
 import unittest
 
 
+# Teste estático de proteção contra XSS
 class ProtecaoXssFrontendTest(unittest.TestCase):
+    # Verificação de APIs que inserem HTML diretamente no DOM
     def test_frontend_nao_deve_usar_insercao_direta_de_html(self):
         frontend_src = Path(__file__).resolve().parents[2] / 'frontend' / 'src'
         recursos_perigosos = (

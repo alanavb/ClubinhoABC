@@ -1,4 +1,4 @@
-// RF06: indicadores do dashboard
+// RF06: indicadores do painel do responsável
 
 import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL } from './api';
@@ -13,7 +13,7 @@ export async function buscarDashboard(criancaId) {
   return resposta.json(); // { totais, por_etapa, evolucao, dificuldades, recomendacoes }
 }
 
-// recarrega no evento 'progresso-atualizado' (acerto de atividade)
+// Atualiza indicadores após registrar progresso
 export function useDashboard(criancaId) {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(false);

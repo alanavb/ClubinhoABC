@@ -1,8 +1,4 @@
-"""Proteção contra força bruta: bloqueio de tentativas e limite de requisições por IP.
-
-Os limites são reduzidos na configuração do teste para não precisar de centenas de
-requisições. O relógio do módulo é simulado para testar o fim do bloqueio sem esperar.
-"""
+# Proteção contra excesso de tentativas e requisições por IP
 
 import unittest
 from unittest.mock import patch
@@ -14,8 +10,10 @@ TOKEN = {'Authorization': 'Bearer token-de-teste'}
 MENSAGEM = 'Muitas tentativas. Aguarde alguns minutos e tente novamente.'
 
 
+# Testes dos limites de autenticação e requisições
 class LimiteDeTentativasTest(unittest.TestCase):
 
+    # Preparação do cliente e limites de teste
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -38,20 +36,24 @@ class LimiteDeTentativasTest(unittest.TestCase):
         relogio.start()
         self.addCleanup(relogio.stop)
 
+    # Limpeza do contexto da aplicação
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Cabeçalho com token válido
     def _com_token_valido(self):
         return patch('app.auth_utils._decodificar_token',
                      return_value={'sub': 'familia-a', 'email': 'ana@teste.local'})
 
+    # Simulação de falhas de autenticação
     def _falhar(self, vezes, ip='127.0.0.1'):
         for _ in range(vezes):
             self.client.get('/api/auth/me', environ_base={'REMOTE_ADDR': ip})
 
+    # Bloqueio após falhas consecutivas
     def test_get_authMe_aposMuitasFalhas_deveRetornar429ComMensagemGenerica(self):
         self._falhar(3)
 
@@ -61,6 +63,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
         self.assertEqual(MENSAGEM, resposta.get_json()['erro'])
         self.assertEqual('901', resposta.headers['Retry-After'])
 
+    # IP bloqueado permanece bloqueado com token válido
     def test_get_authMe_comIpBloqueado_deveRetornar429MesmoComTokenValido(self):
         self._falhar(3)
 
@@ -70,6 +73,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
         self.assertEqual(429, resposta.status_code)
         self.assertNotIn('email', resposta.get_json())
 
+    # Liberação após o tempo de bloqueio
     def test_get_authMe_depoisDoTempoDeBloqueio_deveVoltarAResponder(self):
         self._falhar(3)
         self.agora += 901
@@ -79,6 +83,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
 
         self.assertEqual(200, resposta.status_code)
 
+    # Autenticação válida limpa falhas anteriores
     def test_get_authMe_comAcessoValidoEntreFalhas_deveZerarAsFalhas(self):
         self._falhar(2)
         with self._com_token_valido():
@@ -89,6 +94,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
 
         self.assertEqual(401, resposta.status_code)
 
+    # Bloqueio não afeta outro IP
     def test_get_authMe_comIpDiferenteDoBloqueado_naoDeveSerBloqueado(self):
         self._falhar(3, ip='10.0.0.1')
 
@@ -96,6 +102,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
 
         self.assertEqual(401, resposta.status_code)
 
+    # Limite de requisições por minuto
     def test_api_comMaisRequisicoesQueOLimitePorMinuto_deveRetornar429(self):
         with self._com_token_valido():
             respostas = [self.client.get('/api/auth/me', headers=TOKEN).status_code for _ in range(11)]
@@ -103,6 +110,7 @@ class LimiteDeTentativasTest(unittest.TestCase):
         self.assertEqual([200] * 10, respostas[:10])
         self.assertEqual(429, respostas[10])
 
+    # Liberação após a janela de um minuto
     def test_api_depoisDeUmMinuto_deveLiberarNovasRequisicoes(self):
         with self._com_token_valido():
             for _ in range(11):

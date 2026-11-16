@@ -3,7 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-// A parlenda é apresentada antes do desafio, para a criança ouvi-la e conhecê-la.
+// Apresenta a parlenda antes do desafio
 const parlendas = [
   {
     titulo: 'Feijão com arroz', icone: '🍚', decoracoes: ['🥄', '🫘', '🍽️'],
@@ -38,7 +38,7 @@ export default function DesafioDaParlenda({ atividadeId, aoConcluir, aoFechar })
   const ultima = indice === parlendas.length - 1;
 
   function tocar(texto, aoTerminar = null) {
-    // Um pouco mais rápida para preservar o ritmo natural da parlenda.
+    // Mantém o ritmo natural da parlenda
     const identificador = audioAtual.current + 1;
     audioAtual.current = identificador;
     setAudioTocando(true);

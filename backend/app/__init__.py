@@ -5,8 +5,10 @@ from flask_sqlalchemy import SQLAlchemy
 from .config import Config
 from .limite_tentativas import ContadoresPorIp, verificar_limites
 
+# Instância do banco de dados da aplicação
 db = SQLAlchemy()
 
+# Criação da aplicação e configuração dos serviços
 def create_app(test_config=None):
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -15,11 +17,11 @@ def create_app(test_config=None):
 
     db.init_app(app)
 
-    # limite por IP roda antes de qualquer rota
+    # Controle de requisições por IP
     app.extensions['contadores_por_ip'] = ContadoresPorIp()
     app.before_request(verificar_limites)
 
-    # sem estes dois, 404 e 405 cairiam no handler genérico e virariam 500
+    # Tratamento de erros HTTP da API
     @app.errorhandler(404)
     def tratar_endereco_nao_encontrado(erro):
         return jsonify({'erro': 'Endereço não encontrado.'}), 404
@@ -41,6 +43,7 @@ def create_app(test_config=None):
     
     CORS(app, resources={r'/api/*': {'origins': app.config['CORS_ALLOWED_ORIGINS']}})
 
+    # Registro das rotas protegidas da API
     from .routes.auth_routes import auth_bp
     from .routes.resultados_routes import resultados_bp
     from .routes.etapas_routes import etapas_bp

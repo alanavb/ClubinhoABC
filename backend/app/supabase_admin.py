@@ -1,4 +1,4 @@
-"""Operações administrativas do Supabase Auth executadas somente no servidor."""
+# Operações administrativas do Supabase Auth no servidor
 
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
@@ -7,16 +7,19 @@ from urllib.request import Request, urlopen
 from flask import current_app
 
 
+# Erro em operação administrativa do Supabase
 class SupabaseAdminError(Exception):
-    """A operação administrativa não pôde ser concluída com segurança."""
+    pass
 
 
+# Exclusão de usuário no Supabase Auth
 def excluir_usuario(user_id):
     supabase_url = (current_app.config.get('SUPABASE_URL') or '').rstrip('/')
     secret_key = current_app.config.get('SUPABASE_SECRET_KEY')
     if not supabase_url or not secret_key:
         raise SupabaseAdminError('Exclusão administrativa não configurada.')
 
+    # Requisição autenticada de exclusão no Supabase
     requisicao = Request(
         f'{supabase_url}/auth/v1/admin/users/{quote(user_id, safe="")}',
         method='DELETE',
@@ -25,12 +28,13 @@ def excluir_usuario(user_id):
             'Authorization': f'Bearer {secret_key}',
         },
     )
+    # Tratamento da resposta da exclusão
     try:
         with urlopen(requisicao, timeout=10) as resposta:
             if resposta.status not in (200, 204):
                 raise SupabaseAdminError('O Supabase recusou a exclusão da conta.')
     except HTTPError as erro:
-        # 404: já apagado no Auth; segue para a exclusão poder ser repetida
+        # Permite repetir a exclusão se o usuário já não existir
         if erro.code != 404:
             raise SupabaseAdminError('O Supabase recusou a exclusão da conta.') from erro
     except (URLError, TimeoutError) as erro:
