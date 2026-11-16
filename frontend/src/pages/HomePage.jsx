@@ -3,6 +3,7 @@ import { AvisoFaixaEtaria, IndicadoresProgresso, MapaAventura } from '../compone
 import { obterCriancaId, obterCriancaSelecionada } from '../utils/auth';
 import { useResumoProgresso } from '../utils/etapas';
 
+// Página inicial da criança
 export default function HomePage({ onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'criança';

@@ -1,3 +1,4 @@
+// Mensagem visual exibida após uma resposta da criança
 export default function FeedbackResposta({ tipo, rodadaConcluida = false }) {
   const acertou = tipo === 'correct';
 

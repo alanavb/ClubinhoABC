@@ -1,10 +1,10 @@
-"""Testes de integração da trilha de etapas (etapa 1 -> 2 -> 3 -> 4).
-
-Cada teste passa por rota -> autenticação -> controller -> banco SQLite em memória.
-O único componente substituído é a validação do token do Supabase (serviço externo).
-
-Os dados abaixo repetem o que o seeds.py cadastra. Se uma etapa ou atividade
-mudar no seeds.py, atualize a constante TRILHA."""
+# Testes de integração da trilha de etapas (etapa 1 -> 2 -> 3 -> 4).
+#
+# Cada teste passa por rota -> autenticação -> controller -> banco SQLite em memória.
+# O único componente substituído é a validação do token do Supabase (serviço externo).
+#
+# Os dados abaixo repetem o que o seeds.py cadastra. Se uma etapa ou atividade
+# mudar no seeds.py, atualize a constante TRILHA.
 
 import datetime
 import unittest
@@ -13,17 +13,19 @@ from unittest.mock import patch
 from app import create_app, db
 from app.models import Atividade, Etapa, Crianca, Resultado, Responsavel
 
-# Dados da trilha usados nos testes
+# Dados das etapas e atividades usados nos testes
 TRILHA = [
     ('caca-as-letras', [('ouvir', True), ('palavra', True), ('memoria', True), ('bonus', False)]),
     ('monte-a-palavra', [('formar-palavra', True), ('silaba-que-falta', True), ('palavra-e-figura', True), ('bonus-monte', False), ('bonus-parlenda', False)]),
     ('ouca-e-escolha', [('frase-cena', True), ('complete-frase', True), ('frases-sonoras', True), ('bonus-ouca', False)]),
     ('leia-e-descubra', [('bilhete', True), ('quem-sou-eu', True), ('ordene-historia', True), ('bonus-leia', False)]),
 ]
-CABECALHO = {'Authorization': 'Bearer token-de-teste'} 
+CABECALHO = {'Authorization': 'Bearer token-de-teste'}
 
+# Testes de integração da trilha de etapas
 class TrilhaDeEtapasTest(unittest.TestCase):
 
+    # Preparação do banco, da trilha e da criança
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -34,7 +36,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.context.push()
         db.create_all()
 
-        # Mapeamento entre chaves e ids criados no teste
+        # Mapeamento entre chaves e identificadores criados no teste
         self.etapas = {}
         self.atividades = {}
         for ordem, (chave_etapa,atividades) in enumerate(TRILHA, start=1):
@@ -63,14 +65,14 @@ class TrilhaDeEtapasTest(unittest.TestCase):
                         return_value={'sub': 'user-trilha', 'email': 'ana@teste.local'})
         patcher.start()
         self.addCleanup(patcher.stop)
-        
+
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         self.context.pop()
 
-    # Envio de resposta para uma atividade
-
+    # Envio de uma resposta para uma atividade
     def _responder(self, chave_atividade, enviada, esperada):
         return self.client.post('/api/resultados', headers=CABECALHO, json={
             'crianca_id': self.crianca_id,
@@ -79,42 +81,46 @@ class TrilhaDeEtapasTest(unittest.TestCase):
             "resposta_esperada": esperada,
         })
 
+    # Envio de uma resposta correta
     def _acertar(self, chave_atividade):
         return self._responder(chave_atividade, 'certa', 'certa')
 
-    
+    # Conclusão das atividades obrigatórias de uma etapa
     def _concluir_obrigatorias(self, chave_etapa):
         atividades = dict(TRILHA)[chave_etapa]
         for chave_atividade, obrigatoria in atividades:
             if obrigatoria:
                 self.assertEqual(201, self._acertar(chave_atividade).status_code)
 
+    # Consulta da etapa atual após uma resposta
     def _etapa_atual(self):
-        db.session.expire_all()  # Atualiza dados gravados pela requisição
+        db.session.expire_all()
         crianca = db.session.get(Crianca, self.crianca_id)
         return db.session.get(Etapa, crianca.etapa_atual_id).chave
 
+    # Consulta do estado de uma etapa
     def _status(self, chave_etapa):
         resposta = self.client.get(
             f'/api/criancas/{self.crianca_id}/etapas/{self.etapas[chave_etapa]}/status', headers=CABECALHO)
         self.assertEqual(200, resposta.status_code)
         return resposta.get_json()
 
+    # Consulta do progresso completo da criança
     def _progresso(self):
         resposta = self.client.get(f'/api/criancas/{self.crianca_id}/progresso', headers=CABECALHO)
         self.assertEqual(200, resposta.status_code)
         return resposta.get_json()
 
-    # RN1: acesso às etapas
+    # Regra de acesso às etapas
 
-    # Bloqueio de atividade futura
+    # Atividade de etapa futura permanece bloqueada
     def test_deve_bloquear_atividade_da_etapa_4_para_crianca_na_etapa_1(self):
         resposta = self._acertar('bilhete')
 
         self.assertEqual(403, resposta.status_code)
         self.assertEqual(0, Resultado.query.count(), 'nada pode ser gravado quando o acesso é negado')
 
-    # Revisão de atividade concluída
+    # Atividade concluída pode ser revisada
     def test_deve_permitir_revisar_atividade_de_etapa_ja_concluida(self):
         self._concluir_obrigatorias('caca-as-letras')
         self.assertEqual('monte-a-palavra', self._etapa_atual())
@@ -127,7 +133,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual('monte-a-palavra', self._etapa_atual())
         self.assertEqual(2, Resultado.query.filter_by(atividade_id=self.atividades['ouvir'], correta=True).count())
 
-    # RN2: registro de tentativas
+    # Registro de tentativas
 
     # Resposta incorreta não conclui a atividade
     def test_deve_registrar_resposta_errada_sem_concluir_a_atividade(self):
@@ -147,7 +153,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
         self.assertTrue(realizadas['ouvir'])
 
-    # Ordem da história da Etapa 4
+    # Ordem da história na etapa de leitura
     def test_deve_avaliar_a_ordem_da_historia_da_etapa_4(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra', 'ouca-e-escolha']:
             self._concluir_obrigatorias(chave_etapa)
@@ -161,7 +167,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('leia-e-descubra')['atividades']}
         self.assertTrue(realizadas['ordene-historia'])
 
-    # RN3: avanço da trilha
+    # Avanço da trilha
 
     # Bônus não substitui atividade obrigatória
     def test_nao_deve_avancar_quando_falta_uma_atividade_obrigatoria(self):
@@ -205,7 +211,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
 
         self.assertEqual(201, resposta.status_code)
 
-    # Bônus da Etapa 2 não altera a etapa atual
+    # Bônus da etapa 2 não altera a etapa atual
     def test_deve_permitir_o_bonus_da_etapa_2_sem_alterar_a_etapa_atual(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra']:
             self._concluir_obrigatorias(chave_etapa)
@@ -215,6 +221,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(201, resposta.status_code)
         self.assertEqual('ouca-e-escolha', self._etapa_atual())
 
+    # Bônus de parlenda não altera a etapa atual
     def test_deve_permitir_o_bonus_da_parlenda_sem_alterar_a_etapa_atual(self):
         for chave_etapa in ['caca-as-letras', 'monte-a-palavra']:
             self._concluir_obrigatorias(chave_etapa)
@@ -224,9 +231,7 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.assertEqual(201, resposta.status_code)
         self.assertEqual('ouca-e-escolha', self._etapa_atual())
 
-    # Regressão: tamanho da resposta
-
-    # Coluna comporta a maior resposta enviada pelo front-end
+    # Tamanho da resposta enviada pelo front-end
     def test_coluna_resposta_comporta_a_maior_resposta_enviada_pelo_front(self):
         maior_resposta = 'Depois da chuva, a menina encontrou uma borboleta azul no jardim.'
 

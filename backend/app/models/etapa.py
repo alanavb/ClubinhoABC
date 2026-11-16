@@ -1,6 +1,7 @@
 from app import db
 
 
+# Modelo de etapa da trilha de aprendizagem
 class Etapa(db.Model):
     __tablename__ = 'etapas'
 

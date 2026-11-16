@@ -1,4 +1,4 @@
-"""RN2: registro de cada tentativa da criança."""
+# RN2: registro de cada tentativa da criança
 
 from app import db
 from app.controllers.auditoria_controller import registrar_log

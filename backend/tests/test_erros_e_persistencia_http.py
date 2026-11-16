@@ -1,7 +1,5 @@
-"""Pessoa 2 — cenários de erro (4xx) e persistência, com HTTP real.
-
-Controllers cobertos: auth_routes (crianças) e resultados_routes.
-"""
+# Cenários de erro (4xx) e persistência com HTTP real.
+# Rotas cobertas: crianças e resultados.
 
 import datetime
 import unittest

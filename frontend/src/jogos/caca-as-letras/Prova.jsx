@@ -3,9 +3,12 @@ import { criarAlternativas, falar, palavrasDoAlfabeto, sortear } from '../alfabe
 import { registrarResultadoPorId } from '../../utils/resultados';
 import FeedbackResposta from './FeedbackResposta';
 
+// Número de rodadas do desafio bônus
 const totalRodadas = 3;
 
+// Desafio de escolha da letra inicial
 export default function Prova({ atividadeId, aoConcluir, aoFechar }) {
+  // Criação de uma rodada com alternativas para a letra sorteada
   const criarRodada = () => {
     const desafio = sortear(palavrasDoAlfabeto);
     return { ...desafio, alternativas: criarAlternativas(desafio.letra) };
@@ -14,6 +17,7 @@ export default function Prova({ atividadeId, aoConcluir, aoFechar }) {
   const [desafio, setDesafio] = useState(criarRodada);
   const [retorno, setRetorno] = useState('');
 
+  // Validação da letra escolhida
   function responder(letra) {
     if (retorno === 'correct') return;
     const correta = letra === desafio.letra;
@@ -28,6 +32,7 @@ export default function Prova({ atividadeId, aoConcluir, aoFechar }) {
     setRetorno('incorrect');
   }
 
+  // Avanço para a próxima rodada
   function avancarRodada() {
     if (rodada === totalRodadas) { aoConcluir(); aoFechar(); return; }
     setRodada((atual) => atual + 1);

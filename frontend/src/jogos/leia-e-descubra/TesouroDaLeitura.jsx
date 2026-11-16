@@ -3,6 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Histórias, perguntas e ilustrações do desafio bônus
 const rodadas = [
     { 
         texto: 'Um pirata achou um mapa velho dentro de um baú. No desenho, havia uma ilha, uma palmeira e um X bem perto dela. O pirata chegou à ilha, cavou perto da palmeira e encontrou o tesouro.',
@@ -27,6 +28,7 @@ const rodadas = [
   },
 ];
 
+// Desafio bônus de leitura e compreensão de histórias
 export default function TesouroDaLeitura({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [opcoes, setOpcoes] = useState(() => embaralhar(rodadas[0].opcoes));
@@ -34,6 +36,7 @@ export default function TesouroDaLeitura({ atividadeId, aoConcluir, aoFechar }) 
   const rodada = rodadas[indice];
   const ultima = indice === rodadas.length - 1;
 
+  // Validação da resposta escolhida
   function responder(opcao) {
     if (retorno === 'correct') return;
     const correta = opcao === rodada.resposta;
@@ -47,6 +50,7 @@ export default function TesouroDaLeitura({ atividadeId, aoConcluir, aoFechar }) 
     }
   }
 
+  // Avanço para a próxima história
   function avancar() {
     if (ultima) { aoConcluir(); return; }
     setIndice(indice + 1);

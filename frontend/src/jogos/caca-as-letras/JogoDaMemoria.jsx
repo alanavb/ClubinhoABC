@@ -3,13 +3,16 @@ import { embaralhar, letras } from '../alfabeto';
 import { registrarResultadoPorId } from '../../utils/resultados';
 import FeedbackResposta from './FeedbackResposta';
 
+// Número de rodadas do jogo da memória
 const totalRodadas = 3;
 
+// Criação dos pares de letras de uma rodada
 function criarRodada() {
   const escolhidas = embaralhar(letras).slice(0, 3);
   return embaralhar(escolhidas.flatMap((letra) => [{ par: letra, valor: letra }, { par: letra, valor: letra.toLowerCase() }]));
 }
 
+// Jogo de associação entre letras maiúsculas e minúsculas
 export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
   const [rodada, setRodada] = useState(1);
   const [cartas, setCartas] = useState(criarRodada);
@@ -17,6 +20,7 @@ export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
   const [encontradas, setEncontradas] = useState([]);
   const [retorno, setRetorno] = useState('');
 
+  // Validação do par de cartas escolhido
   function escolherCarta(indice) {
     if (encontradas.includes(indice) || abertas.includes(indice) || abertas.length === 2) return;
     const proximasAbertas = [...abertas, indice];
@@ -40,7 +44,9 @@ export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
     window.setTimeout(() => setAbertas([]), 700);
   }
 
+  // Verificação de todos os pares encontrados
   const rodadaConcluida = encontradas.length === cartas.length;
+  // Avanço para uma nova rodada
   function avancarRodada() {
     if (rodada === totalRodadas) { aoConcluir(); aoFechar(); return; }
     setRodada((atual) => atual + 1);

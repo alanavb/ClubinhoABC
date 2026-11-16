@@ -3,12 +3,14 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Pistas e figuras usadas nas rodadas
 const rodadas = [
   { resposta: 'pato', pistas: ['Eu tenho penas.', 'Eu nado no lago.', 'Eu faço quá!'], opcoes: [['pato', '🦆'], ['gato', '🐱'], ['vaca', '🐮']] },
   { resposta: 'bola', pistas: ['Eu sou redonda.', 'Eu rolo pelo chão.', 'As crianças me chutam.'], opcoes: [['bola', '⚽'], ['tênis', '👟'], ['Queijo', '🧀']] },
   { resposta: 'sol', pistas: ['Eu sou amarelo.', 'Eu brilho no céu.', 'Eu apareço de dia.'], opcoes: [['sol', '☀️'], ['lua', '🌙'], ['Nuvem', '☁️']] },
 ];
 
+// Atividade de leitura de pistas e escolha da figura
 export default function QuemSouEu({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [opcoes, setOpcoes] = useState(() => embaralhar(rodadas[0].opcoes));
@@ -16,6 +18,7 @@ export default function QuemSouEu({ atividadeId, aoConcluir, aoFechar }) {
   const rodada = rodadas[indice];
   const ultima = indice === rodadas.length - 1;
 
+  // Validação da figura escolhida
   function responder(nome) {
     if (retorno === 'correct') return;
     const correta = nome === rodada.resposta;
@@ -29,6 +32,7 @@ export default function QuemSouEu({ atividadeId, aoConcluir, aoFechar }) {
     }
   }
 
+  // Avanço para a próxima rodada
   function avancar() {
     if (ultima) { aoConcluir(); return; }
     setIndice(indice + 1);

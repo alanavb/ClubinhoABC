@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
+// Janela com a política de privacidade da plataforma
 function PoliticaDePrivacidade({ onClose }) {
+  // Fechamento da janela pela tecla Escape
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === 'Escape') onClose();

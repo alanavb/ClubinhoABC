@@ -3,6 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Histórias curtas e perguntas do desafio bônus
 const desafios = [
   {
     historia: 'No sábado, Sofia levou um livro azul para ler no parque. Depois, ela sentou perto de uma árvore.',
@@ -24,11 +25,13 @@ const desafios = [
   },
 ];
 
+// Desafio bônus de compreensão oral de histórias
 export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
 
+  // Validação da resposta escolhida
   function responder(resposta) {
     if (retorno === 'correct') return;
     const correta = resposta === desafio.resposta;
@@ -42,6 +45,7 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
     }
   }
 
+  // Avanço para a próxima história
   function avancar() {
     if (indice === desafios.length - 1) { aoConcluir(); return; }
     setIndice((atual) => atual + 1);

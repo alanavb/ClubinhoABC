@@ -5,7 +5,9 @@ import FeedbackResposta from './FeedbackResposta';
 
 const totalRodadas = 3;
 
+// Atividade de escuta e escolha da letra
 export default function OuvirEEscolher({ atividadeId, aoConcluir, aoFechar }) {
+  // Dados de uma nova rodada
   const criarRodada = () => {
     const letra = sortear(letras);
     return { letra, alternativas: criarAlternativas(letra) };
@@ -14,6 +16,7 @@ export default function OuvirEEscolher({ atividadeId, aoConcluir, aoFechar }) {
   const [desafio, setDesafio] = useState(criarRodada);
   const [retorno, setRetorno] = useState('');
 
+  // Validação da letra escolhida
   function responder(letra) {
     if (retorno === 'correct') return;
     const correta = letra === desafio.letra;
@@ -28,6 +31,7 @@ export default function OuvirEEscolher({ atividadeId, aoConcluir, aoFechar }) {
     setRetorno('incorrect');
   }
 
+  // Avanço para a próxima rodada
   function avancarRodada() {
     if (rodada === totalRodadas) { aoConcluir(); aoFechar(); return; }
     setRodada((atual) => atual + 1);

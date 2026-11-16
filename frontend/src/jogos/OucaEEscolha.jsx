@@ -14,6 +14,7 @@ const fases = [
   { chave: 'bonus-parlenda', numero: 'BÔNUS', icone: '🎵', titulo: 'Desafio da Parlenda', obrigatoria: false, Jogo: DesafioDaParlenda },
 ];
 
+// Etapa 3: jogos de compreensão oral
 export default function OucaEEscolha({ jogavel }) {
   const { concluidas, erro, carregar, atividadeId, concluir } = useEtapa('ouca-e-escolha');
   const [faseAberta, setFaseAberta] = useState(null);
@@ -24,6 +25,7 @@ export default function OucaEEscolha({ jogavel }) {
     return <Jogo atividadeId={atividadeId(chave)} aoConcluir={() => { concluir(chave); setFaseAberta(null); }} aoFechar={() => setFaseAberta(null)} />;
   }
 
+  // RN3: verificação de desbloqueio da fase
   function faseDisponivel(indice) {
     const fase = fases[indice];
     if (!jogavel) return false;

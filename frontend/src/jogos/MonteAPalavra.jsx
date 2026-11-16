@@ -16,6 +16,7 @@ const fases = [
 
 const obrigatorias = fases.filter((fase) => fase.obrigatoria);
 
+// Etapa 2: jogos de consciência silábica
 export default function MonteAPalavra({ jogavel }) {
   const { concluidas, erro, carregar, atividadeId, concluir } = useEtapa('monte-a-palavra');
   const [faseAberta, setFaseAberta] = useState(null);
@@ -29,6 +30,7 @@ export default function MonteAPalavra({ jogavel }) {
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;
 
   // RN3: obrigatórias em sequência e bônus ao final
+  // RN3: verificação de desbloqueio da fase
   function liberada(indice) {
     if (!fases[indice].obrigatoria) return obrigatoriasFeitas === obrigatorias.length;
     return indice === 0 || concluidas.includes(fases[indice - 1].chave);

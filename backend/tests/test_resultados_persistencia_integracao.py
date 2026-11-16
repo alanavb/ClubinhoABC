@@ -5,10 +5,12 @@ from app import create_app, db
 from app.models import Atividade, Crianca, Etapa, Resultado, Responsavel
 
 
+# Testes de persistência dos resultados
 class ResultadosPersistenciaIntegracaoTest(unittest.TestCase):
-    """Integração models + banco (SQLite em memória): salvar e recuperar um Resultado.
-    Sem rota e sem mocks: cada teste monta o próprio cenário e o banco é descartado no fim."""
+    # Integra os modelos ao banco SQLite em memória.
+    # Cada teste cria seu cenário sem rota ou simulações.
 
+    # Preparação do banco, da criança e da atividade
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -28,23 +30,25 @@ class ResultadosPersistenciaIntegracaoTest(unittest.TestCase):
         db.session.add_all([crianca, atividade])
         db.session.commit()
 
-        #guardados como números simples: depois do expunge_all() os objetos acima ficam desanexados
+        # Identificadores mantidos após limpar a sessão do banco
         self.crianca_id = crianca.id
         self.atividade_id = atividade.id
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Resultado incorreto é salvo e recuperado do banco
     def test_deve_salvar_e_recuperar_resultado_no_banco_de_teste(self):
-        #uma tentativa ERRADA (garante que o False também é persistido corretamente)
+        # Tentativa incorreta registrada pela criança
         resultado = Resultado(
             crianca_id=self.crianca_id, atividade_id=self.atividade_id, resposta='B', correta=False
         )
 
-        #grava, descarta o cache da sessão e lê de novo direto do banco
+        # Grava e consulta novamente sem o cache da sessão
         db.session.add(resultado)
         db.session.commit()
         resultado_id = resultado.id
@@ -60,7 +64,7 @@ class ResultadosPersistenciaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Joana', recuperado.crianca.nome)
         self.assertEqual('ouvir', recuperado.atividade.chave)
         
-        #consulta customizada (a mesma usada pela regra RN3): tentativa errada não aparece como correta
+        # Consulta de respostas corretas não inclui a tentativa incorreta
         corretas = Resultado.query.filter_by(
             crianca_id=self.crianca_id, atividade_id=self.atividade_id, correta=True
         ).all()

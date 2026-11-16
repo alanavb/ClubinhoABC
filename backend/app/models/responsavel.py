@@ -3,6 +3,7 @@ import datetime
 from app import db
 
 
+# Modelo da conta do responsável pela família
 class Responsavel(db.Model):
     __tablename__ = 'responsaveis'
 

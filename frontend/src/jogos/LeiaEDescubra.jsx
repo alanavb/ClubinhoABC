@@ -15,6 +15,7 @@ const fases = [
 
 const obrigatorias = fases.filter((fase) => fase.obrigatoria);
 
+// Etapa 4: jogos de leitura e compreensão
 export default function LeiaEDescubra({ jogavel }) {
   const { concluidas, erro, carregar, atividadeId, concluir } = useEtapa('leia-e-descubra');
   const [faseAberta, setFaseAberta] = useState(null);
@@ -28,6 +29,7 @@ export default function LeiaEDescubra({ jogavel }) {
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;
 
   // RN3: obrigatórias em sequência e bônus ao final
+  // RN3: verificação de desbloqueio da fase
   function faseDisponivel(indice) {
     const fase = fases[indice];
     if (!jogavel) return false;

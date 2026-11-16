@@ -3,11 +3,13 @@ import TermosDeUso from '../../TermosDeUso';
 import PoliticaDePrivacidade from '../../PoliticaDePrivacidade';
 import { atualizarSenha, cadastrar, emailFoiConfirmado, entrar, enviarRecuperacaoSenha, reenviarConfirmacao } from '../../utils/auth';
 
+// Dados e regras dos formulários de autenticação
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE');
 const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
 const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
 
+// Validação dos requisitos mínimos da senha
 function senhaAtendeRequisitos(senha) {
   return senha.length >= 8
     && /[a-z]/.test(senha)
@@ -16,6 +18,7 @@ function senhaAtendeRequisitos(senha) {
     && /[^A-Za-z0-9\s]/.test(senha);
 }
 
+// Campo de senha com opção de mostrar ou ocultar o valor
 export function CampoSenha({ id, value, onChange, placeholder, autoComplete = 'new-password' }) {
   const [visivel, setVisivel] = useState(false);
 
@@ -56,6 +59,7 @@ export function CampoSenha({ id, value, onChange, placeholder, autoComplete = 'n
   );
 }
 
+// Campos reutilizados para os dados da criança
 export function CamposCrianca({ nome, setNome, dataNascimento, setDataNascimento, pet, setPet, idPrefixo = 'child' }) {
   return (
     <>
@@ -73,6 +77,7 @@ export function CamposCrianca({ nome, setNome, dataNascimento, setDataNascimento
   );
 }
 
+// Identidade visual exibida nas telas de autenticação
 export function Brand() {
   return (
     <a className="brand" href="#inicio" aria-label="Clubinho ABC">
@@ -82,6 +87,7 @@ export function Brand() {
   );
 }
 
+// Indicador das etapas do cadastro
 function SignupSteps({ step }) {
   const labels = ['Responsável', 'A criança', 'Tudo pronto'];
 
@@ -107,6 +113,7 @@ function SignupSteps({ step }) {
   );
 }
 
+// Cadastro da família e da primeira criança
 export function Signup({ onBackToLogin, onFinish }) {
   const [step, setStep] = useState(1);
   const [guardianName, setGuardianName] = useState('');
@@ -120,8 +127,10 @@ export function Signup({ onBackToLogin, onFinish }) {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
 
+  // Retorno para a etapa anterior do cadastro
   const previousStep = () => setStep((current) => Math.max(1, current - 1));
 
+  // Validação e avanço entre as etapas do formulário
   function advance(event) {
     event.preventDefault();
     setMessage('');
@@ -132,6 +141,7 @@ export function Signup({ onBackToLogin, onFinish }) {
     setStep((current) => Math.min(3, current + 1));
   }
 
+  // Criação da conta após confirmar os dados
   async function finalizarCadastro() {
     if (!senhaAtendeRequisitos(guardianPassword)) {
       setStep(1);
@@ -228,12 +238,14 @@ export function Signup({ onBackToLogin, onFinish }) {
   );
 }
 
+// Solicitação de redefinição de senha por e-mail
 function EsqueciSenha({ emailInicial, onVoltar }) {
   const [email, setEmail] = useState(emailInicial);
   const [message, setMessage] = useState('');
   const [enviado, setEnviado] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
+  // Envio do link de recuperação de senha
   async function enviar(event) {
     event.preventDefault();
     setSubmitting(true);
@@ -270,6 +282,7 @@ function EsqueciSenha({ emailInicial, onVoltar }) {
   );
 }
 
+// Entrada da conta do responsável
 export function Login({ onCreateAccount, onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -279,6 +292,7 @@ export function Login({ onCreateAccount, onLogin }) {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showForgot, setShowForgot] = useState(false);
 
+  // Autenticação da conta informada
   async function submitLogin(event) {
     event.preventDefault();
     setSubmitting(true);
@@ -347,10 +361,12 @@ export function Login({ onCreateAccount, onLogin }) {
   );
 }
 
+// Orientação para confirmação de e-mail
 export function ConfirmeSeuEmail({ email, onVoltar }) {
   const [message, setMessage] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+  // Reenvio do e-mail de confirmação
   async function reenviar() {
     setEnviando(true);
     setMessage('');
@@ -389,12 +405,14 @@ export function ConfirmeSeuEmail({ email, onVoltar }) {
   );
 }
 
+// Definição de uma nova senha após recuperação
 export function RedefinirSenha() {
   const [senha, setSenha] = useState('');
   const [confirmacao, setConfirmacao] = useState('');
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Validação e atualização da nova senha
   async function salvar(event) {
     event.preventDefault();
     if (!senhaAtendeRequisitos(senha)) {

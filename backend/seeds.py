@@ -5,8 +5,8 @@ from migrar_data_nascimento import migrar
 app = create_app()
 
 
+# Criação das atividades ausentes em uma etapa
 def garantir_atividades(etapa, atividades):
-    """Só cria o que falta; atividade existente não é alterada."""
     criadas = []
     for chave, nome, ordem, obrigatoria in atividades:
         atividade = Atividade.query.filter_by(chave=chave).first()
@@ -28,8 +28,8 @@ def garantir_atividades(etapa, atividades):
         print(f'Atividades criadas na etapa "{etapa.nome}": {", ".join(criadas)}.')
 
 
+# Atualização de atividade que mudou de etapa
 def mover_atividade(chave, etapa, nome, ordem, obrigatoria=False):
-    """Atualiza uma atividade já existente quando ela muda de etapa."""
     atividade = Atividade.query.filter_by(chave=chave).first()
     if not atividade:
         return

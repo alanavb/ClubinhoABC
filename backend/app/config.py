@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+# Configurações da aplicação e serviços externos
 class Config:
     SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL', 'sqlite:///clubinho.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False

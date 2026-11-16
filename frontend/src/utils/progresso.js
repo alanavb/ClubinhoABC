@@ -1,3 +1,4 @@
+// Verificação da conclusão das atividades obrigatórias da etapa
 export function etapaConcluida(atividade) {
     const obrigatorias = atividade.filter((atividade) => atividade.obrigatoria);
 

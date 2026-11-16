@@ -3,12 +3,14 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Palavras e figuras usadas nas rodadas
 const rodadas = [
   { palavra: 'UVA', opcoes: [['UVA', '🍇'], ['PATO', '🦆'], ['LUA', '🌙']] },
   { palavra: 'FOCA', opcoes: [['FOCA', '🦭'], ['FADA', '🧚'], ['BOLA', '⚽']] },
   { palavra: 'DADO', opcoes: [['DADO', '🎲'], ['DEDO', '☝️'], ['VACA', '🐮']] },
 ];
 
+// Atividade de associação entre palavra escrita e figura
 export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [opcoes, setOpcoes] = useState(() => embaralhar(rodadas[0].opcoes));
@@ -16,6 +18,7 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
   const rodada = rodadas[indice];
   const ultima = indice === rodadas.length - 1;
 
+  // Validação da figura escolhida
   function responder(nome) {
     if (retorno === 'correct') return;
     const correta = nome === rodada.palavra;
@@ -29,6 +32,7 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
     }
   }
 
+  // Avanço para a próxima palavra
   function avancar() {
     if (ultima) { aoConcluir(); return; }
     setIndice(indice + 1);
