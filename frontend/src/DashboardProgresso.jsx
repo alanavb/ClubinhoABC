@@ -10,6 +10,7 @@ const caminhosDosIcones = {
   media: 'M4 17l5-5 4 4 7-8M15 8h5v5',
 };
 
+// Ícone dos indicadores do painel
 function Icone({ nome }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -18,15 +19,18 @@ function Icone({ nome }) {
   );
 }
 
+// Nome abreviado do dia para o gráfico semanal
 function diaDaSemana(data) {
   // Usa meio-dia para evitar mudança de data por fuso
   return new Date(`${data}T12:00:00`).toLocaleDateString('pt-BR', { weekday: 'short' }).replace('.', '');
 }
 
+// Cálculo de percentual para gráficos
 function porcentagem(parte, total) {
   return total ? (100 * parte) / total : 0;
 }
 
+// Cartão numérico de desempenho
 function NumeroDestaque({ icone, valor, rotulo, tom }) {
   return (
     <article className={`painel-numero ${tom}`}>
@@ -36,6 +40,7 @@ function NumeroDestaque({ icone, valor, rotulo, tom }) {
   );
 }
 
+// Gráfico de distribuição entre acertos e erros
 function GraficoRosca({ acertos, erros, taxa }) {
   const total = acertos + erros;
   return (
@@ -55,6 +60,7 @@ function GraficoRosca({ acertos, erros, taxa }) {
   );
 }
 
+// Gráfico de desempenho em cada etapa
 function GraficoPorEtapa({ etapas }) {
   return (
     <section className="painel-card">
@@ -78,6 +84,7 @@ function GraficoPorEtapa({ etapas }) {
   );
 }
 
+// Gráfico da evolução nos últimos sete dias
 function GraficoEvolucao({ dias }) {
   const maior = Math.max(1, ...dias.map((dia) => dia.tentativas));
   // Marcas do eixo do gráfico
@@ -111,6 +118,7 @@ function GraficoEvolucao({ dias }) {
   );
 }
 
+// Lista de atividades com maior dificuldade
 function Dificuldades({ dificuldades }) {
   return (
     <section className="painel-card">
@@ -134,6 +142,7 @@ function Dificuldades({ dificuldades }) {
   );
 }
 
+// Recomendações de prática para o responsável
 function Recomendacoes({ recomendacoes, nomeCrianca, onNavigate }) {
   return (
     <section className="painel-card painel-recomendacoes">
@@ -147,6 +156,7 @@ function Recomendacoes({ recomendacoes, nomeCrianca, onNavigate }) {
   );
 }
 
+// Painel completo de desempenho da criança
 export default function DashboardProgresso({ criancaId, nomeCrianca, onNavigate }) {
   const { dados, erro, recarregar } = useDashboard(criancaId);
 

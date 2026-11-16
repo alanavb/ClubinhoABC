@@ -1,9 +1,6 @@
-"""Desempenho: o progresso e o status da etapa não podem fazer uma consulta por atividade.
-
-Em produção, o banco (Supabase) e a API (Render) ficam em servidores diferentes, e cada
-consulta paga o tempo de ida e volta pela rede. Por isso a quantidade de consultas de
-cada rota precisa ficar a mesma, tenha a trilha 4 ou 40 atividades.
-"""
+# Desempenho: progresso e status não podem consultar uma vez por atividade.
+# Banco e API ficam em servidores diferentes; a quantidade de consultas deve ser
+# a mesma para uma trilha com 4 ou 40 atividades.
 
 import datetime
 import unittest

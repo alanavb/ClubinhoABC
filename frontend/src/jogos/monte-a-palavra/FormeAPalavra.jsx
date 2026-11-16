@@ -3,14 +3,17 @@ import { embaralhar, falar, falarEmSequencia } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Sílabas e palavras usadas nas rodadas
 const rodadas = [
   { palavra: 'BOLA', silabas: ['BO', 'LA'], extra: 'CA', icone: '⚽' },
   { palavra: 'CASA', silabas: ['CA', 'SA'], extra: 'PO', icone: '🏠' },
   { palavra: 'MACACO', silabas: ['MA', 'CA', 'CO'], extra: 'LU', icone: '🐒' },
 ];
 
+// Embaralhamento das sílabas disponíveis em uma rodada
 const opcoesDaRodada = (rodada) => embaralhar([...rodada.silabas, rodada.extra]);
 
+// Atividade de formação de palavras por sílabas
 export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [opcoes, setOpcoes] = useState(() => opcoesDaRodada(rodadas[0]));
@@ -19,6 +22,7 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
   const rodada = rodadas[indice];
   const ultima = indice === rodadas.length - 1;
 
+  // Validação da sequência de sílabas escolhida
   function escolher(silaba) {
     if (retorno === 'correct') return;
     falar(silaba);
@@ -41,6 +45,7 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
     }
   }
 
+  // Avanço para a próxima palavra
   function avancar() {
     if (ultima) { aoConcluir(); return; }
     setIndice(indice + 1);

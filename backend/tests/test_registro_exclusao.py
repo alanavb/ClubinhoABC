@@ -1,7 +1,5 @@
-"""Exclusões deixam um registro mínimo (ação e horário) e nenhum dado da criança ou da família.
-
-O único componente substituído é a exclusão do usuário no Supabase Auth (serviço externo).
-"""
+# Exclusões deixam apenas ação e horário, sem dados da criança ou da família.
+# Apenas a exclusão do usuário no Supabase Auth é simulada.
 
 import datetime
 import unittest

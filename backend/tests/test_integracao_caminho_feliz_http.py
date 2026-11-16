@@ -1,7 +1,5 @@
-"""Pessoa 1 — caminho feliz dos endpoints principais, com HTTP real.
-
-Controllers cobertos: auth_routes (crianças) e resultados_routes.
-"""
+# Caminho feliz dos endpoints principais com HTTP real.
+# Rotas cobertas: crianças e resultados.
 
 import datetime
 import unittest

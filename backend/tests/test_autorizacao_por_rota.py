@@ -1,17 +1,16 @@
-"""Autorização por rota (OWASP: validar a permissão no servidor em TODA requisição).
+# Autorização por rota: a permissão é validada no servidor em toda requisição.
 
-Para cada rota que recebe o id de uma criança, três situações:
-  1. o responsável DONO da criança consegue usar a rota;
-  2. OUTRO responsável recebe 403 ou 404, e nada é lido nem alterado;
-  3. quem NÃO está logado recebe 401.
+# Para cada rota que recebe o identificador de uma criança, são verificados:
+# 1. O responsável da criança consegue usar a rota.
+# 2. Outro responsável recebe 403 ou 404, sem ler ou alterar dados.
+# 3. Uma pessoa sem login recebe 401.
 
-Dois testes-guarda evitam que o esquecimento vire falha de segurança:
-  - se alguém criar uma rota com id e não listá-la em ROTAS, o teste falha;
-  - se alguma rota da API deixar de exigir login, o teste falha.
+# Dois testes-guarda evitam falhas de segurança por esquecimento:
+# - Uma rota com identificador que não esteja em ROTAS faz o teste falhar.
+# - Uma rota da API que não exigir login faz o teste falhar.
 
-O bloqueio de IP por excesso de tentativas é testado em test_limite_tentativas.py;
-aqui os limites são aumentados para não atrapalhar as muitas requisições sem token.
-"""
+# O bloqueio de IP por excesso de tentativas é testado em test_limite_tentativas.py.
+# Aqui os limites são aumentados para não interferir nas requisições sem token.
 
 import datetime
 import re
@@ -24,9 +23,9 @@ from app.models import Atividade, Crianca, Etapa, Resultado, Responsavel
 DONO = {'Authorization': 'Bearer familia-a'}
 OUTRO = {'Authorization': 'Bearer familia-b'}
 
-#(método, caminho, corpo da requisição, status esperado para o dono)
-#{crianca}, {etapa} e {atividade} são trocados pelos ids criados em cada teste.
-
+# Rotas que recebem dados de uma criança para validar autorização
+# Cada item possui método, caminho, corpo e status esperado para o responsável.
+# Os marcadores {crianca}, {etapa} e {atividade} usam os ids criados no teste.
 ROTAS = [
     ('GET', '/api/criancas/{crianca}', None, 200),
     ('PUT', '/api/criancas/{crianca}', {'nome': 'Guilherme', 'data_nascimento': '2019-05-10'}, 200),
@@ -36,20 +35,22 @@ ROTAS = [
     ('GET', '/api/criancas/{crianca}/progresso', None, 200),
     ('GET', '/api/criancas/{crianca}/etapas/{etapa}/status', None, 200),
     ('POST', '/api/criancas/{crianca}/etapas/{etapa}/concluir', None, 200),
-    #Rotas em que o id da criança vai na consulta (?crianca_id=) ou no corpo da requisição.
+    # Rotas que recebem o id da criança na consulta ou no corpo da requisição
     ('GET', '/api/resultados?crianca_id={crianca}', None, 200),
     ('GET', '/api/logs?crianca_id={crianca}', None, 200),
     ('POST', '/api/resultados',
      {'crianca_id': '{crianca}', 'atividade_id': '{atividade}', 'resposta_enviada': 'A', 'resposta_esperada': 'A'}, 201),
 ]
 
-#Rota com id que NÃO é dado de criança: o catálogo de atividades de uma etapa. Continua
-#protegida por login (coberta pelo teste-guarda de token), mas não tem "dono".
+# Rota com identificador de etapa, não de criança.
+# Ela exige login, mas não possui um responsável proprietário.
 ROTAS_SEM_DONO = {('GET', '/api/etapas/<string:chave_etapa>/atividades')}
 
 
+# Testes de autorização nas rotas da API
 class AutorizacaoPorRotaTest(unittest.TestCase):
 
+    # Preparação da aplicação e autenticação simulada
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -62,22 +63,23 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
         self.context.push()
         self.client = self.app.test_client()
 
-        #O "token" é só o nome da família; o único componente substituído é a validação
-        #do token do Supabase (serviço externo).
+        # Simulação da validação externa do token do Supabase
         patcher = patch('app.auth_utils._decodificar_token',
                         side_effect=lambda token: {'sub': token, 'email': f'{token}@teste.local'})
         patcher.start()
         self.addCleanup(patcher.stop)
         self._recriar_dados()
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Criação de dados novos para cada rota testada
     def _recriar_dados(self):
-        """Banco novo a cada rota testada, porque algumas rotas (DELETE, concluir) alteram os dados."""
+        # Algumas rotas excluem ou concluem dados durante o teste.
         db.session.remove()
         db.drop_all()
         db.create_all()
@@ -101,7 +103,7 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
         db.session.commit()
         self.ids = {'crianca': guilherme.id, 'etapa': etapa.id, 'atividade': atividade.id}
 
-    #auxiliares
+    # Preenchimento dos marcadores com os ids do cenário
     def _preencher(self, valor):
         if isinstance(valor, str):
             texto = valor.format(**self.ids)
@@ -110,12 +112,13 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
             return {chave: self._preencher(item) for chave, item in valor.items()}
         return valor
 
+    # Chamada de uma rota com dados e autenticação definidos
     def _chamar(self, metodo, caminho, corpo, cabecalhos):
         return self.client.open(caminho.format(**self.ids), method=metodo,
                                 json=self._preencher(corpo) if corpo is not None else None, headers=cabecalhos)
 
+    # Estado da criança usado para identificar alterações indevidas
     def _estado_da_crianca_a(self):
-        """Resumo do que uma requisição indevida poderia ter alterado."""
         db.session.expire_all()
         guilherme = db.session.get(Crianca, self.ids['crianca'])
         return {
@@ -128,7 +131,7 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
             'criancas': Crianca.query.count(),
         }
 
-    #1. dono consegue
+    # Responsável proprietário acessa todas as rotas da criança
     def test_dono_consegue_usar_cada_rota(self):
         for metodo, caminho, corpo, status_esperado in ROTAS:
             with self.subTest(rota=f'{metodo} {caminho}'):
@@ -138,7 +141,7 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
 
                 self.assertEqual(status_esperado, resposta.status_code, resposta.get_data(as_text=True))
 
-    #2. outro responsável é barrado
+    # Outro responsável não lê nem altera os dados da criança
     def test_outro_responsavel_recebe_403_ou_404_e_nada_muda(self):
         for metodo, caminho, corpo, _ in ROTAS:
             with self.subTest(rota=f'{metodo} {caminho}'):
@@ -151,7 +154,7 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
                 self.assertEqual(antes, self._estado_da_crianca_a(), 'a requisição indevida alterou dados')
                 self.assertNotIn('Guilherme', resposta.get_data(as_text=True), 'a resposta vazou dados da criança')
 
-    #3. sem login
+    # Requisição sem token é recusada sem alterar dados
     def test_sem_token_recebe_401_e_nada_muda(self):
         for metodo, caminho, corpo, _ in ROTAS:
             with self.subTest(rota=f'{metodo} {caminho}'):
@@ -163,7 +166,7 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
                 self.assertEqual(401, resposta.status_code)
                 self.assertEqual(antes, self._estado_da_crianca_a())
 
-    #id inexistente
+    # Identificador inexistente não retorna erro interno ou dados
     def test_id_inexistente_nunca_gera_erro_500_nem_devolve_dados(self):
         for metodo, caminho, corpo, _ in ROTAS:
             with self.subTest(rota=f'{metodo} {caminho}'):
@@ -177,19 +180,21 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
                 if resposta.status_code == 200:
                     self.assertIn(resposta.get_json(), ([], {}), 'devolveu dados para uma criança que não existe')
 
-    #testes-guarda
+    # Toda rota com identificador de criança possui teste de autorização
     def test_toda_rota_com_id_no_caminho_deve_estar_na_tabela_de_rotas(self):
         cobertas = {(metodo, re.sub(r'\{(\w+)\}', r'<int:\1_id>', caminho.split('?')[0])) for metodo, caminho, _, _ in ROTAS}
         sem_teste = []
         for regra in self.app.url_map.iter_rules():
+            # Ignora rotas internas do Flask e rotas sem identificador
             if not regra.rule.startswith('/api/') or '<' not in regra.rule:
-                continue  # '/static/...' é do próprio Flask, não faz parte da API
+                continue
             for metodo in regra.methods - {'HEAD', 'OPTIONS'}:
                 if (metodo, regra.rule) not in cobertas and (metodo, regra.rule) not in ROTAS_SEM_DONO:
                     sem_teste.append(f'{metodo} {regra.rule}')
 
         self.assertEqual([], sorted(sem_teste), 'rota com id sem teste de autorização: acrescente em ROTAS')
 
+    # Toda rota da API exige autenticação
     def test_toda_rota_da_api_deve_exigir_login(self):
         verificadas = 0
         for regra in self.app.url_map.iter_rules():

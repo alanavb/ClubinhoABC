@@ -121,6 +121,7 @@ const metodologiaHistorias = {
   rimas: 'Parlendas e histórias em versos para estimular a oralidade, o ritmo e a percepção de rimas.',
 };
 
+// Separação do texto para destacar cada palavra durante a leitura
 function separarPalavras(texto) {
   return [...texto.matchAll(/[A-Za-zÀ-ÖØ-öø-ÿ]+(?:-[A-Za-zÀ-ÖØ-öø-ÿ]+)*[.,!?;:]*/g)].map((resultado) => ({
     texto: resultado[0],
@@ -128,12 +129,14 @@ function separarPalavras(texto) {
   }));
 }
 
+// Ícones dos controles de leitura
 function IconeLeitor({ tipo }) {
   if (tipo === 'reiniciar') return <svg className="reader-icon-reiniciar" viewBox="0 0 24 24" aria-hidden="true"><path className="restart-arrowhead" d="M4 3v7h7Z" /><path d="M5.5 8A8 8 0 1 1 4 14" /></svg>;
   if (tipo === 'pausar') return <svg className="reader-icon-pausar" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>;
   return <svg className="reader-icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 5 11 7-11 7Z" /></svg>;
 }
 
+// Leitor de histórias com acompanhamento da narração
 function LivroHistoria({ historia, onVoltar, onNavigate }) {
   const palavras = separarPalavras(historia.texto);
   const falaAtual = useRef(null);
@@ -148,6 +151,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
   }, []);
 
+  // Localização da palavra narrada no texto
   function palavraNoIndiceDeCaractere(indice) {
     let encontrada = 0;
     palavras.forEach((palavra, posicao) => {
@@ -156,6 +160,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     return encontrada;
   }
 
+  // Início da leitura a partir da palavra atual
   function iniciarLeitura(indiceInicial = proximaPalavra.current) {
     if (!('speechSynthesis' in window)) {
       setMensagem('A narração não está disponível neste navegador.');
@@ -199,6 +204,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     window.speechSynthesis.speak(fala);
   }
 
+  // Pausa ou retomada da leitura
   function pausarOuContinuar() {
     if (!('speechSynthesis' in window) || repetindoPalavra) return;
     if (!lendo && !pausada) {
@@ -222,6 +228,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     setMensagem('Leitura pausada.');
   }
 
+  // Reprodução isolada de uma palavra
   function repetirPalavra(indice) {
     if (!('speechSynthesis' in window)) return;
     window.speechSynthesis.cancel();
@@ -242,6 +249,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
     window.speechSynthesis.speak(fala);
   }
 
+  // Retorno da leitura ao início da história
   function recomecar() {
     proximaPalavra.current = 0;
     setPalavraAtiva(-1);
@@ -268,6 +276,7 @@ function LivroHistoria({ historia, onVoltar, onNavigate }) {
   </main>;
 }
 
+// Janela com informações pedagógicas da história
 function InformacoesHistoria({ historia, onClose }) {
   return <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="terms-dialog story-info-dialog" role="dialog" aria-modal="true" aria-labelledby="story-info-title">
@@ -280,6 +289,7 @@ function InformacoesHistoria({ historia, onClose }) {
   </div>;
 }
 
+// Página de seleção de histórias e parlendas
 export default function StoriesPage({ onNavigate }) {
   const [historiaAberta, setHistoriaAberta] = useState(null);
   const [historiaInfo, setHistoriaInfo] = useState(null);

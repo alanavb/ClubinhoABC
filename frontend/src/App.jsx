@@ -34,11 +34,13 @@ import {
 import { useResumoProgresso } from './utils/etapas';
 import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from './utils/materiais';
 
+// Dados compartilhados das telas de conta e cadastro
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
 const hojeLocal = () => new Date().toLocaleDateString('sv-SE'); // AAAA-MM-DD no fuso do navegador
 const REQUISITOS_SENHA = 'Mínimo de 8 caracteres, com pelo menos uma letra maiúscula, uma minúscula, um número e um símbolo.';
 const ERRO_SENHA = 'Sua senha ainda não atende aos requisitos.';
 
+// Avisos globais enviados pelas funcionalidades da aplicação
 function AvisoDoSistema({ onEntrarNovamente }) {
   const [aviso, setAviso] = useState(null);
 
@@ -50,6 +52,7 @@ function AvisoDoSistema({ onEntrarNovamente }) {
 
   if (!aviso) return null;
 
+  // Encerramento da sessão antes de novo login
   const entrarNovamente = async () => {
     await sair();
     setAviso(null);
@@ -69,6 +72,7 @@ function AvisoDoSistema({ onEntrarNovamente }) {
   );
 }
 
+// Itens da navegação principal
 const navItems = [
   ['início', '⛱️', 'Início'],
   ['jogos', '🎮', 'Jogos'],
@@ -77,14 +81,17 @@ const navItems = [
   ['progresso', '🛝', 'Progresso'],
 ];
 
+// Texto da idade exibido ao responsável
 function textoIdade(crianca) {
   return crianca.idade == null ? 'idade não informada' : `${crianca.idade} ${crianca.idade === 1 ? 'ano' : 'anos'}`;
 }
 
+// Formatação da data de nascimento
 function textoDataNascimento(dataNascimento) {
   return dataNascimento ? dataNascimento.split('-').reverse().join('/') : 'data não informada';
 }
 
+// Aviso para criança fora da faixa etária indicada
 function AvisoFaixaEtaria({ crianca }) {
   if (!crianca?.fora_da_faixa_etaria) return null;
   return (
@@ -95,6 +102,7 @@ function AvisoFaixaEtaria({ crianca }) {
   );
 }
 
+// Gestão da conta familiar e das crianças vinculadas
 function MinhaConta({ onNavigate, onAccountDeleted }) {
   const perfil = obterPerfil();
   const criancas = perfil?.criancas ?? [];
@@ -111,6 +119,7 @@ function MinhaConta({ onNavigate, onAccountDeleted }) {
   const [securitySubmitting, setSecuritySubmitting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
+  // Inclusão de uma nova criança na conta
   async function salvar(event) {
     event.preventDefault();
     setSubmitting(true);
@@ -127,6 +136,7 @@ function MinhaConta({ onNavigate, onAccountDeleted }) {
     }
   }
 
+  // Solicitação do link de alteração de senha
   async function solicitarAlteracaoSenha() {
     setSecuritySubmitting(true);
     setSecurityMessage('');
@@ -221,12 +231,14 @@ function MinhaConta({ onNavigate, onAccountDeleted }) {
   );
 }
 
+// Confirmação de senha antes de acessar dados familiares
 function ConfirmarResponsavel({ onBack, onConfirmed }) {
   const perfil = obterPerfil();
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
   const [enviando, setEnviando] = useState(false);
 
+  // Validação da senha do responsável
   async function confirmar(event) {
     event.preventDefault();
     setErro('');
@@ -272,6 +284,7 @@ function ConfirmarResponsavel({ onBack, onConfirmed }) {
   );
 }
 
+// Edição dos dados de uma criança
 function EditarCriancaDialog({ crianca, onClose }) {
   const [nome, setNome] = useState(crianca.nome);
   const [dataNascimento, setDataNascimento] = useState(crianca.data_nascimento || '');
@@ -279,6 +292,7 @@ function EditarCriancaDialog({ crianca, onClose }) {
   const [message, setMessage] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Atualização dos dados da criança
   async function salvar(event) {
     event.preventDefault();
     setSubmitting(true);
@@ -309,6 +323,7 @@ function EditarCriancaDialog({ crianca, onClose }) {
   );
 }
 
+// Confirmação de exclusão do perfil da criança
 function ConfirmarExclusaoCrianca({ crianca, onClose }) {
   const fraseConfirmacao = `EXCLUIR ${crianca.nome}`;
   const [confirmacao, setConfirmacao] = useState('');
@@ -316,6 +331,7 @@ function ConfirmarExclusaoCrianca({ crianca, onClose }) {
   const [excluindo, setExcluindo] = useState(false);
   const confirmacaoCorreta = confirmacao.trim().replace(/\s+/g, ' ') === fraseConfirmacao;
 
+  // Exclusão confirmada da criança
   async function confirmar(event) {
     event.preventDefault();
     setErro('');
@@ -357,6 +373,7 @@ function ConfirmarExclusaoCrianca({ crianca, onClose }) {
   );
 }
 
+// Confirmação de exclusão da conta familiar
 function ConfirmarExclusaoConta({ onClose, onDeleted }) {
   const fraseConfirmacao = 'EXCLUIR MINHA CONTA';
   const [confirmacao, setConfirmacao] = useState('');
@@ -365,6 +382,7 @@ function ConfirmarExclusaoConta({ onClose, onDeleted }) {
   const [excluindo, setExcluindo] = useState(false);
   const confirmacaoCorreta = confirmacao.trim().replace(/\s+/g, ' ') === fraseConfirmacao;
 
+  // Exclusão definitiva após dupla confirmação
   async function excluirDefinitivamente() {
     if (!confirmacaoCorreta || !confirmado || excluindo) return;
     setErro('');
@@ -410,6 +428,7 @@ function ConfirmarExclusaoConta({ onClose, onDeleted }) {
   );
 }
 
+// Mensagem final após exclusão da conta
 function ExclusaoContaConcluida({ onClose }) {
   return (
     <div className="terms-overlay" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
@@ -423,11 +442,13 @@ function ExclusaoContaConcluida({ onClose }) {
   );
 }
 
+// Cabeçalho das áreas autenticadas
 function AppHeader({ active, onNavigate }) {
   const crianca = obterCriancaSelecionada();
   const nomeCrianca = crianca?.nome || 'Manu';
   const estrelas = useEstrelas(obterCriancaId());
 
+  // Encerramento da sessão do responsável
   async function sairDaConta() {
     await sair();
     onNavigate('login');
@@ -454,6 +475,7 @@ function AppHeader({ active, onNavigate }) {
   );
 }
 
+// Rodapé com links institucionais
 function AppFooter() {
   const [showTerms, setShowTerms] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -474,6 +496,7 @@ function AppFooter() {
   );
 }
 
+// Janela de contato com a equipe
 function ContactDialog({ onClose }) {
   useEffect(() => {
     function handleKeyDown(event) {
@@ -500,14 +523,17 @@ function ContactDialog({ onClose }) {
   );
 }
 
+// Cartão resumido de progresso
 function Stat({ icon, value, label, tone }) {
   return <article className="journey-stat"><span className={`stat-icon ${tone}`}>{icon}</span><div><strong>{value}</strong><small>{label}</small></div></article>;
 }
 
+// Consulta das estrelas da criança selecionada
 function useEstrelas(criancaId) {
   return useResumoProgresso(criancaId).resumo?.estrelas ?? 0;
 }
 
+// Indicadores de progresso exibidos na página inicial
 function IndicadoresProgresso({ resumo, erro, recarregar }) {
   if (erro) {
     return <p className="form-message" role="alert">Não foi possível carregar o progresso. <button className="text-link" type="button" onClick={recarregar}>Tentar de novo</button></p>;
@@ -526,6 +552,7 @@ function IndicadoresProgresso({ resumo, erro, recarregar }) {
   );
 }
 
+// Medalhas conquistadas e bloqueadas
 function Conquistas({ conquistas }) {
   if (!conquistas) return null;
   const ganhas = conquistas.filter((conquista) => conquista.conquistada).length;
@@ -541,6 +568,7 @@ function Conquistas({ conquistas }) {
   );
 }
 
+// Mapa visual da sequência de etapas
 function MapaAventura({ nomeCrianca, etapas, tituloId }) {
   const atual = etapas?.find((etapa) => etapa.situacao === 'atual');
   const texto = !etapas
@@ -562,9 +590,11 @@ function MapaAventura({ nomeCrianca, etapas, tituloId }) {
   );
 }
 
+// Páginas controladas pelo estado principal da aplicação
 const VIEWS_PROTEGIDAS = ['home', 'jogos', 'historias', 'atividades', 'progresso', 'confirmar-responsavel', 'conta'];
 const VIEWS_PRE_LOGIN = ['login', 'signup', 'confirmar-email'];
 
+// Controle de autenticação, navegação e conteúdo principal
 function App() {
   const [view, setView] = useState('login');
   const [authTick, setAuthTick] = useState(0);
@@ -594,6 +624,7 @@ function App() {
     return () => clearInterval(intervalo);
   }, [logado]);
 
+  // Troca entre as páginas da aplicação
   const navigate = (page) => {
     const destino = page === 'início' || page === 'inicio' ? 'home' : page;
     setView(destino === 'conta' ? 'confirmar-responsavel' : destino);

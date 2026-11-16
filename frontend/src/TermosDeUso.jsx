@@ -1,6 +1,8 @@
 import { useEffect } from 'react';
 
+// Janela com os termos de uso da plataforma
 function TermosDeUso({ onClose }) {
+  // Fechamento da janela pela tecla Escape
   useEffect(() => {
     function handleKeyDown(event) {
       if (event.key === 'Escape') onClose();

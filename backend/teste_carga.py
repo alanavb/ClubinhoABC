@@ -25,9 +25,11 @@ import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
+# Limite de tempo definido pelo requisito não funcional RNF08
 LIMITE_RNF08 = 3.0  # segundos
 
 
+# Envio de uma requisição e medição do tempo de resposta
 def requisitar(url, token):
     pedido = urllib.request.Request(url, headers={'Authorization': f'Bearer {token}'})
     inicio = time.perf_counter()
@@ -38,10 +40,11 @@ def requisitar(url, token):
     except urllib.error.HTTPError as erro:
         status = erro.code
     except (urllib.error.URLError, TimeoutError):
-        status = 0  # sem resposta
+        status = 0  # Sem resposta do servidor
     return time.perf_counter() - inicio, status
 
 
+# Simulação das requisições feitas por uma pessoa na aba Progresso
 def usuario(base, token, crianca_id, rodadas):
     medicoes = []
     for _ in range(rodadas):
@@ -50,6 +53,7 @@ def usuario(base, token, crianca_id, rodadas):
     return medicoes
 
 
+# Execução de um nível de usuários simultâneos e cálculo das métricas
 def rodar_nivel(base, token, crianca_id, usuarios, rodadas):
     inicio = time.perf_counter()
     with ThreadPoolExecutor(max_workers=usuarios) as executor:
@@ -73,13 +77,16 @@ def rodar_nivel(base, token, crianca_id, usuarios, rodadas):
     }
 
 
+# Inicialização local da API com banco e token temporários
 def subir_api_local():
     """API real numa porta livre, banco SQLite temporário e token simulado."""
     from unittest.mock import patch
     from werkzeug.serving import make_server
 
-    logging.getLogger('werkzeug').setLevel(logging.ERROR)  # sem uma linha de log por requisição
+    # Oculta um registro de log para cada requisição simulada
+    logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
+    # Criação do banco temporário usado no teste local
     pasta = tempfile.mkdtemp()
     os.environ['DATABASE_URL'] = f'sqlite:///{os.path.join(pasta, "carga.db")}'
 
@@ -89,7 +96,7 @@ def subir_api_local():
     app = create_app({
         'SQLALCHEMY_DATABASE_URI': os.environ['DATABASE_URL'],
         'SUPABASE_JWKS_URL': 'https://nao-usado.local/jwks',
-        # Todos os usuários simulados saem do mesmo IP; sem isso o limite por IP barraria o teste.
+        # Evita que o limite por IP interrompa os usuários simulados
         'LIMITE_REQUISICOES_POR_MINUTO': 10 ** 9,
     })
     with app.app_context():
@@ -110,20 +117,23 @@ def subir_api_local():
                           etapa_atual_id=etapas[1].id)
         db.session.add(crianca)
         db.session.flush()
-        # Histórico parecido com o de uma criança que já jogou bastante.
+        # Histórico semelhante ao de uma criança que já realizou atividades
         for indice, atividade in enumerate(Atividade.query.all() * 5):
             db.session.add(Resultado(crianca_id=crianca.id, atividade_id=atividade.id, resposta='x',
                                      correta=indice % 3 != 0))
         db.session.commit()
         crianca_id = crianca.id
 
+    # Simulação da validação externa do token do Supabase
     patch('app.auth_utils._decodificar_token', return_value={'sub': 'carga', 'email': 'carga@teste.local'}).start()
     servidor = make_server('127.0.0.1', 0, app, threaded=True)
     threading.Thread(target=servidor.serve_forever, daemon=True).start()
     return f'http://127.0.0.1:{servidor.server_port}/api', 'token-simulado', crianca_id
 
 
+# Configuração e execução do teste de carga
 def main():
+    # Argumentos disponíveis no terminal
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('--url', help='endereço da API publicada (ex.: https://clubinhoabc.onrender.com/api)')
     parser.add_argument('--token', help='token de acesso de uma conta de teste')
@@ -132,6 +142,7 @@ def main():
     parser.add_argument('--rodadas', type=int, default=3, help='quantas vezes cada usuário abre a aba Progresso')
     args = parser.parse_args()
 
+    # Definição do ambiente publicado ou do ambiente local temporário
     if args.url:
         if not (args.token and args.crianca):
             parser.error('no modo publicado, informe também --token e --crianca')
@@ -141,6 +152,7 @@ def main():
         base, token, crianca_id = subir_api_local()
         print('Modo local: API do projeto com banco SQLite temporário')
 
+    # Exibição das métricas por nível de usuários simultâneos
     print(f'Cada usuário faz {args.rodadas * 3} requisições (/auth/me, /progresso, /dashboard).\n')
     print(f'{"usuários":>8} | {"requisições":>11} | {"ok":>5} | {"média":>8} | {"p95":>8} | {"req/s":>6} | outros status')
     resultados = []
@@ -151,6 +163,7 @@ def main():
         print(f'{r["usuarios"]:>8} | {r["requisicoes"]:>11} | {r["ok"]:>5} | {r["media"] * 1000:>6.0f}ms | '
               f'{r["p95"] * 1000:>6.0f}ms | {r["por_segundo"]:>6.1f} | {outros}')
 
+    # Identificação do maior nível que atende ao RNF08
     dentro = [r['usuarios'] for r in resultados if r['p95'] <= LIMITE_RNF08 and not r['outros']]
     print()
     if dentro:

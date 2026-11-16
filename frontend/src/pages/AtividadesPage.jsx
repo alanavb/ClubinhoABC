@@ -3,6 +3,7 @@ import { AppFooter, AppHeader } from '../components/layout/AppLayout';
 import { obterCriancaSelecionada } from '../utils/auth';
 import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from '../utils/materiais';
 
+// Página de materiais e atividades complementares
 export default function AtividadesPage({ onNavigate }) {
   const [filter, setFilter] = useState('Todas');
   const nomeCrianca = obterCriancaSelecionada()?.nome || 'criança';

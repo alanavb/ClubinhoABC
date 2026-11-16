@@ -30,6 +30,7 @@ const telasDasEtapas = {
   },
 };
 
+// Área que apresenta a trilha de jogos disponível
 export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
   const { resumo, erro, recarregar } = useResumoProgresso(obterCriancaId());
   const [selecionada, setSelecionada] = useState(null);

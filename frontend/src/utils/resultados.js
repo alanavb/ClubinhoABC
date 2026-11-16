@@ -6,10 +6,12 @@ import { obterCriancaId, obterToken } from './auth';
 
 export { API_BASE_URL };
 
+// Exibição de avisos para a interface
 function publicarAviso(mensagem, acao = null) {
   window.dispatchEvent(new CustomEvent('clubinho:aviso', { detail: { mensagem, acao } }));
 }
 
+// Conversão de erros HTTP em mensagens para a família
 function mensagemAmigavel(status) {
   if (status === 401) {
     return {
@@ -26,11 +28,13 @@ function mensagemAmigavel(status) {
   return { mensagem: 'Tivemos um probleminha ao salvar sua resposta. Tente novamente em instantes.' };
 }
 
+// Cabeçalhos autenticados das requisições
 function cabecalhosAutenticados(extras = {}) {
   const token = obterToken();
   return token ? { ...extras, Authorization: `Bearer ${token}` } : extras;
 }
 
+// RN2: envio de uma tentativa para o back-end
 export async function registrarResultadoPorId(atividadeId, respostaEnviada, respostaEsperada) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/resultados`, {
@@ -59,6 +63,7 @@ export async function registrarResultadoPorId(atividadeId, respostaEnviada, resp
   }
 }
 
+// Consulta das tentativas da criança selecionada
 export async function listarResultados() {
   const resposta = await fetch(`${API_BASE_URL}/resultados?crianca_id=${obterCriancaId()}`, {
     headers: cabecalhosAutenticados(),

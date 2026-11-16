@@ -3,17 +3,21 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
+// Frases e palavras usadas nas rodadas
 const desafios = [
   { completa: 'A bola rola.', partes: ['A bola', '.'], resposta: 'rola', opcoes: ['rola', 'mia', 'voa'], icone: '⚽' },
   { completa: 'O pato nada no lago.', partes: ['O pato', 'no lago.'], resposta: 'nada', opcoes: ['nada', 'dorme', 'pula'], icone: '🦆' },
   { completa: 'A menina rega a flor.', partes: ['A menina', 'a flor.'], resposta: 'rega', opcoes: ['rega', 'come', 'lê'], icone: '🌷' },
 ];
 
+// Atividade de completar frases pela escuta
 export default function CompleteAFrase({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
+  // Validação da palavra escolhida
   const responder = (palavra) => { if (retorno !== 'correct') { const correta = palavra === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, palavra, desafio.resposta); falar(palavra, 1, avancar); } else { falar(palavra); registrarResultadoPorId(atividadeId, palavra, desafio.resposta); } } };
+  // Avanço para a próxima frase
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage complete-frase" aria-live="polite"><div className="game-session-card sound-session">

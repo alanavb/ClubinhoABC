@@ -1,9 +1,8 @@
-"""Proteção de acesso pela URL: uma família não pode ver nem alterar os dados de outra
-trocando o id da criança no endereço, e nada é feito sem o token de login.
-
-Cada teste usa duas contas: a família A (dona da criança) e a família B (que tenta o acesso).
-O único componente substituído é a validação do token do Supabase (serviço externo).
-"""
+# Proteção de acesso pela URL: uma família não pode ver nem alterar os dados de outra
+# trocando o id da criança no endereço, e nada é feito sem o token de login.
+#
+# Cada teste usa duas contas: a família A (dona da criança) e a família B (que tenta o acesso).
+# O único componente substituído é a validação do token do Supabase (serviço externo).
 
 import datetime
 import unittest

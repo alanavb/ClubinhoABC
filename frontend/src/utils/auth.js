@@ -4,6 +4,7 @@
 import { API_BASE_URL } from './api';
 import { supabase, voltouDaConfirmacaoDeEmail } from './supabaseClient';
 
+// Estado local da sessão e do perfil da família
 let sessaoSupabase = null;
 let perfil = null; // { responsavel_id, nome, email, criancas } vindo de /auth/me
 let redefinicaoPendente = false; // chegou pelo link de "esqueci a senha"
@@ -12,15 +13,18 @@ let emailAcabouDeSerConfirmado = false;
 let loginAcabouDeAcontecer = false; // SIGNED_IN de entrar(), não de recarregar a página
 const ouvintes = new Set();
 
+// Atualização das telas que dependem da sessão
 function avisarOuvintes() {
   ouvintes.forEach((cb) => cb());
 }
 
+// Inscrição em alterações de sessão e perfil
 export function aoMudarSessao(callback) {
   ouvintes.add(callback);
   return () => ouvintes.delete(callback);
 }
 
+// Consulta do perfil familiar no back-end
 async function sincronizarPerfil() {
   if (!sessaoSupabase?.access_token) {
     perfil = null;
@@ -40,7 +44,7 @@ async function sincronizarPerfil() {
   perfil = await resposta.json();
 }
 
-// Sessão única registrada no back-end
+// Registro da sessão única no back-end
 async function registrarSessaoAtiva() {
   await fetch(`${API_BASE_URL}/auth/sessao`, {
     method: 'POST',
@@ -48,7 +52,7 @@ async function registrarSessaoAtiva() {
   });
 }
 
-// Criação do perfil no primeiro login
+// Criação do perfil no primeiro login confirmado
 async function completarCadastroSePendente() {
   if (perfil || !sessaoSupabase?.access_token) return;
 
@@ -73,6 +77,7 @@ async function completarCadastroSePendente() {
   }
 }
 
+// Sincronização após alterações de autenticação do Supabase
 const { data: inscricaoAuth } = supabase.auth.onAuthStateChange(async (event, session) => {
   sessaoSupabase = session;
   if (session && confirmacaoPendente) {
@@ -110,11 +115,12 @@ if (import.meta.hot) {
   import.meta.hot.dispose(() => inscricaoAuth.subscription.unsubscribe());
 }
 
+// Consulta da confirmação de e-mail recém-concluída
 export function emailFoiConfirmado() {
   return emailAcabouDeSerConfirmado;
 }
 
-// Só encerra quando a API confirma a troca de sessão
+// Verificação da sessão única registrada no servidor
 export async function sessaoContinuaAtiva() {
   if (!sessaoSupabase?.access_token) return true;
   try {
@@ -129,24 +135,30 @@ export async function sessaoContinuaAtiva() {
   }
 }
 
+// Consulta do fluxo de redefinição de senha
 export function precisaRedefinirSenha() {
   return redefinicaoPendente;
 }
 
+// Verificação de token de acesso disponível
 export function estaAutenticado() {
   return Boolean(sessaoSupabase?.access_token);
 }
 
+// Verificação de perfil familiar carregado
 export function perfilCompleto() {
   return Boolean(perfil);
 }
 
+// Consulta do token usado nas requisições autenticadas
 export function obterToken() {
   return sessaoSupabase?.access_token ?? null;
 }
 
+// Chave local da criança escolhida pela família
 const CHAVE_CRIANCA_SELECIONADA = 'clubinho-crianca-selecionada';
 
+// Leitura da criança selecionada no navegador
 function lerCriancaSelecionada() {
   try {
     return Number(localStorage.getItem(CHAVE_CRIANCA_SELECIONADA)) || null;
@@ -155,17 +167,19 @@ function lerCriancaSelecionada() {
   }
 }
 
-// Criança usada em jogos, estrelas e progresso
+// Consulta da criança usada em jogos, estrelas e progresso
 export function obterCriancaSelecionada() {
   const criancas = perfil?.criancas ?? [];
   const id = lerCriancaSelecionada();
   return criancas.find((crianca) => crianca.crianca_id === id) ?? criancas[0] ?? null;
 }
 
+// Consulta do identificador da criança selecionada
 export function obterCriancaId() {
   return obterCriancaSelecionada()?.crianca_id ?? null;
 }
 
+// Atualização da criança selecionada pela família
 export function selecionarCrianca(criancaId) {
   try {
     localStorage.setItem(CHAVE_CRIANCA_SELECIONADA, String(criancaId));
@@ -175,6 +189,7 @@ export function selecionarCrianca(criancaId) {
   avisarOuvintes();
 }
 
+// Cadastro de nova criança na conta familiar
 export async function adicionarCrianca({ nome, dataNascimento, avatar }) {
   const resposta = await fetch(`${API_BASE_URL}/criancas`, {
     method: 'POST',
@@ -192,6 +207,7 @@ export async function adicionarCrianca({ nome, dataNascimento, avatar }) {
   return dados;
 }
 
+// Atualização dos dados de uma criança
 export async function editarCrianca({ criancaId, nome, dataNascimento, avatar }) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}`, {
     method: 'PUT',
@@ -214,6 +230,7 @@ export async function editarCrianca({ criancaId, nome, dataNascimento, avatar })
   return dados;
 }
 
+// Exclusão confirmada de uma criança
 export async function excluirCrianca({ criancaId, confirmacao }) {
   const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}`, {
     method: 'DELETE',
@@ -240,6 +257,7 @@ export async function excluirCrianca({ criancaId, confirmacao }) {
   avisarOuvintes();
 }
 
+// Exclusão confirmada da conta familiar
 export async function excluirConta(confirmacao) {
   const resposta = await fetch(`${API_BASE_URL}/auth/conta`, {
     method: 'DELETE',
@@ -264,10 +282,12 @@ export async function excluirConta(confirmacao) {
   avisarOuvintes();
 }
 
+// Consulta do perfil familiar em memória
 export function obterPerfil() {
   return perfil;
 }
 
+// Conversão de erros de autenticação em mensagens para a família
 function mensagemAmigavel(erro) {
   const texto = erro?.message || '';
   // Trata limites de tentativas e e-mail do Supabase
@@ -278,6 +298,7 @@ function mensagemAmigavel(erro) {
   return texto || 'Não foi possível completar a operação.';
 }
 
+// Entrada da conta do responsável
 export async function entrar(email, senha) {
   loginAcabouDeAcontecer = true;
   const { error } = await supabase.auth.signInWithPassword({ email, password: senha });
@@ -288,7 +309,7 @@ export async function entrar(email, senha) {
   emailAcabouDeSerConfirmado = false;
 }
 
-// Reautenticação antes de abrir Minha Conta
+// Reautenticação antes de abrir a conta familiar
 export async function confirmarSenhaResponsavel(senha) {
   const email = perfil?.email || sessaoSupabase?.user?.email;
   if (!email) throw new Error('Não foi possível identificar a conta do responsável.');
@@ -302,6 +323,7 @@ export async function confirmarSenhaResponsavel(senha) {
   }
 }
 
+// Cadastro da conta e dos dados iniciais da criança
 export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNascimento, criancaAvatar }) {
   const { error } = await supabase.auth.signUp({
     email,
@@ -319,11 +341,13 @@ export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNa
   // Evita revelar se o e-mail já possui conta
 }
 
+// Reenvio do e-mail de confirmação
 export async function reenviarConfirmacao(email) {
   const { error } = await supabase.auth.resend({ type: 'signup', email });
   if (error) throw new Error(mensagemAmigavel(error));
 }
 
+// Envio do link de recuperação de senha
 export async function enviarRecuperacaoSenha(email) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: window.location.origin,
@@ -331,6 +355,7 @@ export async function enviarRecuperacaoSenha(email) {
   if (error) throw new Error(mensagemAmigavel(error));
 }
 
+// Atualização da senha após recuperação
 export async function atualizarSenha(novaSenha) {
   const { error } = await supabase.auth.updateUser({ password: novaSenha });
   if (error) throw new Error(mensagemAmigavel(error));
@@ -338,6 +363,7 @@ export async function atualizarSenha(novaSenha) {
   avisarOuvintes();
 }
 
+// Encerramento da sessão local
 export async function sair() {
   await supabase.auth.signOut();
 }

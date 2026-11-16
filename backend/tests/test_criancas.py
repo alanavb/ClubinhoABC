@@ -8,8 +8,10 @@ from app.models import Atividade, Crianca, Etapa, Responsavel, Resultado
 HOJE = datetime.date(2026, 10, 17)
 
 
+# Testes das regras de idade da criança
 class IdadeCriancaTest(unittest.TestCase):
 
+    # Cálculo considera se a criança já fez aniversário no ano
     def test_deve_calcular_idade_considerando_se_ja_fez_aniversario(self):
         casos = [
             (datetime.date(2020, 10, 17), 6),  # aniversário hoje
@@ -20,6 +22,7 @@ class IdadeCriancaTest(unittest.TestCase):
             with self.subTest(nascimento=nascimento):
                 self.assertEqual(idade_esperada, Crianca(data_nascimento=nascimento).idade(HOJE))
 
+    # Aviso aparece somente fora da faixa etária indicada
     def test_deve_avisar_somente_quando_idade_sai_da_faixa_de_6_a_7_anos(self):
         casos = [
             (datetime.date(2020, 10, 18), True),   # ainda tem 5 anos
@@ -31,6 +34,7 @@ class IdadeCriancaTest(unittest.TestCase):
             with self.subTest(nascimento=nascimento):
                 self.assertEqual(fora, Crianca(data_nascimento=nascimento).fora_da_faixa_etaria(HOJE))
 
+    # Cadastro antigo sem data permanece compatível
     def test_cadastro_antigo_sem_data_nao_tem_idade_nem_aviso(self):
         crianca = Crianca(data_nascimento=None)
 
@@ -38,8 +42,10 @@ class IdadeCriancaTest(unittest.TestCase):
         self.assertFalse(crianca.fora_da_faixa_etaria(HOJE))
 
 
+# Testes de integração das rotas de crianças
 class AdicionarCriancaIntegracaoTest(unittest.TestCase):
 
+    # Preparação do banco, da família e da criança inicial
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -66,12 +72,14 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         token.start()
         self.addCleanup(token.stop)
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Nova criança aparece junto à criança já cadastrada
     def test_deve_adicionar_segunda_crianca_e_listar_as_duas_no_perfil(self):
         criada = self.client.post(
             '/api/criancas',
@@ -85,6 +93,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('2020-02-01', criada.get_json()['data_nascimento'])
         self.assertEqual(['Bia', 'Leo'], [c['nome'] for c in perfil.get_json()['criancas']])
 
+    # Cadastro antigo com idade continua aceito
     def test_conta_antiga_sem_data_de_nascimento_conclui_cadastro(self):
         token = patch('app.auth_utils._decodificar_token', return_value={'sub': 'user-antigo', 'email': 'velho@gmail.com'})
         token.start()
@@ -101,6 +110,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Teo', crianca['nome'])
         self.assertIsNone(crianca['data_nascimento'])
 
+    # Progresso é calculado separadamente para cada criança
     def test_mapa_da_aventura_mostra_progresso_real_de_cada_crianca(self):
         etapa1 = Etapa.query.first()
         etapa2 = Etapa(chave='monte-a-palavra', nome='Monte a Palavra', ordem=2)
@@ -123,6 +133,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual([('atual', 50), ('bloqueada', 0)], [(e['situacao'], e['percentual']) for e in mapa_bia])
         self.assertEqual([('atual', 0), ('bloqueada', 0)], [(e['situacao'], e['percentual']) for e in mapa_leo])
 
+    # Última etapa concluída libera as conquistas finais
     def test_ultima_etapa_completa_conta_como_concluida_e_libera_conquistas(self):
         etapa = Etapa.query.first()  # única etapa do cenário: é também a última
         atividade = Atividade(etapa_id=etapa.id, chave='ouvir', nome='Ouvir', ordem=1, obrigatoria=True)
@@ -138,6 +149,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('concluida', resumo['etapas'][0]['situacao'])
         self.assertEqual({'primeira-atividade', 'etapa-caca-letras', 'trilha-completa'}, conquistadas)
 
+    # Data futura não permite cadastrar criança
     def test_deve_retornar_400_quando_data_de_nascimento_esta_no_futuro(self):
         resposta = self.client.post(
             '/api/criancas',
@@ -149,6 +161,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertIn('futuro', resposta.get_json()['erro'])
         self.assertEqual(1, Crianca.query.count())
 
+    # Crianças iguais não são duplicadas na mesma conta
     def test_nao_deve_cadastrar_duas_criancas_iguais_na_mesma_conta(self):
         resposta = self.client.post(
             '/api/criancas',
@@ -160,6 +173,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
         self.assertEqual(1, Crianca.query.count())
 
+    # Acentos não permitem duplicar uma criança na mesma conta
     def test_nao_deve_cadastrar_criancas_iguais_quando_apenas_o_acento_muda(self):
         primeira = self.client.post(
             '/api/criancas',
@@ -177,6 +191,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
         self.assertEqual(2, Crianca.query.count())
 
+    # Crianças iguais podem existir em contas diferentes
     def test_deve_permitir_criancas_iguais_em_contas_diferentes(self):
         outro_responsavel = Responsavel(
             supabase_user_id='outro-user', nome='Rui', email='rui@example.test'
@@ -197,6 +212,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual(201, resposta.status_code)
         self.assertEqual(2, Crianca.query.count())
 
+    # Edição não cria dados iguais aos de outra criança da conta
     def test_nao_deve_editar_crianca_para_dados_iguais_aos_de_outra(self):
         criada = self.client.post(
             '/api/criancas',
@@ -214,6 +230,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('Esta criança já está cadastrada nesta conta.', resposta.get_json()['erro'])
         self.assertEqual('Leo', db.session.get(Crianca, criada['crianca_id']).nome)
 
+    # Responsável edita os dados da criança vinculada
     def test_deve_editar_crianca_do_responsavel_autenticado(self):
         bia = Crianca.query.filter_by(nome='Bia').first()
 
@@ -228,6 +245,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         self.assertEqual('2019-06-12', resposta.get_json()['data_nascimento'])
         self.assertEqual('🦊', resposta.get_json()['avatar'])
 
+    # Responsável não edita criança vinculada a outra conta
     def test_nao_deve_editar_crianca_de_outro_responsavel(self):
         etapa = Etapa.query.first()
         outro_responsavel = Responsavel(

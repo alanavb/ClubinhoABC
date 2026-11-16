@@ -1,6 +1,7 @@
 from app import db
 
 
+# Modelo de atividade disponível em uma etapa
 class Atividade(db.Model):
     __tablename__ = 'atividades'
 

@@ -1,8 +1,5 @@
-"""Auditoria sem dados desnecessários: os logs guardam QUEM (ids), O QUÊ (ação) e QUANDO,
-mas não o e-mail do responsável, o nome da criança nem o texto das respostas.
-
-O fluxo usa valores bem incomuns para que o teste não passe por acaso.
-"""
+# Auditoria guarda identificadores, ação e horário, sem dados pessoais ou respostas.
+# O fluxo usa valores incomuns para impedir que o teste passe por coincidência.
 
 import unittest
 from unittest.mock import patch

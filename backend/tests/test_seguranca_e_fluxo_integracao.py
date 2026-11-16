@@ -5,8 +5,10 @@ from app import create_app, db
 from app.auth_utils import TokenInvalidoError
 from app.models import Atividade, Crianca, Etapa, Responsavel
 
+# Testes de segurança e fluxo de resultados
 class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
 
+    # Preparação de famílias, criança e atividade
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -53,25 +55,29 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
             'resposta_esperada': 'A',
         }
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Dados do token de um responsável
     def _claims(self, responsavel):
         return {'sub': responsavel.supabase_user_id, 'email': responsavel.email}
 
+    # Resultado sem token é recusado
     def test_post_resultados_semToken_deveRetornar401ComMensagem(self):
-        # Act
+        # Envio sem autenticação
         resposta = self.client.post('/api/resultados', json=self.dados_validos)
 
-        # Assert
+        # Conferência da mensagem de acesso negado
         self.assertEqual(401, resposta.status_code)
         self.assertIn('Token de autenticação ausente', resposta.get_json()['erro'])
 
+    # Token inválido não expõe detalhes técnicos
     def test_post_resultados_comTokenInvalido_deveRetornar401SemDetalheTecnico(self):
-        # Act
+        # Simulação de falha na validação do token
         with patch(
             'app.auth_utils._decodificar_token',
             side_effect=TokenInvalidoError('assinatura JWT incompatível com a chave 123'),
@@ -82,13 +88,14 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
                 headers={'Authorization': 'Bearer token-invalido'},
             )
 
-        # Assert
+        # Conferência da resposta segura
         self.assertEqual(401, resposta.status_code)
         self.assertEqual('Não foi possível validar sua sessão. Entre novamente.', resposta.get_json()['erro'])
         self.assertNotIn('JWT', resposta.get_json()['erro'])
 
+    # Falha inesperada não expõe detalhes internos
     def test_post_resultados_comFalhaInesperada_deveRetornar500SemDetalheTecnico(self):
-        # Act
+        # Simulação de falha durante o registro
         with patch(
             'app.auth_utils._decodificar_token',
             return_value=self._claims(self.responsavel_dono),
@@ -102,15 +109,16 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
 
-        # Assert
+        # Conferência da resposta segura
         corpo = resposta.get_json()
         self.assertEqual(500, resposta.status_code)
         self.assertEqual('Não foi possível concluir esta ação agora. Tente novamente em instantes.', corpo['erro'])
         self.assertIn('codigo', corpo)
         self.assertNotIn('tabela privada', corpo['erro'])
 
+    # Responsável não acessa resultado de outra criança
     def test_post_resultados_comResponsavelDeOutraCrianca_deveRetornar403ComMensagem(self):
-        # Act
+        # Envio com token de outro responsável
         with patch(
             'app.auth_utils._decodificar_token',
             return_value=self._claims(self.responsavel_sem_permissao),
@@ -121,12 +129,13 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
 
-        # Assert
+        # Conferência da permissão negada
         self.assertEqual(403, resposta.status_code)
         self.assertEqual('Você não tem permissão para realizar esta ação.', resposta.get_json()['erro'])
 
+    # Responsável da criança registra o resultado
     def test_post_resultados_comResponsavelDono_deveRetornar201ComCorpo(self):
-        # Act
+        # Envio com token do responsável vinculado
         with patch(
             'app.auth_utils._decodificar_token',
             return_value=self._claims(self.responsavel_dono),
@@ -137,7 +146,7 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
 
-        # Assert
+        # Conferência do resultado criado
         self.assertEqual(201, resposta.status_code)
         self.assertEqual(
             {
@@ -149,8 +158,9 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
             resposta.get_json(),
         )
 
+    # Resultado correto atualiza o progresso da criança
     def test_resultadoEProgresso_daMesmaCrianca_deveRefletirAtividadeConcluida(self):
-        # Act
+        # Registro da resposta e consulta do progresso
         with patch(
             'app.auth_utils._decodificar_token',
             return_value=self._claims(self.responsavel_dono),
@@ -165,7 +175,7 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
 
-        # Assert
+        # Conferência da atividade concluída e da conquista
         self.assertEqual(201, registro.status_code)
         self.assertEqual(200, progresso.status_code)
         corpo = progresso.get_json()

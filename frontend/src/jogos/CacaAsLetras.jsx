@@ -13,6 +13,7 @@ const fases = [
   { chave: 'bonus', icone: '💎', titulo: 'Desafio Bônus', rotulo: 'BÔNUS', requisito: null, obrigatoria: false, Jogo: Prova },
 ];
 
+// Etapa 1: jogos de reconhecimento de letras
 export default function CacaAsLetras({ jogavel }) {
   const { concluidas, erro, carregar, atividadeId, concluir } = useEtapa('caca-as-letras');
   const [faseAberta, setFaseAberta] = useState(null);

@@ -6,10 +6,12 @@ from app import create_app, db
 from app.models import Atividade, Crianca, Etapa, Resultado, Responsavel
 
 
+# Testes de erro no registro de resultados
 class ResultadosErroApiIntegracaoTest(unittest.TestCase):
-    """Integração rota + controller + banco (SQLite em memória): erro 4xx do POST /api/resultados.
-    Só a validação do token do Supabase é substituída; o resto da cadeia é real."""
+    # Integra rota, controller e banco SQLite em memória para erros 4xx.
+    # Apenas a validação externa do token do Supabase é simulada.
 
+    # Preparação do banco, da criança e da atividade
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -30,26 +32,28 @@ class ResultadosErroApiIntegracaoTest(unittest.TestCase):
         db.session.commit()
         self.client = self.app.test_client()
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Campos obrigatórios ausentes retornam erro sem gravar resultado
     def test_deve_retornar_400_e_mensagem_quando_faltam_campos_obrigatorios(self):
-        #traz a criança e a atividade, mas não traz as respostas
+        # Dados sem as respostas da atividade
         dados = {
             'crianca_id': self.crianca.id,
             'atividade_id': self.atividade.id,
         }
 
-        # Act
+        # Envio autenticado com dados incompletos
         with patch('app.auth_utils._decodificar_token', return_value={'sub': 'user-test', 'email': 'ana@gmail.com'}):
             resposta = self.client.post(
                 '/api/resultados', json=dados, headers={'Authorization': 'Bearer token-de-teste'}
             )
 
-        #status, corpo de erro (só cita o que falta) e nada gravado no banco
+        # Conferência do erro e da ausência de persistência
         self.assertEqual(400, resposta.status_code)
         mensagem = resposta.get_json()['erro']
         self.assertIn('Campos obrigatórios ausentes', mensagem)

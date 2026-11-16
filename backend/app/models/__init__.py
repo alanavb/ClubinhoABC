@@ -1,3 +1,4 @@
+# Modelos disponíveis para as rotas e controladores da aplicação
 from .responsavel import Responsavel
 from .crianca import Crianca
 from .etapa import Etapa
