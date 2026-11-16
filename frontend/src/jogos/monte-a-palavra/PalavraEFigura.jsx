@@ -18,13 +18,13 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
 
   function responder(nome) {
     if (retorno === 'correct') return;
-    falar(nome);
     const correta = nome === rodada.palavra;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
       if (ultima) registrarResultadoPorId(atividadeId, nome, rodada.palavra);
-      window.setTimeout(avancar, 800);
+      falar(nome, 1, avancar);
     } else {
+      falar(nome);
       registrarResultadoPorId(atividadeId, nome, rodada.palavra);
     }
   }
@@ -38,7 +38,7 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session sound-stage" aria-live="polite"><div className="game-session-card word-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>FASE 3 · LEIA E ENCONTRE</span><small className="game-round">Palavra {indice + 1} de {rodadas.length}</small>
+    <span>FASE 3 · LEIA E ENCONTRE</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
     <h2>Que figura é esta palavra?</h2><p>Leia a palavra e toque na figura certa. Se precisar, ouça a palavra.</p>
     <div className="missing-sentence written-word"><b>{rodada.palavra}</b></div>
     <button className="sentence-clue" type="button" onClick={() => falar(rodada.palavra)}>🔊 Ouvir a palavra</button>

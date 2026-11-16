@@ -20,13 +20,13 @@ export default function ContarSilabas({ atividadeId, aoConcluir, aoFechar }) {
 
   function responder(quantidade) {
     if (retorno === 'correct') return;
-    falar(quantidade);
     const correta = quantidade === rodada.silabas;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
       if (ultima) registrarResultadoPorId(atividadeId, quantidade, rodada.silabas);
-      window.setTimeout(avancar, 1500);
+      falar(quantidade, 1, avancar);
     } else {
+      falar(quantidade);
       registrarResultadoPorId(atividadeId, quantidade, rodada.silabas);
     }
   }
@@ -39,7 +39,7 @@ export default function ContarSilabas({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session" aria-live="polite"><div className="game-session-card word-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>DESAFIO BÔNUS · CONTE AS SÍLABAS</span><small className="game-round">Palavra {indice + 1} de {rodadas.length}</small>
+    <span>DESAFIO BÔNUS · CONTE AS SÍLABAS</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
     <h2>Quantos pedacinhos?</h2><p>Toque na figura para ouvir a palavra. Depois, conte as sílabas.</p>
     <button className="word-picture" type="button" onClick={() => falar(rodada.palavra)} aria-label={`Ouvir a palavra ${rodada.palavra}`}><i aria-hidden="true">{rodada.icone}</i><i className="sound-badge" aria-hidden="true">🔊</i></button>
     <div className="missing-sentence written-word"><b>{retorno === 'correct' ? rodada.separada : rodada.palavra}</b></div>

@@ -22,9 +22,8 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
       // primeiro a sílaba, depois a palavra inteira
-      falarEmSequencia([silaba, rodada.palavra]);
+      falarEmSequencia([silaba, rodada.palavra], 1, avancar);
       if (ultima) registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
-      window.setTimeout(avancar, 800);
     } else {
       falar(silaba);
       registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
@@ -41,7 +40,7 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
   const [antes, depois] = rodada.partes;
   return <section className="game-session" aria-live="polite"><div className="game-session-card word-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>FASE 2 · QUAL SÍLABA FALTA?</span><small className="game-round">Palavra {indice + 1} de {rodadas.length}</small>
+    <span>FASE 2 · QUAL SÍLABA FALTA?</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
     <h2>Complete a palavra</h2><p>Ouça a palavra e escolha o pedacinho que está faltando.</p>
     <button className="sentence-clue" type="button" onClick={() => falar(rodada.palavra)}>🔊 Ouvir a palavra</button>
     <div className="missing-sentence syllable-slots">

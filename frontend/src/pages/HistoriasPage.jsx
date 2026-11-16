@@ -68,12 +68,57 @@ const stories = [{
   time: '3 min',
   tema: 'ceu',
   texto: 'Nino levou seu patinete para o parque. No caminho, ele encontrou uma amiga e seu cachorro. Os dois pararam perto de uma árvore para beber água. Depois, Nino voltou para casa muito contente.',
+}, {
+  id: 'parlendas-brincar',
+  icon: '🎵',
+  title: 'Parlendas para Brincar',
+  nivel: 'Nível 4',
+  nivelClasse: 'rimas',
+  objetivo: 'Conhecer parlendas da tradição oral, percebendo ritmo, repetição e rimas.',
+  tag: '3 PARLENDAS',
+  time: '3 min',
+  tema: 'parlenda',
+  texto: 'Um, dois, feijão com arroz. Três, quatro, feijão no prato. Cinco, seis, falar inglês. Sete, oito, comer biscoito. Nove, dez, comer pastéis. Uni, duni, tê. Salamê, mingüê. Um sorvete colorê. O escolhido foi você! Batatinha quando nasce se esparrama pelo chão. Menininha quando dorme põe a mão no coração.',
+}, {
+  id: 'parlendas-roda',
+  icon: '🪇',
+  title: 'Parlendas de Roda',
+  nivel: 'Nível 4',
+  nivelClasse: 'rimas',
+  objetivo: 'Conhecer parlendas da tradição oral, percebendo ritmo, repetição e rimas.',
+  tag: '3 PARLENDAS',
+  time: '3 min',
+  tema: 'parlenda',
+  texto: 'Hoje é domingo, pede cachimbo. O cachimbo é de ouro, bate no touro. O touro é valente, bate na gente. A gente é fraco, cai no buraco. O buraco é fundo, acabou-se o mundo. Corre, cutia, na casa da tia. Corre, cipó, na casa da avó. Lencinho na mão caiu no chão. Moça bonita do meu coração. O macaco foi à feira, não teve o que comprar. Comprou uma cadeira pra comadre se sentar.',
+}, {
+  id: 'lila-e-lua',
+  icon: '🌙',
+  title: 'Lila e a Lua',
+  nivel: 'Nível 4',
+  nivelClasse: 'rimas',
+  objetivo: 'Acompanhar uma história curta em versos, percebendo palavras com sons parecidos.',
+  tag: 'HISTÓRIA RIMADA',
+  time: '2 min',
+  tema: 'parlenda',
+  texto: 'Lila viu a lua lá no céu. Pegou sua lanterna e fez um papel. Dobrou uma estrela, pintou de azul. E deixou o desenho perto do baú. A lua brilhou, Lila sorriu. Boa noite, lua! E assim dormiu.',
+}, {
+  id: 'gato-sapato',
+  icon: '🐱',
+  title: 'O Gato e o Sapato',
+  nivel: 'Nível 4',
+  nivelClasse: 'rimas',
+  objetivo: 'Acompanhar uma história curta em versos, percebendo palavras com sons parecidos.',
+  tag: 'HISTÓRIA RIMADA',
+  time: '2 min',
+  tema: 'parlenda',
+  texto: 'Guto, o gato, achou um sapato. Era amarelo e muito engraçado. Ele pôs uma pata, depois a outra. Deu um pulinho e chamou a lontra. O sapato saiu voando no ar. Guto riu muito e voltou a brincar.',
 }];
 
 const metodologiaHistorias = {
   iniciante: 'Palavras e frases curtas, com repetição de sílabas simples para apoiar a decodificação.',
   intermediario: 'Frases conectadas e vocabulário do cotidiano para desenvolver ritmo e fluência de leitura.',
   avancado: 'Histórias curtas com início, acontecimento e desfecho para apoiar a compreensão do texto.',
+  rimas: 'Parlendas e histórias em versos para estimular a oralidade, o ritmo e a percepção de rimas.',
 };
 
 function separarPalavras(texto) {
@@ -242,8 +287,8 @@ export default function StoriesPage({ onNavigate }) {
 
   return <main className="app-shell"><AppHeader active="historias" onNavigate={onNavigate} />
     <section className="page-content stories-page">
-      <section className="stories-intro"><img src="/images/ilustra-historias.png" alt="" /><div><span>Hora da história</span><h1>Vamos ler juntos?</h1><p>Escolha uma história e acompanhe a leitura palavra por palavra.</p></div></section>
-      <h2 className="section-title">Escolha uma história</h2>
+      <section className="stories-intro"><img src="/images/ilustra-historias.png" alt="" /><div><span>Hora da história</span><h1>Vamos ler juntos?</h1><p>Escolha uma história ou parlenda e acompanhe a leitura palavra por palavra.</p></div></section>
+      <h2 className="section-title">Escolha uma leitura</h2>
       <div className="story-grid">{stories.map((historia) => <article className={`story-card story-card-${historia.tema}`} key={historia.id}><button className="story-card-open" type="button" onClick={() => setHistoriaAberta(historia)} aria-label={`Abrir a história ${historia.title}`}><span className={`story-level story-level-${historia.nivelClasse}`}>{historia.nivel}</span><i>{historia.icon}</i><strong>{historia.title}</strong><small>{historia.tag}</small><em>{historia.time}</em></button><button className="story-info-button" type="button" onClick={() => setHistoriaInfo(historia)} aria-label={`Informações sobre ${historia.title}`} title="Sobre esta história">i</button></article>)}</div>
       <p className="parent-note">A história foi criada para o Clubinho ABC. Novas leituras serão adicionadas gradualmente.</p>
     </section>

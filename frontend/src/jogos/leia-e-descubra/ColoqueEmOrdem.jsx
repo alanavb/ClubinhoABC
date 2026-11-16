@@ -12,6 +12,7 @@ const rodadas = [
 
 const frasesEmbaralhadas = (rodada) => embaralhar(rodada.frases.map((frase, indice) => ({ numero: indice + 1, frase })));
 const ordemCerta = (rodada) => rodada.frases.map((_, indice) => indice + 1).join('-'); // ex.: "1-2-3"
+const momentos = ['Primeiro', 'Depois', 'Por último'];
 
 export default function ColoqueEmOrdem({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
@@ -23,9 +24,9 @@ export default function ColoqueEmOrdem({ atividadeId, aoConcluir, aoFechar }) {
 
 function escolher({ numero, frase }) {
     if (retorno === 'correct' || escolhidas.includes(numero)) return;
-    falar(frase);
     const proximas = [...escolhidas, numero];
     if (proximas.length < rodada.frases.length) {
+      falar(frase);
       setEscolhidas(proximas);
       setRetorno('');
       return;
@@ -36,8 +37,9 @@ function escolher({ numero, frase }) {
       setEscolhidas(proximas);
       setRetorno('correct');
       if (ultima) registrarResultadoPorId(atividadeId, resposta, ordemCerta(rodada));
-      window.setTimeout(avancar, 1200);
+      falar(frase, 1, avancar);
     } else {
+      falar(frase);
       registrarResultadoPorId(atividadeId, resposta, ordemCerta(rodada));
       setEscolhidas([]);
       setRetorno('incorrect');
@@ -52,16 +54,17 @@ function escolher({ numero, frase }) {
     setRetorno('');
   }
 
-  return <section className="game-session sound-stage" aria-live="polite"><div className="game-session-card sound-session">
+  return <section className="game-session sound-stage order-game-session" aria-live="polite"><div className="game-session-card sound-session order-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>FASE 3 · COLOQUE EM ORDEM</span><small className="game-round">História {indice + 1} de {rodadas.length} · {rodada.titulo}</small>
-    <h2>O que aconteceu primeiro?</h2><p>Leia as frases. Toque na primeira, depois na segunda e por último na terceira.</p>
-    <div className="missing-sentence reading-note" aria-label="Sua história">
-      {rodada.frases.map((_, lugar) => escolhidas[lugar]
-        ? <b key={lugar}>{lugar + 1}. {rodada.frases[escolhidas[lugar] - 1]}</b>
-        : <i key={lugar}>{lugar + 1}</i>)}
+    <span>FASE 3 · COLOQUE EM ORDEM</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
+    <h2>Organize a história</h2><p>Qual frase aconteceu primeiro? Toque nas frases na ordem em que aconteceram.</p>
+    <div className="order-sequence" aria-label="Sua sequência da história">
+      <small>SUA SEQUÊNCIA</small>
+      <div>{rodada.frases.map((_, lugar) => escolhidas[lugar]
+        ? <p key={lugar}><span>{lugar + 1}</span><b>{momentos[lugar]}: {rodada.frases[escolhidas[lugar] - 1]}</b></p>
+        : <p key={lugar} className="order-empty"><span>{lugar + 1}</span><em>{momentos[lugar]}</em></p>)}</div>
     </div>
-    <div className="sentence-signs">{opcoes.map((opcao) => <button type="button" key={opcao.numero} disabled={escolhidas.includes(opcao.numero)} onClick={() => escolher(opcao)}><b>{opcao.frase}</b></button>)}</div>
+    <div className="sentence-signs order-options">{opcoes.map((opcao) => <button type="button" key={opcao.numero} disabled={escolhidas.includes(opcao.numero)} onClick={() => escolher(opcao)}><b>{opcao.frase}</b></button>)}</div>
     <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />}</div>
   </div></section>;
 }

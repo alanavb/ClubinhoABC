@@ -37,7 +37,10 @@ function prepararTextoParaFala(texto) {
 }
 
 export function falar(texto, velocidade = 1, aoTerminar = null) {
-  if (!('speechSynthesis' in window)) return;
+  if (!('speechSynthesis' in window)) {
+    aoTerminar?.();
+    return;
+  }
   const sintetizador = window.speechSynthesis;
   // Cancelar sem haver fala em curso pode causar uma pausa desnecessária em
   // alguns navegadores. Só interrompemos quando realmente há algo para parar.
@@ -56,10 +59,19 @@ export function falar(texto, velocidade = 1, aoTerminar = null) {
 }
 
 // falar() duas vezes seguidas cortaria a primeira fala
-export function falarEmSequencia(textos) {
-  if (!('speechSynthesis' in window)) return;
+export function falarEmSequencia(textos, velocidade = 1, aoTerminar = null) {
+  if (!('speechSynthesis' in window)) {
+    aoTerminar?.();
+    return;
+  }
   window.speechSynthesis.cancel();
-  textos.forEach((texto) => {
-    window.speechSynthesis.speak(criarFala(prepararTextoParaFala(texto)));
+  textos.forEach((texto, indice) => {
+    const fala = criarFala(prepararTextoParaFala(texto));
+    fala.rate = velocidade;
+    if (indice === textos.length - 1 && aoTerminar) {
+      fala.onend = aoTerminar;
+      fala.onerror = aoTerminar;
+    }
+    window.speechSynthesis.speak(fala);
   });
 }

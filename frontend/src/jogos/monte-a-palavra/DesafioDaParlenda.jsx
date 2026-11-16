@@ -37,13 +37,16 @@ export default function DesafioDaParlenda({ atividadeId, aoConcluir, aoFechar })
   const parlenda = parlendas[indice];
   const ultima = indice === parlendas.length - 1;
 
-  function tocar(texto) {
+  function tocar(texto, aoTerminar = null) {
     // Um pouco mais rápida para preservar o ritmo natural da parlenda.
     const identificador = audioAtual.current + 1;
     audioAtual.current = identificador;
     setAudioTocando(true);
     falar(texto, 1.16, () => {
-      if (audioAtual.current === identificador) setAudioTocando(false);
+      if (audioAtual.current === identificador) {
+        setAudioTocando(false);
+        aoTerminar?.();
+      }
     });
   }
 
@@ -69,13 +72,13 @@ export default function DesafioDaParlenda({ atividadeId, aoConcluir, aoFechar })
 
   function responder(opcao) {
     if (retorno === 'correct') return;
-    tocar(opcao);
     const correta = opcao === parlenda.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
       if (ultima) registrarResultadoPorId(atividadeId, opcao, parlenda.resposta);
-      window.setTimeout(avancar, 1050);
+      tocar(opcao, avancar);
     } else {
+      tocar(opcao);
       registrarResultadoPorId(atividadeId, opcao, parlenda.resposta);
     }
   }

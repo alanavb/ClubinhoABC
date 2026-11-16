@@ -20,13 +20,30 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
   const [indiceRodada, setIndiceRodada] = useState(0);
   const [acertos, setAcertos] = useState([]);
   const [rodadaConcluida, setRodadaConcluida] = useState(false);
+  const [concluido, setConcluido] = useState(false);
   const opcaoTocada = useRef('');
+  const finalizando = useRef(false);
+  const falaFinalTerminou = useRef(false);
+  const popupMostrado = useRef(false);
   const desafios = rodadas[indiceRodada];
   const ultimaRodada = indiceRodada === rodadas.length - 1;
 
+  function mostrarConclusao() {
+    if (popupMostrado.current) return;
+    popupMostrado.current = true;
+    setConcluido(true);
+    window.setTimeout(aoConcluir, 1300);
+  }
+
+  function terminarFalaFinal() {
+    if (finalizando.current) mostrarConclusao();
+    else falaFinalTerminou.current = true;
+  }
+
   function tocarOpcao(indice, opcao) {
     opcaoTocada.current = `${indice}-${opcao}`;
-    falar(opcao);
+    const eUltimoAcerto = ultimaRodada && opcao === desafios[indice].resposta && acertos.length === desafios.length - 1;
+    falar(opcao, 1, eUltimoAcerto ? terminarFalaFinal : null);
   }
 
   function responder(indice, opcao) {
@@ -35,12 +52,15 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
     opcaoTocada.current = '';
     // Depois de acertar, a linha vira um espaço de prática: qualquer opção
     // ainda pode ser ouvida sem mudar o resultado já registrado.
-    if (acertos.includes(indice)) {
+    if (concluido || acertos.includes(indice)) {
       if (!jaTocou) falar(opcao);
       return;
     }
-    if (!jaTocou) falar(opcao);
     const desafio = desafios[indice];
+    if (!jaTocou) {
+      const eUltimoAcerto = ultimaRodada && opcao === desafio.resposta && acertos.length === desafios.length - 1;
+      falar(opcao, 1, eUltimoAcerto ? terminarFalaFinal : null);
+    }
     if (opcao !== desafio.resposta) {
       registrarResultadoPorId(atividadeId, opcao, desafio.resposta);
       return;
@@ -51,8 +71,10 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
     if (novosAcertos.length === desafios.length) {
       setRodadaConcluida(true);
       if (ultimaRodada) {
+        if (finalizando.current) return;
+        finalizando.current = true;
         registrarResultadoPorId(atividadeId, 'rimas encontradas', 'rimas encontradas');
-        aoConcluir();
+        if (falaFinalTerminou.current) mostrarConclusao();
       }
     }
   }
@@ -65,7 +87,7 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session" aria-live="polite"><div className="game-session-card word-session rimas-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>DESAFIO BÔNUS · PALAVRAS QUE RIMAM</span><small className="game-round">Rodada {indiceRodada + 1} de {rodadas.length}</small>
+    <span>DESAFIO BÔNUS · PALAVRAS QUE RIMAM</span><small className="game-round">{indiceRodada + 1} de {rodadas.length}</small>
     <h2>Caça-rimas</h2><p>Qual palavra rima?</p>
     <div className="rimas-lista">{desafios.map((desafio, indice) => {
       const acertou = acertos.includes(indice);
@@ -77,5 +99,6 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
       </article>;
     })}</div>
     {rodadaConcluida && !ultimaRodada && <button className="small-primary rimas-proxima" type="button" onClick={proximaRodada}>Próxima rodada →</button>}
+    {concluido && <div className="rimas-conclusao" role="status"><span aria-hidden="true">🎉</span><strong>Você conseguiu!</strong><small>Parabéns, encontrou todas as rimas!</small></div>}
   </div></section>;
 }

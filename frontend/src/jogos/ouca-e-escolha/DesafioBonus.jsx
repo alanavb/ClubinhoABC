@@ -31,14 +31,14 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
 
   function responder(resposta) {
     if (retorno === 'correct') return;
-    falar(resposta);
     const correta = resposta === desafio.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
       if (indice === desafios.length - 1 && atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
-      window.setTimeout(avancar, 800);
-    } else if (atividadeId) {
-      registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
+      falar(resposta, 1, avancar);
+    } else {
+      falar(resposta);
+      if (atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
     }
   }
 
@@ -50,7 +50,7 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session sound-stage desafio-bonus" aria-live="polite"><div className="game-session-card sound-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>DESAFIO BÔNUS · DETETIVE DE HISTÓRIAS</span><small className="game-round">Caso {indice + 1} de {desafios.length}</small>
+    <span>DESAFIO BÔNUS · DETETIVE DE HISTÓRIAS</span><small className="game-round">{indice + 1} de {desafios.length}</small>
     <h2>Encontre a pista certa</h2>
     <div className="detective-step"><small>1 · OUÇA A HISTÓRIA</small><div className="detective-story"><button type="button" onClick={() => falar(desafio.historia)}>🔊 Ouvir história</button></div></div>
     <section className="detective-question"><small>2 · LEIA A PERGUNTA</small><h3>{desafio.pergunta}</h3></section>
