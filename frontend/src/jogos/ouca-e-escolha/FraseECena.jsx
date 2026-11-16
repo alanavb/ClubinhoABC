@@ -13,12 +13,12 @@ export default function FraseECena({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const rodada = rodadas[indice];
-  const responder = (id, texto) => { if (retorno !== 'correct') { const correta = id === rodada.resposta; falar(texto); setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === rodadas.length - 1) registrarResultadoPorId(atividadeId, texto, rodada.frase); window.setTimeout(avancar, 800); } else registrarResultadoPorId(atividadeId, texto, rodada.frase); } };
+  const responder = (id, texto) => { if (retorno !== 'correct') { const correta = id === rodada.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === rodadas.length - 1) registrarResultadoPorId(atividadeId, texto, rodada.frase); falar(texto, 1, avancar); } else { falar(texto); registrarResultadoPorId(atividadeId, texto, rodada.frase); } } };
   const avancar = () => { if (indice === rodadas.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frase-cena" aria-live="polite"><div className="game-session-card sound-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>FASE 1 · RÁDIO DAS HISTÓRIAS</span><small className="game-round">História {indice + 1} de {rodadas.length}</small>
+    <span>FASE 1 · RÁDIO DAS HISTÓRIAS</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
     <h2>Qual cena o rádio contou?</h2><p>Ouça a história no rádio e escolha a cena certa.</p>
     <div className="story-radio"><span aria-hidden="true">📻</span><button type="button" onClick={() => falar(rodada.frase)} aria-label="Ouvir frase">🔊 Ouvir narrador</button></div>
     <div className="scene-options">{embaralhar(rodada.opcoes).map(({ id, icone, texto }) => <button type="button" key={id} onClick={() => responder(id, texto)}><span>{icone}</span><b>{texto}</b></button>)}</div>

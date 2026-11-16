@@ -18,14 +18,14 @@ export default function LeiaOBilhete({ atividadeId, aoConcluir, aoFechar }) {
 
     function responder(opcao) {
         if (retorno === 'correct') return;
-        falar(opcao);
         const correta = opcao === rodada.resposta;
-        setRetorno(correta ? 'correct' : 'incorret');
+        setRetorno(correta ? 'correct' : 'incorrect');
         if (correta) {
         // acerto só é gravado na última rodada
         if (ultima) registrarResultadoPorId(atividadeId, opcao, rodada.resposta);
-      window.setTimeout(avancar, 800);
+      falar(opcao, 1, avancar);
         } else {
+      falar(opcao);
       registrarResultadoPorId(atividadeId, opcao, rodada.resposta);
         }
     }
@@ -37,12 +37,14 @@ export default function LeiaOBilhete({ atividadeId, aoConcluir, aoFechar }) {
         setRetorno('');
     }
 
-    return <section className="game-session sound-stage" aria-live="polite"><div className="game-session-card sound-session">
+    return <section className="game-session sound-stage" aria-live="polite"><div className="game-session-card sound-session bilhete-session">
         <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-        <span>FASE 1 · LEIA O BILHETE</span><small className="game-round">Bilhete {indice + 1} de {rodadas.length}</small>
-        <h2>O que o bilhete diz?</h2><p>Leia o bilhete com atenção. Depois, escolha a resposta certa.</p>
-        <div className="missing-sentence reading-note"><small>📝 Bilhete {rodada.remetente}</small><b>{rodada.texto}</b></div>
-        <button className="sentence-clue" type="button" onClick={() => falar(rodada.texto)}>🔊 Ouvir o bilhete (se precisar)</button>
+        <span>FASE 1 · LEIA O BILHETE</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
+        <h2>Leia o bilhete</h2>
+        <article className="bilhete-card">
+          <header><small>📝 Bilhete {rodada.remetente}</small><button type="button" onClick={() => falar(rodada.texto)} aria-label="Ouvir o bilhete">🔊</button></header>
+          <p>{rodada.texto}</p>
+        </article>
         <h3 className="reading-question">{rodada.pergunta}</h3>
         <div className="sentence-signs">{opcoes.map((opcao) => <button type="button" key={opcao} onClick={() => responder(opcao)}><b>{opcao}</b></button>)}</div>
         <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={retorno === 'correct' && ultima} />}</div>

@@ -13,7 +13,7 @@ export default function FrasesSonoras({ atividadeId, aoConcluir, aoFechar }) {
   const [indice, setIndice] = useState(0);
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
-  const responder = (frase) => { if (retorno !== 'correct') { const correta = frase === desafio.resposta; falar(frase); setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, frase, desafio.resposta); window.setTimeout(avancar, 800); } else registrarResultadoPorId(atividadeId, frase, desafio.resposta); } };
+  const responder = (frase) => { if (retorno !== 'correct') { const correta = frase === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, frase, desafio.resposta); falar(frase, 1, avancar); } else { falar(frase); registrarResultadoPorId(atividadeId, frase, desafio.resposta); } } };
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 
   return <section className="game-session sound-stage frases-sonoras" aria-live="polite"><div className="game-session-card sound-session">

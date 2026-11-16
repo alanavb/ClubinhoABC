@@ -52,7 +52,7 @@ export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session" aria-live="polite"><div className="game-session-card memory-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Fechar atividade">×</button>
-    <span>ATIVIDADE 3</span><small className="game-round">Rodada {rodada} de {totalRodadas}</small><h2>Jogo da memória</h2><p>Encontre os pares das letras.</p>
+    <span>ATIVIDADE 3</span><small className="game-round">{rodada} de {totalRodadas}</small><h2>Jogo da memória</h2><p>Encontre os pares das letras.</p>
     <div className="memory-board">{cartas.map((carta, indice) => { const revelada = abertas.includes(indice) || encontradas.includes(indice); return <button className={[(revelada ? 'revealed' : ''), (encontradas.includes(indice) ? 'matched' : '')].join(' ')} type="button" onClick={() => escolherCarta(indice)} disabled={encontradas.includes(indice)} key={carta.par + '-' + indice}>{revelada ? carta.valor : '?'}</button>; })}</div>
     <div className="feedback-slot">{retorno && <FeedbackResposta tipo={retorno} rodadaConcluida={rodadaConcluida} />}</div>
   </div></section>;

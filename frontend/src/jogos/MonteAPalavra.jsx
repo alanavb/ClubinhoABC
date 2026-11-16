@@ -23,7 +23,7 @@ export default function MonteAPalavra({ jogavel }) {
   const aberta = fases.find((fase) => fase.chave === faseAberta);
   if (aberta) {
     const { Jogo, chave } = aberta;
-    return <Jogo atividadeId={atividadeId(chave)} aoConcluir={() => { concluir(chave); if (chave !== 'bonus-rimas') setFaseAberta(null); }} aoFechar={() => setFaseAberta(null)} />;
+    return <Jogo atividadeId={atividadeId(chave)} aoConcluir={() => { concluir(chave); setFaseAberta(null); }} aoFechar={() => setFaseAberta(null)} />;
   }
 
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;

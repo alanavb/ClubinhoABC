@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { embaralhar, falar } from '../alfabeto';
+import { embaralhar, falar, falarEmSequencia } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
@@ -32,9 +32,8 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
     if (resposta === rodada.palavra) {
       setMontada(proxima);
       setRetorno('correct');
-      falar(rodada.palavra);
       if (ultima) registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
-      window.setTimeout(avancar, 800);
+      falarEmSequencia([silaba, rodada.palavra], 1, avancar);
     } else {
       registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
       setMontada([]);
@@ -52,7 +51,7 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
 
   return <section className="game-session" aria-live="polite"><div className="game-session-card word-session">
     <button className="close-game-session" type="button" onClick={aoFechar} aria-label="Voltar para as fases">×</button>
-    <span>FASE 1 · FORME A PALAVRA</span><small className="game-round">Palavra {indice + 1} de {rodadas.length}</small>
+    <span>FASE 1 · FORME A PALAVRA</span><small className="game-round">{indice + 1} de {rodadas.length}</small>
     <h2>Monte a palavra</h2><p>Toque na figura para ouvir. Depois, toque nas sílabas na ordem certa.</p>
     <button className="word-picture" type="button" onClick={() => falar(rodada.palavra)} aria-label={`Ouvir a palavra ${rodada.palavra}`}><i aria-hidden="true">{rodada.icone}</i><i className="sound-badge" aria-hidden="true">🔊</i></button>
     <div className="missing-sentence syllable-slots" aria-label={`Palavra montada: ${montada.join('') || 'vazia'}`}>
