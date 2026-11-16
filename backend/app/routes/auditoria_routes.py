@@ -9,6 +9,7 @@ auditoria_bp =  Blueprint('auditoria',__name__)
 
 @auditoria_bp.route('/logs', methods=['GET'])
 @requer_autenticacao
+# Rota de consulta dos registros de auditoria
 def logs():
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:

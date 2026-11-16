@@ -3,10 +3,12 @@ from app import db
 from app.models import Atividade, Crianca, Etapa, Resultado
 
 
+# Erro de acesso fora da etapa ou família
 class AcessoNegadoError(Exception):
-    """Atividade fora da etapa atual (RN1) ou criança de outra família."""
+    pass
 
 
+# Busca da criança autorizada
 def _buscar_crianca(crianca_id, responsavel_id=None):
     crianca = Crianca.query.get(crianca_id)
     if not crianca:
@@ -16,8 +18,8 @@ def _buscar_crianca(crianca_id, responsavel_id=None):
     return crianca
 
 
+# Consulta das atividades respondidas corretamente
 def _atividades_acertadas(crianca_id):
-    """Uma consulta só, em vez de uma por atividade: o banco fica em outro servidor."""
     linhas = (
         Resultado.query
         .filter_by(crianca_id=crianca_id, correta=True)
@@ -28,8 +30,9 @@ def _atividades_acertadas(crianca_id):
     return {atividade_id for (atividade_id,) in linhas}
 
 
+# RN1: validação de acesso à atividade
 def pode_acessar_atividade(crianca_id, atividade_id):
-    # RN1: a criança acessa a etapa atual e as já concluídas (revisão), nunca as futuras
+    # RN1: permite etapa atual e revisão das concluídas
     crianca = _buscar_crianca(crianca_id)
 
     atividade = Atividade.query.get(atividade_id)
@@ -39,8 +42,9 @@ def pode_acessar_atividade(crianca_id, atividade_id):
     return atividade.etapa.ordem <= crianca.etapa_atual.ordem
 
 
+# Lista das atividades acessíveis à criança
 def listar_atividades_acessiveis(crianca_id, responsavel_id=None):
-    # RN1: lista só as atividades da etapa atual da criança
+    # RN1: lista atividades da etapa atual
     crianca = _buscar_crianca(crianca_id, responsavel_id)
 
     atividades = (
@@ -52,6 +56,7 @@ def listar_atividades_acessiveis(crianca_id, responsavel_id=None):
     return crianca, atividades
 
 
+# Lista de atividades pelo identificador da etapa
 def listar_atividades_por_etapa(chave_etapa):
     etapa = Etapa.query.filter_by(chave=chave_etapa).first()
     if not etapa:
@@ -61,6 +66,7 @@ def listar_atividades_por_etapa(chave_etapa):
     return etapa, atividades
 
 
+# Resumo de progresso da criança
 def resumo_progresso(crianca_id, responsavel_id=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id)
     estrelas = 0
@@ -76,7 +82,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             estrelas += 1 if atividade.obrigatoria else 2
             bonus_concluido = bonus_concluido or not atividade.obrigatoria
 
-    # antes da atual: concluída; depois: bloqueada; a atual mostra o % das obrigatórias
+    # Define situação e progresso de cada etapa
     ordem_atual = crianca.etapa_atual.ordem
     etapas = []
     for etapa in Etapa.query.order_by(Etapa.ordem).all():
@@ -94,7 +100,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
             'situacao': situacao, 'percentual': percentual,
         })
 
-    # a última etapa não tem para onde avançar: 100% já conta como concluída
+    # Conclui a última etapa sem avançar a trilha
     if etapas and etapas[-1]['situacao'] == 'atual' and etapas[-1]['percentual'] == 100:
         etapas[-1]['situacao'] = 'concluida'
 
@@ -120,6 +126,7 @@ def resumo_progresso(crianca_id, responsavel_id=None):
         'conquistas': conquistas,
     }
 
+# Situação e atividades concluídas da etapa
 def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     crianca = _buscar_crianca(crianca_id, responsavel_id)  # RN3: conclui com acerto em todas as obrigatórias
 
@@ -149,6 +156,7 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     }
 
 
+# RN3: avanço após concluir atividades obrigatórias
 def avancar_etapa_se_concluida(crianca_id, etapa_id, responsavel_id=None, confirmar=True):
     crianca = _buscar_crianca(crianca_id, responsavel_id)
     if crianca.etapa_atual_id != etapa_id:

@@ -14,14 +14,14 @@ class Config:
         'CORS_ALLOWED_ORIGINS', 'http://localhost:5173'
     ).split(',')
 
-    # chave pública para validar o JWT do Supabase
+    # Chave pública para validar o JWT
     SUPABASE_JWKS_URL = os.environ.get('SUPABASE_JWKS_URL')
 
-    # só para excluir a conta no Supabase Auth; nunca vai para o front nem para o Git
+    # Credenciais administrativas do Supabase
     SUPABASE_URL = os.environ.get('SUPABASE_URL')
     SUPABASE_SECRET_KEY = os.environ.get('SUPABASE_SECRET_KEY')
 
-    # ver app/limite_tentativas.py
+    # Limite de requisições por IP
     LIMITE_REQUISICOES_POR_MINUTO = 120
     LIMITE_FALHAS_AUTENTICACAO = 5
     JANELA_FALHAS_SEGUNDOS = 15 * 60

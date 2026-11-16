@@ -1,4 +1,4 @@
-"""GET /api/logs: o responsável vê a trilha de auditoria da própria conta, com horário de Brasília."""
+# Consulta dos registros de auditoria da própria conta
 
 import re
 import unittest
@@ -10,8 +10,10 @@ from app.models import Etapa, Responsavel
 TOKEN = {'Authorization': 'Bearer token-de-teste'}
 
 
+# Testes da rota de auditoria
 class LogsAuditoriaTest(unittest.TestCase):
 
+    # Preparação da conta e da autenticação
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -33,22 +35,24 @@ class LogsAuditoriaTest(unittest.TestCase):
         patcher.start()
         self.addCleanup(patcher.stop)
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Cadastro gera log com horário de Brasília
     def test_get_logs_aposCadastrarCrianca_deveRetornar200ComHorarioDeBrasilia(self):
-        # Arrange: o cadastro da criança gera um registro de auditoria
+        # Cadastro que gera o registro de auditoria
         criada = self.client.post('/api/criancas', headers=TOKEN,
                                   json={'nome': 'Bia', 'data_nascimento': '2019-05-10'})
         self.assertEqual(201, criada.status_code)
 
-        # Act
+        # Consulta dos registros da conta
         resposta = self.client.get('/api/logs', headers=TOKEN)
 
-        # Assert
+        # Conferência do registro retornado
         self.assertEqual(200, resposta.status_code)
         registro = resposta.get_json()[0]
         self.assertEqual('cadastro_crianca', registro['acao'])

@@ -1,6 +1,4 @@
-// PDFs feitos para o projeto, em public/materiais/. Material novo: PDF na pasta + linha em "materiais".
-// A ordem segue a trilha (letras, sílabas, palavras, frases, textos). O guia abaixo foi só referência
-// para os eixos; os PDFs não são cópia nem adaptação das fichas dele.
+// Catálogo de PDFs próprios em public/materiais
 
 export const REFERENCIA = {
     titulo: 'Atividades de alfabetização para imprimir em PDF',
@@ -8,7 +6,7 @@ export const REFERENCIA = {
     url: 'https://viacarreira.com/atividades-de-alfabetizacao-para-imprimir-em-pdf/'
 };
 
-// categoria = filtro da página; eixo = conteúdo trabalhado
+// Categorias usadas no filtro de materiais
 export const CATEGORIAS = ['Todas', 'Para Imprimir', 'Colorir','Recortar'];
 
 export const kitDaSemana = {

@@ -28,7 +28,7 @@ export default function MonteAPalavra({ jogavel }) {
 
   const obrigatoriasFeitas = obrigatorias.filter((fase) => concluidas.includes(fase.chave)).length;
 
-  // RN3: as obrigatórias abrem em sequência; o bônus só abre depois de todas elas
+  // RN3: obrigatórias em sequência e bônus ao final
   function liberada(indice) {
     if (!fases[indice].obrigatoria) return obrigatoriasFeitas === obrigatorias.length;
     return indice === 0 || concluidas.includes(fases[indice - 1].chave);
@@ -40,7 +40,7 @@ export default function MonteAPalavra({ jogavel }) {
     <div className="sentence-world-activities">{fases.map(({ chave, numero, icone, titulo, obrigatoria }, indice) => {
       const pronta = Boolean(atividadeId(chave));
       let acao;
-      // fase feita continua jogável para treinar (revisão)
+      // Mantém fases concluídas disponíveis para revisão
       if (concluidas.includes(chave)) acao = <><b className="phase-done">⭐ Feito!</b>{jogavel && atividadeId(chave) && <button type="button" className="jogar-de-novo" onClick={() => setFaseAberta(chave)}>↻ Jogar de novo</button>}</>;
       else if (!jogavel || !liberada(indice)) acao = <small className="phase-locked">🔒</small>;
       else if (!pronta) acao = <small className="phase-locked">Carregando...</small>;

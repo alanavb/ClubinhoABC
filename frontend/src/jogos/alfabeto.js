@@ -12,22 +12,25 @@ export const palavrasDoAlfabeto = [
 
 export const letras = palavrasDoAlfabeto.map(({ letra }) => letra);
 
+// Embaralhamento das alternativas dos jogos
 export function embaralhar(lista) {
   return [...lista].sort(() => Math.random() - 0.5);
 }
 
+// Sorteio de um item da lista
 export function sortear(lista) {
   return lista[Math.floor(Math.random() * lista.length)];
 }
 
+// Criação de alternativas com uma resposta correta
 export function criarAlternativas(resposta, quantidade = 4) {
   return embaralhar([resposta, ...embaralhar(letras.filter((letra) => letra !== resposta)).slice(0, quantidade - 1)]);
 }
 
 const vogaisAcentuadas = { a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú' };
 
-// algumas vozes leem CA, MA e UVA como sigla ("cê, á"); em minúsculas e com acento
-// na única vogal ("cá"), a sílaba sai como um som só
+// Normaliza sílabas que a voz lê como siglas
+// Preparação do texto para a síntese de voz
 function prepararTextoParaFala(texto) {
   if (!/^[A-ZÀ-ÖØ-Þ]{2,3}$/.test(texto)) return texto;
   const minusculo = texto.toLowerCase();
@@ -36,18 +39,17 @@ function prepararTextoParaFala(texto) {
   return minusculo.replace(vogais[0], vogaisAcentuadas[vogais[0]]);
 }
 
+// Reprodução de uma fala única
 export function falar(texto, velocidade = 1, aoTerminar = null) {
   if (!('speechSynthesis' in window)) {
     aoTerminar?.();
     return;
   }
   const sintetizador = window.speechSynthesis;
-  // Cancelar sem haver fala em curso pode causar uma pausa desnecessária em
-  // alguns navegadores. Só interrompemos quando realmente há algo para parar.
+  // Interrompe apenas uma fala em andamento
   if (sintetizador.speaking || sintetizador.pending) sintetizador.cancel();
   sintetizador.resume();
-  // Mantém a voz brasileira preferida da main e os controles de ritmo/finalização
-  // usados pelos jogos de sílabas e parlendas.
+  // Configura ritmo e retorno após a fala
   const fala = criarFala(prepararTextoParaFala(texto));
   fala.rate = velocidade;
   if (aoTerminar) {
@@ -58,7 +60,8 @@ export function falar(texto, velocidade = 1, aoTerminar = null) {
   sintetizador.resume();
 }
 
-// falar() duas vezes seguidas cortaria a primeira fala
+// Reproduz palavras sem interromper a fala anterior
+// Reprodução de palavras em sequência
 export function falarEmSequencia(textos, velocidade = 1, aoTerminar = null) {
   if (!('speechSynthesis' in window)) {
     aoTerminar?.();

@@ -1,12 +1,5 @@
-"""Base compartilhada dos testes de integração com HTTP real.
-
-Sobe o Flask de verdade em uma porta aleatória (equivalente ao RANDOM_PORT do
-Spring) e usa um banco SQLite em memória, novo a cada teste. Cada chamada dos
-testes passa pela rede local: rota -> autenticação -> controller -> banco.
-
-O único componente substituído é a validação do token do Supabase (serviço
-externo): `_decodificar_token` devolve as claims do responsável de teste.
-"""
+# Base compartilhada dos testes de integração HTTP
+# Usa servidor Flask e banco SQLite temporários
 
 import datetime
 import threading
@@ -20,14 +13,16 @@ from werkzeug.serving import make_server
 from app import create_app, db
 from app.models import Atividade, Etapa, Responsavel
 
-TIMEOUT = 5  # segundos: evita teste pendurado se o servidor travar
+TIMEOUT = 5
 
+# Classe base para testes de integração HTTP
 class IntegracaoHttpBase(unittest.TestCase):
 
+    # Preparação de servidor, banco e usuário autenticado
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
-            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',  # nunca o banco de desenvolvimento
+            'SQLALCHEMY_DATABASE_URI': 'sqlite:///:memory:',
             'SUPABASE_JWKS_URL': 'https://nao-usado-em-testes.local/jwks',
        })
         self.context = self.app.app_context()
@@ -35,13 +30,12 @@ class IntegracaoHttpBase(unittest.TestCase):
         db.create_all()
         self.addCleanup(self._descartar_banco)
 
-        # Dados únicos por execução: nada depende de cadastro manual ou de outro teste.
+        # Identificação exclusiva do responsável do teste
         sufixo = uuid.uuid4().hex[:12]
         self.supabase_user_id = f'user-{sufixo}'
         self.email = f'responsavel-{sufixo}@teste.local'
 
-        # Dados do jogo (o que o seeds.py cria) + o responsável autenticado.
-        # O jogo é o mesmo para todos os testes, mas o responsável é único por execução.
+        # Dados da trilha e do responsável autenticado
         etapa = Etapa(chave=f'etapa-{sufixo}', nome='Caça às Letras', ordem=1)
         responsavel = Responsavel(
             supabase_user_id=self.supabase_user_id, nome='Ana', email=self.email
@@ -57,60 +51,67 @@ class IntegracaoHttpBase(unittest.TestCase):
 
         self._iniciar_servidor()
         self._simular_token_do_supabase()
-     # ------------------------------------------------------------------ infraestrutura
+    # Inicialização do servidor temporário
     def _iniciar_servidor(self):
-        self.servidor = make_server('127.0.0.1', 0, self.app, threaded=True) #porta 0 = aleatoria
+        self.servidor = make_server('127.0.0.1', 0, self.app, threaded=True)
         self.base_url = f'http://127.0.0.1:{self.servidor.server_port}'
         thread = threading.Thread(target=self.servidor.serve_forever, daemon=True)
         thread.start()
         self.addCleanup(self._parar_servidor, thread)
 
+    # Encerramento do servidor temporário
     def _parar_servidor(self, thread):
         self.servidor.shutdown()
         thread.join(timeout=TIMEOUT)
         self.servidor.server_close()
 
+    # Simulação da validação do token do Supabase
     def _simular_token_do_supabase(self):
-       claims = {'sub': self.supabase_user_id, 'email': self.email}
-       patcher = patch('app.auth_utils._decodificar_token', return_value=claims)
-       patcher.start()
-       self.addCleanup(patcher.stop)
+        claims = {'sub': self.supabase_user_id, 'email': self.email}
+        patcher = patch('app.auth_utils._decodificar_token', return_value=claims)
+        patcher.start()
+        self.addCleanup(patcher.stop)
     
+    # Remoção do banco temporário
     def _descartar_banco(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
-    # ------------------------------------------------------------------ helpers de HTTP
+    # Cabeçalho de autenticação das requisições
     @property
     def auth(self):
         return {'Authorization': 'Bearer token-de-teste'}
     
+    # Requisição GET autenticada
     def get(self, caminho, **kwargs):
         return requests.get(self.base_url + caminho, headers=self.auth, timeout=TIMEOUT, **kwargs)
 
+    # Requisição POST autenticada
     def post(self, caminho, json=None):
         return requests.post(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
 
+    # Requisição PUT autenticada
     def put(self, caminho, json=None):
         return requests.put(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
 
+    # Requisição DELETE autenticada
     def delete(self, caminho, json=None):
         return requests.delete(self.base_url + caminho, headers=self.auth, json=json, timeout=TIMEOUT)
-    # ------------------------------------------------------------------ helpers de dados
+    # Dados válidos para criar uma criança
     def montar_request_crianca(self, nome, data_nascimento=None, avatar='🦊'):
-        # 1º de janeiro de 6 anos atrás: a idade é 6 em qualquer dia do ano.
+        # Data que mantém a idade mínima em qualquer dia do ano
         data_nascimento = data_nascimento or datetime.date(datetime.date.today().year - 6, 1, 1)
         return {'nome': nome, 'data_nascimento': data_nascimento.isoformat(), 'avatar': avatar}
 
+    # Criação de criança pelo endpoint real
     def criar_crianca(self, nome):
-        """Cria a criança pelo endpoint real e devolve o JSON da resposta."""
         resposta = self.post('/api/criancas', json=self.montar_request_crianca(nome))
         self.assertEqual(201, resposta.status_code, resposta.text)
         return resposta.json()
 
+    # Registro de resultado pelo endpoint real
     def criar_resultado(self, crianca_id, enviada, esperada):
-        """Registra um resultado pelo endpoint real e devolve o JSON da resposta."""
         resposta = self.post('/api/resultados', json={
             'crianca_id': crianca_id,
             'atividade_id': self.atividade_id,

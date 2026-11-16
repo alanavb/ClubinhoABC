@@ -1,8 +1,4 @@
-"""Gera os PDFs da área de Materiais do Clubinho ABC (A4, para imprimir).
-
-Uso único: os PDFs gerados ficam em public/materiais/ e são arquivos estáticos
-do projeto. Este script NÃO faz parte do projeto (reportlab não é dependência).
-"""
+# Geração dos PDFs da área de Materiais
 
 import os
 import random
@@ -13,6 +9,7 @@ from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 from reportlab.pdfgen import canvas
 
+# Caminho de saída e dimensões do documento
 SAIDA = os.environ.get('SAIDA_MATERIAIS', '/home/claude/ClubinhoABC/public/materiais')
 W, H = A4
 M = 42                      #margem lateral
@@ -34,7 +31,7 @@ AZUL_CLARO = HexColor('#E3EAF8')
 BOLD = 'Helvetica-Bold'
 NORMAL = 'Helvetica'
 
-#palavras do jogo do alfabeto do app (letra, palavra, artigo + palavra)
+# Dados do alfabeto usados nos materiais
 ALFABETO = [
     ('A', 'ABELHA', 'uma abelha'), ('B', 'BOLA', 'uma bola'), ('C', 'CASA', 'uma casa'),
     ('D', 'DADO', 'um dado'), ('E', 'ELEFANTE', 'um elefante'), ('F', 'FOCA', 'uma foca'),
@@ -43,7 +40,7 @@ ALFABETO = [
 ]
 
 
-#estrutura do documento
+# Estrutura de um documento PDF
 class Documento:
     def __init__(self, arquivo, titulo, eixo):
         self.arquivo, self.titulo, self.eixo, self.paginas = arquivo, titulo, eixo, []
@@ -69,6 +66,7 @@ class Documento:
         return total
 
 
+# Cabeçalho padrão das páginas
 def cabecalho(c, titulo, instrucao):
     c.setFillColor(ROSA)
     c.setFont(BOLD, 10)
@@ -90,6 +88,7 @@ def cabecalho(c, titulo, instrucao):
     c.line(M, H - 120, W - M, H - 120)
 
 
+# Rodapé com página e eixo pedagógico
 def rodape(c, numero, total, eixo):
     c.setFillColor(CINZA)
     c.setFont(NORMAL, 8.5)
@@ -97,9 +96,9 @@ def rodape(c, numero, total, eixo):
     c.drawRightString(W - M, 28, f'página {numero} de {total}')
 
 
-#desenho básico
+# Elementos gráficos reutilizáveis
+# Texto com contorno para traçado ou pintura
 def texto_contorno(c, texto, x, y, tamanho, tracejado=True, cor=MARROM, largura=1.3, preenchimento=None, fonte=BOLD):
-    """Letra só com o contorno (tracejado para a criança cobrir, ou contínuo para pintar)."""
     c.saveState()
     c.setStrokeColor(cor)
     c.setLineWidth(largura)
@@ -117,8 +116,8 @@ def texto_contorno(c, texto, x, y, tamanho, tracejado=True, cor=MARROM, largura=
     c.restoreState()
 
 
+# Linhas de apoio para caligrafia
 def pauta(c, x, y, largura, tamanho):
-    """Linhas de caligrafia: base, meio (tracejada) e altura das maiúsculas."""
     c.saveState()
     c.setLineWidth(0.9)
     c.setStrokeColor(CINZA)
@@ -130,18 +129,21 @@ def pauta(c, x, y, largura, tamanho):
     c.restoreState()
 
 
+# Fileira de itens para traçado
 def fileira_tracejada(c, itens, y, tamanho, passo):
     pauta(c, M, y, W - 2 * M, tamanho)
     for i, item in enumerate(itens):
         texto_contorno(c, item, M + 8 + i * passo, y, tamanho)
 
 
+# Texto centralizado na página
 def centro(c, texto, x, y, tamanho, fonte=BOLD, cor=MARROM):
     c.setFillColor(cor)
     c.setFont(fonte, tamanho)
     c.drawCentredString(x, y, texto)
 
 
+# Caixa pontilhada para recorte
 def caixa_tracejada(c, x, y, w, h, tesoura=True):
     c.saveState()
     c.setStrokeColor(CINZA)
@@ -153,8 +155,8 @@ def caixa_tracejada(c, x, y, w, h, tesoura=True):
         desenhar_tesoura(c, x + 6, y + h - 12)
 
 
+# Ícone de tesoura nas atividades de recorte
 def desenhar_tesoura(c, x, y):
-    """Tesoura simples: duas lâminas cruzadas e dois aros."""
     c.saveState()
     c.setStrokeColor(CINZA)
     c.setLineWidth(1.2)
@@ -165,19 +167,21 @@ def desenhar_tesoura(c, x, y):
     c.restoreState()
 
 
+# Quadrado de marcação para respostas
 def quadradinho(c, x, y, lado=14):
     c.setStrokeColor(MARROM)
     c.setLineWidth(1.2)
     c.rect(x, y, lado, lado)
 
 
+# Linha para escrita da criança
 def linha_escrita(c, x, y, largura):
     c.setStrokeColor(CINZA)
     c.setLineWidth(0.9)
     c.line(x, y, x + largura, y)
 
 
-#1) CALIGRAFIA DAS VOGAIS (8 págs)
+# Material 1: caligrafia das vogais
 VOGAIS = [('A', 'a', 'ABELHA'), ('E', 'e', 'ELEFANTE'), ('I', 'i', 'IGREJA'), ('O', 'o', 'OVO'), ('U', 'u', 'UVA')]
 CORES_VOGAIS = [ROSA_CLARO, AZUL_CLARO, VERDE_CLARO, CREME, HexColor('#EFE3F7')]
 

@@ -6,13 +6,10 @@ from app.controllers import resultados_controller
 from app.controllers.etapas_controller import AcessoNegadoError
 
 
+# RN2: testes do registro de resultado
 class RegistrarResultadoTest(unittest.TestCase):
-    """Testes unitários da regra RN2 (registro do resultado da atividade).
 
-    Banco e log de auditoria são substituídos por mocks: nenhum teste aqui
-    abre conexão nem sobe o Flask.
-    """
-
+    # Preparação dos modelos e serviços substituídos
     def setUp(self):
         self.crianca_model = self._substituir('Crianca')
         self.atividade_model = self._substituir('Atividade')
@@ -21,24 +18,26 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.log_mock = self._substituir('registrar_log')
         self.avanco_mock = self._substituir('avancar_etapa_se_concluida')
 
-        # Cenário base: criança de um responsável, na etapa 5, com atividade da etapa 5.
+        # Criança e atividade da etapa atual
         self.crianca = SimpleNamespace(id=1, responsavel_id=10, etapa_atual_id=5, etapa_atual=SimpleNamespace(ordem=5))
         self.atividade = SimpleNamespace(id=2, etapa_id=5, chave='ouvir', etapa=SimpleNamespace(ordem=5))
         self.crianca_model.query.get.return_value = self.crianca
         self.atividade_model.query.get.return_value = self.atividade
 
+    # Substituição de dependência por mock
     def _substituir(self, nome):
         patcher = patch.object(resultados_controller, nome)
         self.addCleanup(patcher.stop)
         return patcher.start()
 
+    # Conferência de ausência de gravação
     def _assert_nada_foi_gravado(self):
         self.resultado_model.assert_not_called()
         self.db_mock.session.add.assert_not_called()
         self.db_mock.session.commit.assert_not_called()
         self.log_mock.assert_not_called()
 
-    # TESTE 1 - caminho feliz
+    # Registro de resposta correta
     def test_deve_registrar_resultado_correto_quando_resposta_confere(self):
         resultado = MagicMock()
         self.resultado_model.return_value = resultado
@@ -54,7 +53,7 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.avanco_mock.assert_called_once_with(1, 5, responsavel_id=10, confirmar=False)
         self.assertEqual('atividade_realizada', self.log_mock.call_args.kwargs['acao'])
 
-    # TESTE 2 - violação: criança inexistente
+    # Erro para criança inexistente
     def test_deve_lancar_erro_quando_crianca_nao_existe(self):
         self.crianca_model.query.get.return_value = None
 
@@ -64,7 +63,7 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.atividade_model.query.get.assert_not_called()
         self._assert_nada_foi_gravado()
 
-    # TESTE 3 - violação: atividade de etapa futura (RN1)
+    # RN1: bloqueio de atividade futura
     def test_deve_negar_acesso_quando_atividade_e_de_etapa_futura(self):
         self.atividade.etapa_id = 9
         self.atividade.etapa = SimpleNamespace(ordem=9)
@@ -74,7 +73,7 @@ class RegistrarResultadoTest(unittest.TestCase):
 
         self._assert_nada_foi_gravado()
 
-    # TESTE 3b - revisão: etapa já concluída grava o resultado, mas não mexe na trilha (RN1)
+    # Revisão não altera etapa já concluída
     def test_deve_registrar_revisao_de_etapa_concluida_sem_avancar_etapa(self):
         self.atividade.etapa_id = 3
         self.atividade.etapa = SimpleNamespace(ordem=3)
@@ -85,7 +84,7 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.db_mock.session.commit.assert_called_once()
         self.avanco_mock.assert_not_called()
 
-    # TESTE 4 - parametrizado (subTest) e casos-limite: iguais, diferentes, maiúscula, vazias
+    # Comparação entre resposta enviada e esperada
     def test_deve_marcar_correta_conforme_comparacao_das_respostas(self):
         casos = [
             ('A', 'A', True),

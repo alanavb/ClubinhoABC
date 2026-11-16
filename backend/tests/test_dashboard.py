@@ -1,4 +1,4 @@
-"""RF06 — GET /api/criancas/<id>/dashboard: indicadores de desempenho para o responsável."""
+# RF06: indicadores de desempenho da criança
 
 import datetime
 import unittest
@@ -10,8 +10,10 @@ from app.models import Atividade, Crianca, Etapa, Responsavel, Resultado
 TOKEN = {'Authorization': 'Bearer token-de-teste'}
 
 
+# Testes do painel de desempenho
 class DashboardTest(unittest.TestCase):
 
+    # Preparação da família, criança e atividades
     def setUp(self):
         self.app = create_app({
             'TESTING': True,
@@ -43,22 +45,26 @@ class DashboardTest(unittest.TestCase):
         self.patcher.start()
         self.addCleanup(self.patcher.stop)
 
+    # Remoção do banco temporário
     def tearDown(self):
         db.session.remove()
         db.drop_all()
         db.engine.dispose()
         self.context.pop()
 
+    # Registro de tentativa para o cenário
     def _resultado(self, atividade, correta, quando=None):
         db.session.add(Resultado(crianca_id=self.bia.id, atividade_id=atividade.id, resposta='x',
                                  correta=correta, criado_em=quando or datetime.datetime.utcnow()))
         db.session.commit()
 
+    # Consulta do painel da criança
     def _dashboard(self):
         resposta = self.client.get(f'/api/criancas/{self.bia.id}/dashboard', headers=TOKEN)
         self.assertEqual(200, resposta.status_code)
         return resposta.get_json()
 
+    # Painel sem tentativas
     def test_get_dashboard_semTentativas_deveRetornarIndicadoresZerados(self):
         corpo = self._dashboard()
 
@@ -67,6 +73,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual([], corpo['recomendacoes'])
         self.assertEqual(7, len(corpo['evolucao']))
 
+    # Cálculo de totais e taxa de acerto
     def test_get_dashboard_comTentativas_deveCalcularTotaisETaxaDeAcerto(self):
         self._resultado(self.ouvir, True)
         self._resultado(self.ouvir, False)
@@ -81,6 +88,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(67, etapas['Caça às Letras']['taxa_acerto'])
         self.assertEqual(0, etapas['Monte a Palavra']['taxa_acerto'])
 
+    # Ordenação das atividades com dificuldade
     def test_get_dashboard_deveListarDificuldadesDaMenorParaAMaiorTaxaDeAcerto(self):
         self._resultado(self.ouvir, True)
         self._resultado(self.ouvir, False)  # 50% de acerto
@@ -93,6 +101,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(['Forme a palavra', 'Qual é a letra?'], [item['nome'] for item in corpo['dificuldades']])
         self.assertEqual(2, corpo['dificuldades'][0]['erros'])
 
+    # Recomendação baseada na maior dificuldade
     def test_get_dashboard_deveRecomendarAHabilidadeDaAtividadeComMaisDificuldade(self):
         self._resultado(self.formar, False)
 
@@ -102,6 +111,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual('Forme a palavra', recomendacao['atividade'])
         self.assertIn('juntar sílabas para formar palavras', recomendacao['texto'])
 
+    # Evolução limitada aos últimos sete dias
     def test_get_dashboard_deveSepararAsTentativasPorDia(self):
         agora = datetime.datetime.utcnow()
         self._resultado(self.ouvir, True, quando=agora)
@@ -114,6 +124,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(2, sum(dia['tentativas'] for dia in corpo['evolucao']))
         self.assertEqual(1, corpo['evolucao'][-1]['acertos'])  # o último dia é hoje
 
+    # Bloqueio de painel de outra família
     def test_get_dashboard_deOutraFamilia_deveRetornar403(self):
         self.patcher.stop()
         with patch('app.auth_utils._decodificar_token',
@@ -124,6 +135,7 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(403, resposta.status_code)
         self.assertNotIn('totais', resposta.get_json())
 
+    # Painel exige autenticação
     def test_get_dashboard_semToken_deveRetornar401(self):
         resposta = self.client.get(f'/api/criancas/{self.bia.id}/dashboard')
 

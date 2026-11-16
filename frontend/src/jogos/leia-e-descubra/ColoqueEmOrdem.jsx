@@ -3,7 +3,7 @@ import { embaralhar, falar } from '../alfabeto';
 import FeedbackResposta from '../caca-as-letras/FeedbackResposta';
 import { registrarResultadoPorId } from '../../utils/resultados';
 
-// frases já na ordem certa; o número de cada uma é a posição
+// Frases na sequência correta da história
 const rodadas = [
   { titulo: 'A florzinha', frases: ['Duda plantou uma semente.', 'Duda regou a terra.', 'Nasceu uma flor.'] },
   { titulo: 'A manhã do João', frases: ['O dia amanheceu.', 'João escovou os dentes.', 'João foi para a escola.'] },
@@ -31,7 +31,7 @@ function escolher({ numero, frase }) {
       setRetorno('');
       return;
     }
-    // todas escolhidas: confere a ordem
+    // Valida a sequência após a última escolha
     const resposta = proximas.join('-');
     if (resposta === ordemCerta(rodada)) {
       setEscolhidas(proximas);

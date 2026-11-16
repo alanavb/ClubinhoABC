@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { buscarAtividadesDaEtapa, buscarResumoProgresso, buscarStatusEtapa, concluirEtapa } from '../utils/etapas';
 
-// RN3: atividades da etapa e quais a criança já acertou; ids vêm da API pela chave
+// RN3: controle de atividades, acertos e avanço da etapa
 export function useEtapa(chaveEtapa) {
   const [etapaId, setEtapaId] = useState(null);
   const [atividades, setAtividades] = useState(null);
   const [concluidas, setConcluidas] = useState([]);
   const [erro, setErro] = useState('');
 
+  // Carregamento das atividades e do progresso da etapa
   const carregar = useCallback(() => {
     setErro('');
     buscarAtividadesDaEtapa(chaveEtapa)
@@ -17,7 +18,7 @@ export function useEtapa(chaveEtapa) {
         setAtividades(dados.atividades);
         setConcluidas(status.atividades.filter((atividade) => atividade.realizada).map((atividade) => atividade.chave));
 
-        // destrava etapa que ficou em 100% sem avançar (avanço pedido antes do último acerto chegar)
+        // Recupera etapa concluída que ainda não avançou
         if (status.concluida) {
           const resumo = await buscarResumoProgresso();
           const etapa = resumo.etapas.find((item) => item.etapa_id === dados.etapa_id);
@@ -36,12 +37,12 @@ export function useEtapa(chaveEtapa) {
 
   const atividadeId = (chave) => atividades?.find((atividade) => atividade.chave === chave)?.activity_id;
 
+  // Confirmação da atividade e avanço da trilha
   async function concluir(chave) {
     const concluidasAgora = concluidas.includes(chave) ? concluidas : [...concluidas, chave];
     setConcluidas(concluidasAgora);
 
-    // a última resposta pode ainda não ter chegado: só pede o avanço depois que o
-    // servidor confirma todas as obrigatórias
+    // Confirma todas as atividades obrigatórias antes do avanço
     const obrigatorias = (atividades ?? []).filter((atividade) => atividade.obrigatoria);
     const terminouObrigatorias = obrigatorias.length > 0
       && obrigatorias.every((atividade) => concluidasAgora.includes(atividade.chave));
@@ -53,7 +54,7 @@ export function useEtapa(chaveEtapa) {
         const resumo = await buscarResumoProgresso();
         const etapa = resumo.etapas.find((item) => item.etapa_id === etapaId);
 
-        // o back-end já pode ter avançado ao gravar a resposta: só atualiza a tela
+        // Atualiza a tela se o servidor já avançou a etapa
         if (etapa?.situacao === 'concluida') {
           window.dispatchEvent(new Event('progresso-atualizado'));
           return;
@@ -67,7 +68,7 @@ export function useEtapa(chaveEtapa) {
           return;
         }
 
-        // espera a requisição da última resposta terminar
+        // Aguarda o registro da última resposta
         await new Promise((resolve) => window.setTimeout(resolve, 350));
       }
       throw new Error('A resposta final não foi confirmada a tempo.');

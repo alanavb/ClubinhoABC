@@ -6,7 +6,7 @@ import LeiaEDescubra from './LeiaEDescubra';
 import { obterCriancaId } from '../utils/auth';
 import { useResumoProgresso } from '../utils/etapas';
 
-// chave da etapa no banco -> tela de jogos
+// Mapeamento entre a etapa do banco e sua tela
 const telasDasEtapas = {
   'caca-as-letras': {
     Tela: CacaAsLetras, icone: '🔤', legenda: 'A · B · C',
@@ -37,9 +37,9 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
 
   const etapas = (resumo?.etapas ?? []).filter((etapa) => telasDasEtapas[etapa.chave]);
   const atual = etapas.find((etapa) => etapa.situacao === 'atual');
-  // trilha completa não tem etapa "atual": mostra a última, por causa do bônus
+  // Mostra a última etapa quando a trilha está concluída
   const visualizada = etapas.find((etapa) => etapa.chave === selecionada) ?? atual ?? etapas[etapas.length - 1];
-  // a trilha avança no back-end, mas a tela fica na etapa jogada para mostrar o bônus
+  // Mantém a etapa selecionada após o avanço da trilha
   useEffect(() => {
     if (!selecionada && visualizada) setSelecionada(visualizada.chave);
   }, [selecionada, visualizada]);
@@ -98,7 +98,7 @@ export default function AreaDeJogos({ Cabecalho, Rodape, onNavigate }) {
           <p>{telasDasEtapas[etapaInfo].descricao}</p>
         </section>
       </div>}
-      {/* key: trocar de etapa recomeça a tela */}
+      {/* Reinicia a tela ao trocar de etapa */}
       {Tela && <Tela key={visualizada.chave} jogavel={visualizada.situacao !== 'bloqueada'} />}
       <p className="games-journey-note">
         <span>{visualizada?.situacao === 'concluida' ? '⭐' : '🔒'}</span>

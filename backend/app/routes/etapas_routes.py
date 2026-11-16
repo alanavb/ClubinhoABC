@@ -8,6 +8,7 @@ from app.error_responses import MENSAGEM_ACESSO_NEGADO, erro_publico
 etapas_bp = Blueprint('etapas', __name__)
 
 
+# Identificação do responsável autenticado
 def _responsavel_atual():
     responsavel = auth_controller.buscar_por_supabase_id(g.supabase_user_id)
     if not responsavel:
@@ -17,8 +18,9 @@ def _responsavel_atual():
 
 @etapas_bp.route('/criancas/<int:crianca_id>/atividades', methods=['GET'])
 @requer_autenticacao
+# Rota de atividades acessíveis da criança
 def atividades_acessiveis(crianca_id):
-    # RN1: só devolve as atividades da etapa atual da criança
+    # RN1: retorna atividades da etapa atual
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
         return erro_resposta
@@ -49,6 +51,7 @@ def atividades_acessiveis(crianca_id):
 
 @etapas_bp.route('/criancas/<int:crianca_id>/progresso', methods=['GET'])
 @requer_autenticacao
+# Rota de progresso da criança
 def progresso_da_crianca(crianca_id):
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
@@ -66,8 +69,9 @@ def progresso_da_crianca(crianca_id):
 
 @etapas_bp.route('/etapas/<string:chave_etapa>/atividades', methods=['GET'])
 @requer_autenticacao
+# Rota de atividades por etapa
 def atividades_da_etapa(chave_etapa):
-    # o front descobre os ids das atividades pela chave da etapa
+    # Localiza atividades pela chave da etapa
     try:
         etapa, atividades = etapas_controller.listar_atividades_por_etapa(chave_etapa)
     except ValueError as erro:
@@ -90,8 +94,9 @@ def atividades_da_etapa(chave_etapa):
 
 @etapas_bp.route('/criancas/<int:crianca_id>/etapas/<int:etapa_id>/status', methods=['GET'])
 @requer_autenticacao
+# Rota de status da etapa
 def etapa_status(crianca_id, etapa_id):
-    # RN3: diz se a etapa está concluída (todas as obrigatórias feitas)
+    # RN3: informa a conclusão das obrigatórias
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
         return erro_resposta
@@ -108,6 +113,7 @@ def etapa_status(crianca_id, etapa_id):
 
 @etapas_bp.route('/criancas/<int:crianca_id>/etapas/<int:etapa_id>/concluir', methods=['POST'])
 @requer_autenticacao
+# Rota de confirmação de conclusão da etapa
 def concluir_etapa(crianca_id, etapa_id):
     responsavel_id, erro_resposta = _responsavel_atual()
     if erro_resposta:
