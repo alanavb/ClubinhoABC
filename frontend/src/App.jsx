@@ -212,7 +212,7 @@ function MinhaConta({ onNavigate, onAccountDeleted }) {
             {section === 'privacidade' && <section className="account-card">
               <h2>Privacidade e conta</h2>
               <p>Para dúvidas sobre seus dados ou os dados das crianças vinculadas, entre em contato com a equipe pelo canal de suporte.</p>
-              <a className="account-contact-link" href="mailto:clubinhoabc@gmail.com?subject=D%C3%BAvida%20sobre%20privacidade%20-%20Clubinho%20ABC">Falar sobre privacidade</a>
+              <a className="account-contact-link" href="mailto:suporte.clubinhoabc@gmail.com?subject=D%C3%BAvida%20sobre%20privacidade%20-%20Clubinho%20ABC">Falar sobre privacidade</a>
               <div className="delete-account-panel">
                 <h3>Excluir conta</h3>
                 <p>A exclusão da conta remove definitivamente o acesso do responsável, os perfis, o histórico e o progresso das crianças vinculadas.</p>
@@ -516,7 +516,7 @@ function ContactDialog({ onClose }) {
         <h1 id="contact-title">Fale com a gente</h1>
         <p>Precisa de ajuda, quer enviar uma sugestão ou encontrou alguma dificuldade? A equipe do Clubinho ABC está à disposição para ouvir você.</p>
         <p>Envie sua mensagem para:</p>
-        <a className="contact-dialog-email" href="mailto:clubinhoabc@gmail.com?subject=Contato%20pelo%20Clubinho%20ABC">clubinhoabc@gmail.com</a>
+        <a className="contact-dialog-email" href="mailto:suporte.clubinhoabc@gmail.com?subject=Contato%20pelo%20Clubinho%20ABC">suporte.clubinhoabc@gmail.com</a>
         <p className="contact-dialog-note">Para proteger sua conta, não envie senhas, códigos de confirmação ou outras credenciais por e-mail.</p>
       </section>
     </div>

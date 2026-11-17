@@ -24,7 +24,7 @@ function PoliticaDePrivacidade({ onClose }) {
 
         <h2>1. Responsável pelo tratamento e canal de privacidade</h2>
         <p>Durante a fase acadêmica, a equipe do <strong>Clubinho ABC</strong> determina as finalidades e os meios do tratamento realizado pela plataforma e atua como responsável pelo projeto. Em uma implantação real por escola, empresa ou outra organização, a entidade que oferecer o serviço e tomar essas decisões deverá ser identificada como controladora.</p>
-        <p><strong>Canal para privacidade e direitos dos titulares:</strong> clubinhoabc@gmail.com</p>
+        <p><strong>Canal para privacidade e direitos dos titulares:</strong> suporte.clubinhoabc@gmail.com</p>
         <p>O projeto não possui encarregado formalmente designado nesta etapa acadêmica. O canal acima recebe dúvidas, solicitações e comunicações relacionadas aos dados do responsável e da criança.</p>
 
         <h2>2. Dados pessoais tratados</h2>
@@ -92,7 +92,7 @@ function PoliticaDePrivacidade({ onClose }) {
           <li>oposição ao tratamento realizado em desconformidade com a LGPD;</li>
           <li>explicação e revisão de decisões tomadas unicamente por tratamento automatizado que afetem seus interesses, quando aplicável.</li>
         </ul>
-        <p>As solicitações devem ser enviadas para <strong>clubinhoabc@gmail.com</strong>. Para impedir acesso indevido, poderão ser solicitadas informações estritamente necessárias para confirmar a identidade e a representação da criança. Se algum pedido não puder ser atendido integralmente, o motivo será informado.</p>
+        <p>As solicitações devem ser enviadas para <strong>suporte.clubinhoabc@gmail.com</strong>. Para impedir acesso indevido, poderão ser solicitadas informações estritamente necessárias para confirmar a identidade e a representação da criança. Se algum pedido não puder ser atendido integralmente, o motivo será informado.</p>
 
         <h2>10. Segurança das informações</h2>
         <p>Entre as medidas adotadas na versão atual estão: senha armazenada pelo Supabase Auth com função de hash e salt; confirmação de e-mail; recuperação de senha por link temporário; tokens de sessão; validação do token no backend; restrição dos dados à criança vinculada ao responsável; uso de ORM; credenciais fora do código-fonte; e registros de ações relevantes.</p>

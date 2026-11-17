@@ -76,7 +76,7 @@ function TermosDeUso({ onClose }) {
         <h2>11. Responsável e contato</h2>
         <p>O Clubinho ABC é o projeto acadêmico responsável pela administração da plataforma nesta etapa de desenvolvimento. Em uma implantação por escola, empresa ou outra organização, a entidade que determinar as finalidades e os meios do tratamento deverá ser identificada como controladora.</p>
         <p><strong>Responsável pela plataforma:</strong> Clubinho ABC<br />
-          <strong>E-mail de contato e suporte:</strong> clubinhoabc@gmail.com</p>
+          <strong>E-mail de contato e suporte:</strong> suporte.clubinhoabc@gmail.com</p>
 
         <h2>12. Legislação aplicável</h2>
         <p>Estes Termos são regidos pelas leis da República Federativa do Brasil, especialmente pela Lei Geral de Proteção de Dados Pessoais (LGPD), pelo Estatuto da Criança e do Adolescente (ECA), pelo Estatuto Digital da Criança e do Adolescente e, quando aplicável, pelo Código de Defesa do Consumidor.</p>
