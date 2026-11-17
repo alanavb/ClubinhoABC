@@ -6,9 +6,8 @@ from reportlab.lib.colors import white
 from reportlab.lib.utils import simpleSplit
 from reportlab.pdfbase.pdfmetrics import stringWidth
 
-import gerar_materiais as g
-from gerar_materiais import (AMARELO, AZUL, AZUL_CLARO, BASE, BOLD, CINZA, CREME, M, MARROM, NORMAL, ROSA,
-                             ROSA_CLARO, TEXTO, TOPO, VERDE_CLARO, W, Documento, caixa_tracejada, centro,
+from gerar_materiais import (AZUL_CLARO, BASE, BOLD, CINZA, CREME, M, MARROM, NORMAL, ROSA,
+                             ROSA_CLARO, TEXTO, TOPO, W, Documento, caixa_tracejada, centro,
                              linha_escrita, pauta, quadradinho, texto_contorno)
 
 
