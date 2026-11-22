@@ -32,7 +32,6 @@ import {
   sessaoContinuaAtiva,
 } from './utils/auth';
 import { useResumoProgresso } from './utils/etapas';
-import { CATEGORIAS, REFERENCIA, kitDaSemana, materiais } from './utils/materiais';
 
 // Dados compartilhados das telas de conta e cadastro
 const pets = ['🦊', '🐨', '🐥', '🦕', '🐙', '🐝'];
