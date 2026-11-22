@@ -6,5 +6,6 @@ from .atividade import Atividade
 from .resultado import Resultado
 from .log_auditoria import LogAuditoria
 from .registro_exclusao import RegistroExclusao
+from .historia import Historia
 
-__all__ = ['Responsavel', 'Crianca', 'Etapa', 'Atividade', 'Resultado', 'LogAuditoria', 'RegistroExclusao']         
+__all__ = ['Responsavel', 'Crianca', 'Etapa', 'Atividade', 'Resultado', 'LogAuditoria', 'RegistroExclusao', 'Historia']

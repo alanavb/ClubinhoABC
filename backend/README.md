@@ -116,6 +116,7 @@ outra família dá `403` ou `404`.
 | Método | Rota | O que faz |
 |---|---|---|
 | GET | `/api/auth/me` | Perfil do responsável e lista de crianças |
+| GET | `/api/historias` | Leituras publicadas, ordenadas para a área de histórias |
 | POST | `/api/auth/completar-cadastro` | Cria o perfil no primeiro login depois de confirmar o e-mail |
 | POST | `/api/auth/sessao` | Registra o login atual como a única sessão ativa |
 | GET | `/api/auth/sessao` | Confere se a sessão ainda é a ativa (`401` se a conta entrou em outro computador) |

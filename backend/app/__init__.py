@@ -49,10 +49,12 @@ def create_app(test_config=None):
     from .routes.etapas_routes import etapas_bp
     from .routes.auditoria_routes import auditoria_bp
     from .routes.dashboard_routes import dashboard_bp
+    from .routes.historias_routes import historias_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(resultados_bp, url_prefix='/api')
     app.register_blueprint(etapas_bp, url_prefix='/api')
     app.register_blueprint(auditoria_bp, url_prefix='/api')
     app.register_blueprint(dashboard_bp, url_prefix='/api')
+    app.register_blueprint(historias_bp, url_prefix='/api')
 
     return app
