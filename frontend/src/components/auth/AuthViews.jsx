@@ -349,7 +349,7 @@ export function Login({ onCreateAccount, onLogin }) {
             </form>
           )}
           <div className="divider"><span />ou<span /></div>
-          <button className="secondary-button" type="button" onClick={onCreateAccount}>♧ &nbsp; Criar conta da família</button>
+          <button className="secondary-button" type="button" onClick={onCreateAccount}>Criar conta da família</button>
           <p className="safety-text">Ambiente seguro, sem anúncios e com controle dos responsáveis.</p>
           <button className="terms-link" type="button" onClick={() => setShowTerms(true)}>Termos e Condições de Uso</button>
           <button className="terms-link" type="button" onClick={() => setShowPrivacy(true)}>Política de Privacidade</button>

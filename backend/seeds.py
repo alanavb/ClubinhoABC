@@ -1,6 +1,8 @@
 from app import create_app, db
 from app.models import Atividade, Etapa
 from migrar_data_nascimento import migrar
+from seed_historias import popular_historias
+from seed_materiais import popular_materiais
 
 app = create_app()
 
@@ -54,6 +56,10 @@ def mover_atividade(chave, etapa, nome, ordem, obrigatoria=False):
 with app.app_context():
     db.create_all()
     migrar()  # create_all não mexe em tabela que já existe
+    historias_criadas = popular_historias()
+    print(f'{historias_criadas} história(s) criada(s).')
+    materiais_criados = popular_materiais()
+    print(f'{materiais_criados} material(is) criado(s).')
 
     etapa1 = Etapa.query.filter_by(chave='caca-as-letras').first()
     if not etapa1:
