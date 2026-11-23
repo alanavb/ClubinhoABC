@@ -33,8 +33,9 @@ export default function JogoDaMemoria({ atividadeId, aoConcluir, aoFechar }) {
       const proximasEncontradas = [...encontradas, primeira, segunda];
       setEncontradas(proximasEncontradas);
       setAbertas([]);
-      if (proximasEncontradas.length === cartas.length) {
-        if (rodada === totalRodadas) registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par);
+      const concluiuRodada = proximasEncontradas.length === cartas.length;
+      registrarResultadoPorId(atividadeId, cartas[segunda].par, cartas[primeira].par, concluiuRodada && rodada === totalRodadas);
+      if (concluiuRodada) {
         window.setTimeout(avancarRodada, 800);
       }
       return;

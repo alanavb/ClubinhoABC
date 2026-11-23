@@ -16,7 +16,7 @@ export default function CompleteAFrase({ atividadeId, aoConcluir, aoFechar }) {
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
   // Validação da palavra escolhida
-  const responder = (palavra) => { if (retorno !== 'correct') { const correta = palavra === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, palavra, desafio.resposta); falar(palavra, 1, avancar); } else { falar(palavra); registrarResultadoPorId(atividadeId, palavra, desafio.resposta); } } };
+  const responder = (palavra) => { if (retorno !== 'correct') { const correta = palavra === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { registrarResultadoPorId(atividadeId, palavra, desafio.resposta, indice === desafios.length - 1); falar(palavra, 1, avancar); } else { falar(palavra); registrarResultadoPorId(atividadeId, palavra, desafio.resposta); } } };
   // Avanço para a próxima frase
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 

@@ -1,6 +1,6 @@
 from app import create_app, db
 from app.models import Atividade, Etapa
-from migrar_data_nascimento import migrar
+from migrar_banco import migrar
 from seed_historias import popular_historias
 from seed_materiais import popular_materiais
 

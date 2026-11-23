@@ -14,6 +14,8 @@ class Resultado(db.Model):
     atividade_id = db.Column(db.Integer, db.ForeignKey('atividades.id'), nullable=False)
     resposta = db.Column(db.String(255), nullable=False)
     correta = db.Column(db.Boolean, nullable=False)
+    # Marca somente a tentativa correta que encerrou todas as rodadas da atividade.
+    concluindo_atividade = db.Column(db.Boolean, nullable=False, default=False)
     criado_em = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
     # Conversão do resultado para resposta da API

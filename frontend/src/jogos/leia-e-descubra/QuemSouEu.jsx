@@ -24,7 +24,7 @@ export default function QuemSouEu({ atividadeId, aoConcluir, aoFechar }) {
     const correta = nome === rodada.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (ultima) registrarResultadoPorId(atividadeId, nome, rodada.resposta);
+      registrarResultadoPorId(atividadeId, nome, rodada.resposta, ultima);
       falar(nome, 1, avancar);
     } else {
       falar(nome);

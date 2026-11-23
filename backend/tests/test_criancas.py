@@ -122,7 +122,7 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         db.session.commit()
         bia = Crianca.query.filter_by(nome='Bia').first()
         db.session.add(Resultado(crianca_id=bia.id, atividade_id=Atividade.query.filter_by(chave='ouvir').first().id,
-                                 resposta='A', correta=True))
+                                 resposta='A', correta=True, concluindo_atividade=True))
         db.session.commit()
         leo = self.client.post('/api/criancas', json={'nome': 'Leo', 'data_nascimento': '2020-02-01'},
                                headers=self.auth).get_json()
@@ -140,7 +140,10 @@ class AdicionarCriancaIntegracaoTest(unittest.TestCase):
         db.session.add(atividade)
         db.session.commit()
         bia = Crianca.query.filter_by(nome='Bia').first()
-        db.session.add(Resultado(crianca_id=bia.id, atividade_id=atividade.id, resposta='A', correta=True))
+        db.session.add(Resultado(
+            crianca_id=bia.id, atividade_id=atividade.id, resposta='A', correta=True,
+            concluindo_atividade=True,
+        ))
         db.session.commit()
 
         resumo = self.client.get(f'/api/criancas/{bia.id}/progresso', headers=self.auth).get_json()

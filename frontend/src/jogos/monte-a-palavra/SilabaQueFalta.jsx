@@ -23,7 +23,7 @@ export default function SilabaQueFalta({ atividadeId, aoConcluir, aoFechar }) {
     if (correta) {
       // primeiro a sílaba, depois a palavra inteira
       falarEmSequencia([silaba, rodada.palavra], 1, avancar);
-      if (ultima) registrarResultadoPorId(atividadeId, silaba, rodada.resposta);
+      registrarResultadoPorId(atividadeId, silaba, rodada.resposta, ultima);
     } else {
       falar(silaba);
       registrarResultadoPorId(atividadeId, silaba, rodada.resposta);

@@ -42,11 +42,13 @@ class RegistrarResultadoTest(unittest.TestCase):
         resultado = MagicMock()
         self.resultado_model.return_value = resultado
 
-        retorno = resultados_controller.registrar_resultado(1, 2, 'A', 'A', responsavel_id=10)
+        retorno = resultados_controller.registrar_resultado(
+            1, 2, 'A', 'A', responsavel_id=10, concluindo_atividade=True
+        )
 
         self.assertIs(retorno, resultado)
         self.resultado_model.assert_called_once_with(
-            crianca_id=1, atividade_id=2, resposta='A', correta=True
+            crianca_id=1, atividade_id=2, resposta='A', correta=True, concluindo_atividade=True
         )
         self.db_mock.session.add.assert_called_once_with(resultado)
         self.db_mock.session.commit.assert_called_once()
@@ -78,9 +80,13 @@ class RegistrarResultadoTest(unittest.TestCase):
         self.atividade.etapa_id = 3
         self.atividade.etapa = SimpleNamespace(ordem=3)
 
-        resultados_controller.registrar_resultado(1, 2, 'A', 'A', responsavel_id=10)
+        resultados_controller.registrar_resultado(
+            1, 2, 'A', 'A', responsavel_id=10, concluindo_atividade=True
+        )
 
-        self.resultado_model.assert_called_once_with(crianca_id=1, atividade_id=2, resposta='A', correta=True)
+        self.resultado_model.assert_called_once_with(
+            crianca_id=1, atividade_id=2, resposta='A', correta=True, concluindo_atividade=True
+        )
         self.db_mock.session.commit.assert_called_once()
         self.avanco_mock.assert_not_called()
 
@@ -95,7 +101,10 @@ class RegistrarResultadoTest(unittest.TestCase):
 
         for enviada, esperada, correta_esperada in casos:
             with self.subTest(enviada=enviada, esperada=esperada):
-                resultados_controller.registrar_resultado(1, 2, enviada, esperada, responsavel_id=10)
+                resultados_controller.registrar_resultado(
+                    1, 2, enviada, esperada, responsavel_id=10,
+                    concluindo_atividade=correta_esperada,
+                )
 
                 self.assertEqual(correta_esperada, self.resultado_model.call_args.kwargs['correta'])
                 self.assertEqual(correta_esperada, self.avanco_mock.called)

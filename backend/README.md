@@ -37,7 +37,7 @@ backend/
     __init__.py             monta a aplicação (app factory)
   tests/                    testes automatizados (unittest)
   seeds.py                  cria tabelas, etapas e atividades
-  migrar_data_nascimento.py ajustes de colunas em bancos existentes (o seeds chama)
+  migrar_banco.py          ajustes de colunas em bancos existentes (o seeds chama)
   teste_carga.py            mede usuários simultâneos (ver "Teste de carga")
   run.py                    ponto de entrada
 ```

@@ -53,6 +53,7 @@ class SegurancaEFluxoIntegracaoTest(unittest.TestCase):
             'atividade_id': self.atividade.id,
             'resposta_enviada': 'A',
             'resposta_esperada': 'A',
+            'concluindo_atividade': True,
         }
 
     # Remoção do banco temporário

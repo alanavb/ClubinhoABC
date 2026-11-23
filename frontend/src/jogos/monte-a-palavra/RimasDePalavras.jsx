@@ -67,12 +67,13 @@ export default function RimasDePalavras({ atividadeId, aoConcluir, aoFechar }) {
 
     const novosAcertos = [...acertos, indice];
     setAcertos(novosAcertos);
+    const concluiuAtividade = ultimaRodada && novosAcertos.length === desafios.length;
+    registrarResultadoPorId(atividadeId, opcao, desafio.resposta, concluiuAtividade);
     if (novosAcertos.length === desafios.length) {
       setRodadaConcluida(true);
       if (ultimaRodada) {
         if (finalizando.current) return;
         finalizando.current = true;
-        registrarResultadoPorId(atividadeId, 'rimas encontradas', 'rimas encontradas');
         if (falaFinalTerminou.current) mostrarConclusao();
       }
     }

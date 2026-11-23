@@ -24,7 +24,7 @@ export default function PalavraEFigura({ atividadeId, aoConcluir, aoFechar }) {
     const correta = nome === rodada.palavra;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (ultima) registrarResultadoPorId(atividadeId, nome, rodada.palavra);
+      registrarResultadoPorId(atividadeId, nome, rodada.palavra, ultima);
       falar(nome, 1, avancar);
     } else {
       falar(nome);

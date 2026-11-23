@@ -18,11 +18,11 @@ def _buscar_crianca(crianca_id, responsavel_id=None):
     return crianca
 
 
-# Consulta das atividades respondidas corretamente
-def _atividades_acertadas(crianca_id):
+# Consulta das atividades efetivamente concluídas (todas as rodadas realizadas).
+def _atividades_concluidas(crianca_id):
     linhas = (
         Resultado.query
-        .filter_by(crianca_id=crianca_id, correta=True)
+        .filter_by(crianca_id=crianca_id, correta=True, concluindo_atividade=True)
         .with_entities(Resultado.atividade_id)
         .distinct()
         .all()
@@ -73,10 +73,10 @@ def resumo_progresso(crianca_id, responsavel_id=None):
     atividades_concluidas = 0
     concluidas_ids = set()
     bonus_concluido = False
-    acertadas = _atividades_acertadas(crianca.id)
+    concluidas = _atividades_concluidas(crianca.id)
 
     for atividade in Atividade.query.order_by(Atividade.ordem).all():
-        if atividade.id in acertadas:
+        if atividade.id in concluidas:
             atividades_concluidas += 1
             concluidas_ids.add(atividade.id)
             estrelas += 1 if atividade.obrigatoria else 2
@@ -134,7 +134,7 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
     if not atividades:
         raise ValueError('Etapa não encontrada ou sem atividades')
 
-    acertadas = _atividades_acertadas(crianca.id)
+    concluidas = _atividades_concluidas(crianca.id)
     detalhes = []
     for atividade in atividades:
         detalhes.append({
@@ -142,7 +142,7 @@ def status_etapa(crianca_id, etapa_id, responsavel_id=None):
             'chave': getattr(atividade, 'chave', None),
             'nome': atividade.nome,
             'obrigatoria': atividade.obrigatoria,
-            'realizada': atividade.id in acertadas,
+            'realizada': atividade.id in concluidas,
         })
 
     obrigatorias = [item for item in detalhes if item['obrigatoria']]

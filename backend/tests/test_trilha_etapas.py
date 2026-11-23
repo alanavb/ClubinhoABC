@@ -73,12 +73,15 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         self.context.pop()
 
     # Envio de uma resposta para uma atividade
-    def _responder(self, chave_atividade, enviada, esperada):
+    def _responder(self, chave_atividade, enviada, esperada, concluindo_atividade=None):
+        if concluindo_atividade is None:
+            concluindo_atividade = enviada == esperada
         return self.client.post('/api/resultados', headers=CABECALHO, json={
             'crianca_id': self.crianca_id,
             'atividade_id': self.atividades[chave_atividade],
             'resposta_enviada': enviada,
             "resposta_esperada": esperada,
+            'concluindo_atividade': concluindo_atividade,
         })
 
     # Envio de uma resposta correta
@@ -144,12 +147,20 @@ class TrilhaDeEtapasTest(unittest.TestCase):
         realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
         self.assertFalse(realizadas['ouvir'])
 
-    # Resposta correta conclui a atividade
-    def test_deve_registrar_resposta_certa_e_concluir_a_atividade(self):
-        resposta = self._responder('ouvir', 'A', 'A')
+    # Acerto intermediário não conclui a atividade
+    def test_deve_registrar_acerto_intermediario_sem_concluir_a_atividade(self):
+        resposta = self._responder('ouvir', 'A', 'A', concluindo_atividade=False)
 
         self.assertEqual(201, resposta.status_code)
         self.assertTrue(resposta.get_json()['correct'])
+        realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
+        self.assertFalse(realizadas['ouvir'])
+
+    # Último acerto conclui a atividade
+    def test_deve_concluir_atividade_apenas_ao_final_da_ultima_rodada(self):
+        resposta = self._responder('ouvir', 'A', 'A', concluindo_atividade=True)
+
+        self.assertEqual(201, resposta.status_code)
         realizadas = {item['chave']: item['realizada'] for item in self._status('caca-as-letras')['atividades']}
         self.assertTrue(realizadas['ouvir'])
 
