@@ -2,6 +2,7 @@
 
 
 import { API_BASE_URL } from './api';
+import { buscarDocumentosVigentes } from './documentos';
 import { supabase, voltouDaConfirmacaoDeEmail } from './supabaseClient';
 
 // Estado local da sessão e do perfil da família
@@ -70,6 +71,7 @@ async function completarCadastroSePendente() {
       crianca_nome: metadata.crianca_nome,
       crianca_data_nascimento: metadata.crianca_data_nascimento,
       crianca_avatar: metadata.crianca_avatar,
+      documentos_aceitos: metadata.documentos_aceitos,
     }),
   });
   if (resposta.ok) {
@@ -148,6 +150,26 @@ export function estaAutenticado() {
 // Verificação de perfil familiar carregado
 export function perfilCompleto() {
   return Boolean(perfil);
+}
+
+// Versões novas dos termos que o responsável ainda não aceitou
+export function documentosPendentes() {
+  return perfil?.documentos_pendentes ?? [];
+}
+
+// Aceite das versões novas e atualização do perfil
+export async function aceitarDocumentos(documentoIds) {
+  const resposta = await fetch(`${API_BASE_URL}/aceites`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${sessaoSupabase?.access_token}`,
+    },
+    body: JSON.stringify({ documentos: documentoIds }),
+  });
+  if (!resposta.ok) throw new Error('Não foi possível registrar o aceite. Tente novamente.');
+  await sincronizarPerfil();
+  avisarOuvintes();
 }
 
 // Consulta do token usado nas requisições autenticadas
@@ -325,6 +347,13 @@ export async function confirmarSenhaResponsavel(senha) {
 
 // Cadastro da conta e dos dados iniciais da criança
 export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNascimento, criancaAvatar }) {
+  // Versões dos termos aceitas na tela; sem elas, o aceite é pedido no primeiro acesso
+  let documentosAceitos = [];
+  try {
+    documentosAceitos = (await buscarDocumentosVigentes()).map((documento) => documento.id);
+  } catch {
+    documentosAceitos = [];
+  }
   const { error } = await supabase.auth.signUp({
     email,
     password: senha,
@@ -334,6 +363,7 @@ export async function cadastrar({ nome, email, senha, criancaNome, criancaDataNa
         crianca_nome: criancaNome,
         crianca_data_nascimento: criancaDataNascimento,
         crianca_avatar: criancaAvatar,
+        documentos_aceitos: documentosAceitos,
       },
     },
   });

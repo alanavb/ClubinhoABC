@@ -8,12 +8,14 @@ import HomePage from './pages/HomePage';
 import AtividadesPage from './pages/AtividadesPage';
 import ProgressoPage from './pages/ProgressoPage';
 import HistoriasPage from './pages/HistoriasPage';
+import NovoAceite from './components/NovoAceite';
 import { Brand, CampoSenha, CamposCrianca, ConfirmeSeuEmail, Login, RedefinirSenha, Signup } from './components/auth/AuthViews';
 import {
   adicionarCrianca,
   aoMudarSessao,
   atualizarSenha,
   cadastrar,
+  documentosPendentes,
   confirmarSenhaResponsavel,
   editarCrianca,
   excluirConta,
@@ -675,7 +677,10 @@ function App() {
     conteudo = <Login onCreateAccount={() => setView('signup')} onLogin={() => setView('home')} />;
   }
 
-  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}{exclusaoConcluida && <ExclusaoContaConcluida onClose={() => setExclusaoConcluida(false)} />}</>;
+  // Versão nova dos termos: bloqueia o uso até o novo aceite
+  const pendentes = logado ? documentosPendentes() : [];
+
+  return <><AvisoDoSistema onEntrarNovamente={() => setView('login')} />{conteudo}{pendentes.length > 0 && <NovoAceite pendentes={pendentes} onSair={async () => { await sair(); setView('login'); }} />}{exclusaoConcluida && <ExclusaoContaConcluida onClose={() => setExclusaoConcluida(false)} />}</>;
 }
 
 export default App;
