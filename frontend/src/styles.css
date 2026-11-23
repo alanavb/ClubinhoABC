@@ -280,6 +280,7 @@ button:disabled { cursor: not-allowed; opacity: .55; transform: none !important;
 .painel-numero.verde .painel-numero-icone { color: var(--acerto); background: #dcf5e4; }.painel-numero.verde strong { color: var(--acerto); }
 .painel-numero.vermelho .painel-numero-icone { color: var(--erro); background: #fde2e2; }.painel-numero.vermelho strong { color: var(--erro); }
 .painel-numero.laranja .painel-numero-icone { color: #e46a00; background: #ffead3; }.painel-numero.laranja strong { color: #e46a00; }
+.painel-explicacao { margin: -6px 0 22px; padding: 14px 18px; border-radius: 18px; background: #fff7e8; color: var(--texto-suave); font-size: 14px; font-weight: 700; line-height: 1.5; }.painel-explicacao b { color: #5a3a2b; }
 .painel-grade { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-bottom: 22px; }
 .painel-card { padding: 24px 26px; border-radius: 24px; background: white; box-shadow: 0 4px 12px rgb(98 63 43 / 9%); }.painel-card h3 { margin: 0; font: 800 21px/1.15 'Baloo 2', sans-serif; }
 .painel-subtitulo { margin: 4px 0 20px; color: var(--texto-suave); font-size: 13px; font-weight: 700; }
