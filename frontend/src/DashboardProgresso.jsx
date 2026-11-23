@@ -1,6 +1,18 @@
 // RF06: dados exibidos no painel do responsável
 
+import { useState } from 'react';
 import { useDashboard } from './utils/dashboard';
+
+// Opções do filtro de período
+const PERIODOS = [['7', 'Últimos 7 dias'], ['30', 'Últimos 30 dias'], ['tudo', 'Desde o início']];
+
+// Rótulo do eixo: dia da semana no gráfico de 7 dias; dia/mês a cada 5 dias no de 30
+function rotuloDoDia(data, indice, total) {
+  if (total <= 7) return diaDaSemana(data);
+  if ((total - 1 - indice) % 5 !== 0) return '';
+  const [, mes, dia] = data.split('-');
+  return `${dia}/${mes}`;
+}
 
 // Ícones reutilizados no painel
 const caminhosDosIcones = {
@@ -84,25 +96,27 @@ function GraficoPorEtapa({ etapas }) {
   );
 }
 
-// Gráfico da evolução nos últimos sete dias
+// Gráfico da evolução nos últimos dias (7 ou 30, conforme o filtro)
 function GraficoEvolucao({ dias }) {
+  const colunas = { gridTemplateColumns: `repeat(${dias.length}, 1fr)` };
+  const muitosDias = dias.length > 7;
   const maior = Math.max(1, ...dias.map((dia) => dia.tentativas));
   // Marcas do eixo do gráfico
   const marcas = [...new Set([maior, Math.round(maior / 2), 0])];
   return (
     <section className="painel-card painel-evolucao">
       <div className="painel-card-topo">
-        <div><h3>Desenvolvimento nos últimos 7 dias</h3><p className="painel-subtitulo">Tentativas por dia</p></div>
+        <div><h3>Desenvolvimento nos últimos {dias.length} dias</h3><p className="painel-subtitulo">Tentativas por dia</p></div>
         <ul className="painel-legenda horizontal"><li><i className="acerto" />Acertos</li><li><i className="erro" />Erros</li></ul>
       </div>
       <div className="painel-grafico">
         {marcas.map((marca) => (
           <div className="painel-grade-linha" key={marca} style={{ bottom: `${porcentagem(marca, maior)}%` }}><span>{marca}</span></div>
         ))}
-        <div className="painel-colunas">
+        <div className={`painel-colunas ${muitosDias ? 'muitos-dias' : ''}`} style={colunas}>
           {dias.map((dia) => (
             <div className="painel-coluna" key={dia.data}>
-              {dia.tentativas > 0 && <b>{dia.tentativas}</b>}
+              {dia.tentativas > 0 && !muitosDias && <b>{dia.tentativas}</b>}
               <div className="painel-coluna-barra" role="img" aria-label={`${diaDaSemana(dia.data)}: ${dia.acertos} acertos e ${dia.erros} erros`} style={{ height: `${porcentagem(dia.tentativas, maior)}%` }}>
                 {dia.tentativas > 0 && <>
                   <span className="erro" style={{ height: `${porcentagem(dia.erros, dia.tentativas)}%` }} />
@@ -113,7 +127,9 @@ function GraficoEvolucao({ dias }) {
           ))}
         </div>
       </div>
-      <div className="painel-eixo-x">{dias.map((dia) => <small key={dia.data}>{diaDaSemana(dia.data)}</small>)}</div>
+      <div className={`painel-eixo-x ${muitosDias ? 'muitos-dias' : ''}`} style={colunas}>
+        {dias.map((dia, indice) => <small key={dia.data}>{rotuloDoDia(dia.data, indice, dias.length)}</small>)}
+      </div>
     </section>
   );
 }
@@ -157,14 +173,42 @@ function Recomendacoes({ recomendacoes, nomeCrianca, onNavigate }) {
 }
 
 // Painel completo de desempenho da criança
-export default function DashboardProgresso({ criancaId, nomeCrianca, onNavigate }) {
-  const { dados, erro, recarregar } = useDashboard(criancaId);
+export default function DashboardProgresso({ criancaId, nomeCrianca, etapas = [], onNavigate }) {
+  const [periodo, setPeriodo] = useState('tudo');
+  const [etapa, setEtapa] = useState('');
+  const { dados, erro, recarregar } = useDashboard(criancaId, periodo, etapa);
+  const filtrado = periodo !== 'tudo' || etapa !== '';
+  // só as etapas já liberadas têm tentativas para mostrar
+  const etapasLiberadas = etapas.filter((item) => item.situacao !== 'bloqueada');
+
+  const filtros = (
+    <div className="painel-filtros">
+      <label>Período
+        <select value={periodo} onChange={(evento) => setPeriodo(evento.target.value)}>
+          {PERIODOS.map(([valor, rotulo]) => <option key={valor} value={valor}>{rotulo}</option>)}
+        </select>
+      </label>
+      <label>Etapa
+        <select value={etapa} onChange={(evento) => setEtapa(evento.target.value)}>
+          <option value="">Todas as etapas</option>
+          {etapasLiberadas.map((item) => <option key={item.etapa_id} value={String(item.etapa_id)}>{item.nome}</option>)}
+        </select>
+      </label>
+      {filtrado && (
+        <button className="painel-limpar-filtros" type="button" onClick={() => { setPeriodo('tudo'); setEtapa(''); }}>
+          ✕ Limpar filtros
+        </button>
+      )}
+    </div>
+  );
 
   let conteudo;
   if (erro) {
     conteudo = <p className="form-message" role="alert">Não foi possível carregar o desempenho. <button className="text-link" type="button" onClick={recarregar}>Tentar de novo</button></p>;
   } else if (!dados) {
     conteudo = <p className="form-message" role="status">Carregando o desempenho…</p>;
+  } else if (dados.totais.tentativas === 0 && filtrado) {
+    conteudo = <div className="painel-card painel-sem-dados"><p>Nenhuma tentativa de {nomeCrianca} com esses filtros.</p></div>;
   } else if (dados.totais.tentativas === 0) {
     conteudo = (
       <div className="painel-card painel-sem-dados">
@@ -202,6 +246,7 @@ export default function DashboardProgresso({ criancaId, nomeCrianca, onNavigate 
   return (
     <section className="painel-desempenho" aria-labelledby="painel-titulo">
       <div className="painel-cabecalho"><span>Painel dos responsáveis</span><h2 id="painel-titulo">Desempenho de {nomeCrianca}</h2></div>
+      {filtros}
       {conteudo}
     </section>
   );

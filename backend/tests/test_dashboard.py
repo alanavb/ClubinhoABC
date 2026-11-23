@@ -135,6 +135,58 @@ class DashboardTest(unittest.TestCase):
         self.assertEqual(403, resposta.status_code)
         self.assertNotIn('totais', resposta.get_json())
 
+    # Consulta do painel com filtros na URL
+    def _dashboard_filtrado(self, filtros):
+        resposta = self.client.get(f'/api/criancas/{self.bia.id}/dashboard?{filtros}', headers=TOKEN)
+        self.assertEqual(200, resposta.status_code)
+        return resposta.get_json()
+
+    # Filtro de período: só entram as tentativas dos últimos N dias
+    def test_get_dashboard_filtroPeriodo_deveContarSoOsUltimosDias(self):
+        agora = datetime.datetime.utcnow()
+        self._resultado(self.ouvir, True, quando=agora)
+        self._resultado(self.ouvir, False, quando=agora - datetime.timedelta(days=10))
+        self._resultado(self.ouvir, False, quando=agora - datetime.timedelta(days=60))
+
+        self.assertEqual(1, self._dashboard_filtrado('periodo=7')['totais']['tentativas'])
+        self.assertEqual(2, self._dashboard_filtrado('periodo=30')['totais']['tentativas'])
+        self.assertEqual(3, self._dashboard_filtrado('periodo=tudo')['totais']['tentativas'])
+        self.assertEqual(3, self._dashboard()['totais']['tentativas'])  # sem filtro = desde o início
+
+    # Período de 30 dias mostra 30 dias no gráfico de evolução
+    def test_get_dashboard_filtro30Dias_deveMostrarEvolucaoDe30Dias(self):
+        corpo = self._dashboard_filtrado('periodo=30')
+
+        self.assertEqual(30, len(corpo['evolucao']))
+
+    # Dificuldade antiga some quando o filtro de período a deixa de fora
+    def test_get_dashboard_filtroPeriodo_deveRecalcularDificuldades(self):
+        self._resultado(self.formar, False, quando=datetime.datetime.utcnow() - datetime.timedelta(days=20))
+        self._resultado(self.formar, True)
+
+        self.assertEqual([], self._dashboard_filtrado('periodo=7')['dificuldades'])
+        self.assertEqual(['Forme a palavra'], [item['nome'] for item in self._dashboard()['dificuldades']])
+
+    # Filtro de etapa: totais, etapas e dificuldades só da etapa escolhida
+    def test_get_dashboard_filtroEtapa_deveContarSoAEtapaEscolhida(self):
+        self._resultado(self.ouvir, False)
+        self._resultado(self.memoria, True)
+        self._resultado(self.formar, False)
+
+        corpo = self._dashboard_filtrado(f'etapa={self.ouvir.etapa_id}')
+
+        self.assertEqual({'tentativas': 2, 'acertos': 1, 'erros': 1, 'taxa_acerto': 50}, corpo['totais'])
+        self.assertEqual(['Caça às Letras'], [etapa['nome'] for etapa in corpo['por_etapa']])
+        self.assertEqual(['Qual é a letra?'], [item['nome'] for item in corpo['dificuldades']])
+        self.assertEqual(2, sum(dia['tentativas'] for dia in corpo['evolucao']))
+
+    # Filtro com valor desconhecido é recusado
+    def test_get_dashboard_filtroInvalido_deveRetornar400(self):
+        for filtros in ('periodo=90', 'etapa=9999'):
+            with self.subTest(filtros=filtros):
+                resposta = self.client.get(f'/api/criancas/{self.bia.id}/dashboard?{filtros}', headers=TOKEN)
+                self.assertEqual(400, resposta.status_code)
+
     # Painel exige autenticação
     def test_get_dashboard_semToken_deveRetornar401(self):
         resposta = self.client.get(f'/api/criancas/{self.bia.id}/dashboard')
