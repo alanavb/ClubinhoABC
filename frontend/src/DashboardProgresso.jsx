@@ -181,6 +181,12 @@ export default function DashboardProgresso({ criancaId, nomeCrianca, onNavigate 
         <NumeroDestaque icone="erros" valor={totais.erros} rotulo="erros" tom="vermelho" />
         <NumeroDestaque icone="media" valor={`${totais.taxa_acerto}%`} rotulo="média de acertos" tom="laranja" />
       </div>
+      {/* explica por que há mais tentativas do que atividades */}
+      <p className="painel-explicacao">
+        <b>Como contamos:</b> cada resposta de {nomeCrianca} conta como uma tentativa, certa ou errada.
+        Como as atividades têm várias rodadas, as tentativas passam do número de atividades.
+        Errar faz parte do aprendizado: o que importa é a média de acertos subir com o tempo.
+      </p>
       <div className="painel-grade">
         <GraficoRosca acertos={totais.acertos} erros={totais.erros} taxa={totais.taxa_acerto} />
         <GraficoPorEtapa etapas={dados.por_etapa} />
