@@ -46,9 +46,9 @@ function GraficoRosca({ acertos, erros, taxa }) {
   return (
     <section className="painel-card">
       <h3>Acertos e erros</h3>
-      <p className="painel-subtitulo">Todas as respostas registradas</p>
+      <p className="painel-subtitulo">Todas as tentativas, inclusive ao jogar de novo</p>
       <div className="painel-rosca-area">
-        <div className="painel-rosca" style={{ '--taxa': `${taxa}%` }} role="img" aria-label={`${taxa}% das respostas registradas estão certas`}>
+        <div className="painel-rosca" style={{ '--taxa': `${taxa}%` }} role="img" aria-label={`${taxa}% das tentativas estão certas`}>
           <div><strong>{taxa}%</strong><small>de acertos</small></div>
         </div>
         <ul className="painel-legenda">
@@ -92,7 +92,7 @@ function GraficoEvolucao({ dias }) {
   return (
     <section className="painel-card painel-evolucao">
       <div className="painel-card-topo">
-        <div><h3>Desenvolvimento nos últimos 7 dias</h3><p className="painel-subtitulo">Respostas registradas por dia</p></div>
+        <div><h3>Desenvolvimento nos últimos 7 dias</h3><p className="painel-subtitulo">Tentativas por dia</p></div>
         <ul className="painel-legenda horizontal"><li><i className="acerto" />Acertos</li><li><i className="erro" />Erros</li></ul>
       </div>
       <div className="painel-grafico">
@@ -133,7 +133,7 @@ function Dificuldades({ dificuldades }) {
               <div>
                 <div className="painel-dificuldade-titulo"><strong>{atividade.nome}</strong><em>{atividade.taxa_acerto}%</em></div>
                 <span className="painel-mini-barra"><i style={{ width: `${atividade.taxa_acerto}%` }} /></span>
-                <small>{atividade.etapa_nome} · {atividade.erros} {atividade.erros === 1 ? 'erro' : 'erros'} em {atividade.tentativas} respostas</small>
+                <small>{atividade.etapa_nome} · {atividade.erros} {atividade.erros === 1 ? 'erro' : 'erros'} em {atividade.tentativas} {atividade.tentativas === 1 ? 'tentativa' : 'tentativas'}</small>
               </div>
             </li>
           ))}
@@ -176,7 +176,7 @@ export default function DashboardProgresso({ criancaId, nomeCrianca, onNavigate 
     const { totais } = dados;
     conteudo = <>
       <div className="painel-numeros">
-        <NumeroDestaque icone="respostas" valor={totais.tentativas} rotulo="respostas registradas" tom="azul" />
+        <NumeroDestaque icone="respostas" valor={totais.tentativas} rotulo="tentativas" tom="azul" />
         <NumeroDestaque icone="acertos" valor={totais.acertos} rotulo="acertos" tom="verde" />
         <NumeroDestaque icone="erros" valor={totais.erros} rotulo="erros" tom="vermelho" />
         <NumeroDestaque icone="media" valor={`${totais.taxa_acerto}%`} rotulo="média de acertos" tom="laranja" />
