@@ -3,6 +3,7 @@ from app.models import Atividade, Etapa
 from migrar_banco import migrar
 from seed_historias import popular_historias
 from seed_materiais import popular_materiais
+from seed_documentos import popular_documentos
 
 app = create_app()
 
@@ -60,6 +61,8 @@ with app.app_context():
     print(f'{historias_criadas} história(s) criada(s).')
     materiais_criados = popular_materiais()
     print(f'{materiais_criados} material(is) criado(s).')
+    documentos_criados = popular_documentos()
+    print(f'{documentos_criados} documento(s) legal(is) criado(s).')
 
     etapa1 = Etapa.query.filter_by(chave='caca-as-letras').first()
     if not etapa1:

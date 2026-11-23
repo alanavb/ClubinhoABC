@@ -5,7 +5,8 @@ import unicodedata
 
 from app import db
 from app.controllers.auditoria_controller import registrar_exclusao, registrar_log
-from app.models import Crianca, Etapa, LogAuditoria, Responsavel, Resultado
+from app.controllers.documentos_controller import registrar_aceites_do_cadastro
+from app.models import Aceite, Crianca, Etapa, LogAuditoria, Responsavel, Resultado
 from app.supabase_admin import excluir_usuario as excluir_usuario_supabase
 
 
@@ -82,7 +83,8 @@ def _etapa_inicial():
 
 
 # Conclusão do cadastro da família
-def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data_nascimento, crianca_avatar=None):
+def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data_nascimento, crianca_avatar=None,
+                       documentos_aceitos=None):
     existente = buscar_por_supabase_id(supabase_user_id)
     if existente:
         return existente
@@ -106,6 +108,8 @@ def completar_cadastro(supabase_user_id, email, nome, crianca_nome, crianca_data
         etapa_atual_id=etapa_inicial.id,
     )
     db.session.add(crianca)
+    # aceite dos termos marcado na tela de cadastro
+    registrar_aceites_do_cadastro(responsavel, documentos_aceitos)
     db.session.commit()
 
     registrar_log(
@@ -217,6 +221,7 @@ def excluir_conta(responsavel, confirmacao):
             for crianca in list(responsavel.criancas):
                 db.session.delete(crianca)
 
+        Aceite.query.filter_by(responsavel_id=responsavel.id).delete(synchronize_session=False)
         db.session.delete(responsavel)
         registrar_exclusao('conta_excluida')
         # Confirma o banco antes de excluir no Supabase

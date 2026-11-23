@@ -79,6 +79,7 @@ button, input { font: inherit; } button { cursor: pointer; }
 .terms-dialog h2 { margin: 28px 0 8px; font: 800 22px/1.2 'Baloo 2', sans-serif; }
 .terms-dialog p { margin: 10px 0; }
 .terms-dialog ul { padding-left: 23px; }
+.novo-aceite { width: min(100%, 560px); }.terms-dialog .novo-aceite-lista { display: grid; gap: 8px; margin: 14px 0; padding: 0; list-style: none; }.novo-aceite-lista li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-radius: 16px; background: #fff3df; }.novo-aceite-lista button { padding: 0; border: 0; color: #b91857; background: transparent; font-weight: 900; text-decoration: underline; }.novo-aceite-lista small { color: #7a6255; font-weight: 800; }.novo-aceite-acoes { display: flex; align-items: center; justify-content: flex-end; gap: 16px; margin-top: 18px; }.novo-aceite .terms-acceptance input { width: 18px; height: 18px; accent-color: #ef1d69; }
 .terms-close { position: sticky; top: 0; float: right; display: grid; place-items: center; width: 38px; height: 38px; border: 0; border-radius: 50%; color: #4b2c1f; background: #fff0d9; font-size: 28px; line-height: 1; }
 
 /* Navegação e rodapé da área autenticada. */

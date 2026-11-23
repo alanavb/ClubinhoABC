@@ -1,7 +1,7 @@
 from flask import Blueprint, g, jsonify, request, url_for
 
 from app.auth_utils import requer_autenticacao, requer_autenticacao_de_novo_login
-from app.controllers import auth_controller
+from app.controllers import auth_controller, documentos_controller
 from app.controllers.auditoria_controller import registrar_log
 from app.controllers.auth_controller import DadosInvalidosError
 from app.supabase_admin import SupabaseAdminError
@@ -29,6 +29,11 @@ def _responsavel_para_json(responsavel):
         'nome': responsavel.nome,
         'email': responsavel.email,
         'criancas': [_crianca_para_json(crianca) for crianca in responsavel.criancas],
+        # versões novas dos termos que ainda precisam de aceite
+        'documentos_pendentes': [
+            {'id': documento.id, 'tipo': documento.tipo, 'versao': documento.versao}
+            for documento in documentos_controller.documentos_pendentes(responsavel)
+        ],
     }
 
 
@@ -79,6 +84,7 @@ def completar_cadastro():
             dados.get('crianca_nome'),
             dados.get('crianca_data_nascimento'),
             dados.get('crianca_avatar'),
+            dados.get('documentos_aceitos'),
         )
     except DadosInvalidosError as erro:
         return jsonify({'erro': str(erro)}), 400

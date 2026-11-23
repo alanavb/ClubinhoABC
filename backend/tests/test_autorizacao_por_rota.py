@@ -45,6 +45,8 @@ ROTAS = [
 # Rota com identificador de etapa, não de criança.
 # Ela exige login, mas não possui um responsável proprietário.
 ROTAS_SEM_DONO = {('GET', '/api/etapas/<string:chave_etapa>/atividades')}
+# Única rota pública: a tela de cadastro mostra os Termos e a Política antes do login
+ROTAS_PUBLICAS = {('GET', '/api/documentos')}
 
 
 # Testes de autorização nas rotas da API
@@ -202,6 +204,8 @@ class AutorizacaoPorRotaTest(unittest.TestCase):
                 continue
             caminho = re.sub(r'<[^>]+>', '1', regra.rule)
             for metodo in regra.methods - {'HEAD', 'OPTIONS'}:
+                if (metodo, regra.rule) in ROTAS_PUBLICAS:
+                    continue
                 with self.subTest(rota=f'{metodo} {regra.rule}'):
                     resposta = self.client.open(caminho, method=metodo)
 

@@ -51,6 +51,7 @@ def create_app(test_config=None):
     from .routes.dashboard_routes import dashboard_bp
     from .routes.historias_routes import historias_bp
     from .routes.materiais_routes import materiais_bp
+    from .routes.documentos_routes import documentos_bp
     app.register_blueprint(auth_bp, url_prefix='/api')
     app.register_blueprint(resultados_bp, url_prefix='/api')
     app.register_blueprint(etapas_bp, url_prefix='/api')
@@ -58,5 +59,6 @@ def create_app(test_config=None):
     app.register_blueprint(dashboard_bp, url_prefix='/api')
     app.register_blueprint(historias_bp, url_prefix='/api')
     app.register_blueprint(materiais_bp, url_prefix='/api')
+    app.register_blueprint(documentos_bp, url_prefix='/api')
 
     return app
