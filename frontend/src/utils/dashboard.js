@@ -4,9 +4,11 @@ import { useCallback, useEffect, useState } from 'react';
 import { API_BASE_URL } from './api';
 import { obterToken } from './auth';
 
-export async function buscarDashboard(criancaId) {
+export async function buscarDashboard(criancaId, { periodo = 'tudo', etapa = '' } = {}) {
   const token = obterToken();
-  const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}/dashboard`, {
+  const filtros = new URLSearchParams({ periodo });
+  if (etapa) filtros.set('etapa', etapa);
+  const resposta = await fetch(`${API_BASE_URL}/criancas/${criancaId}/dashboard?${filtros}`, {
     headers: token ? { Authorization: `Bearer ${token}` } : {},
   });
   if (!resposta.ok) throw new Error(`HTTP ${resposta.status}`);
@@ -14,17 +16,22 @@ export async function buscarDashboard(criancaId) {
 }
 
 // Atualiza indicadores após registrar progresso
-export function useDashboard(criancaId) {
+export function useDashboard(criancaId, periodo = 'tudo', etapa = '') {
   const [dados, setDados] = useState(null);
   const [erro, setErro] = useState(false);
 
   const recarregar = useCallback(() => {
     if (!criancaId) return;
     setErro(false);
-    buscarDashboard(criancaId)
-      .then((resposta) => { if (resposta.child_id === criancaId) setDados(resposta); })
+    buscarDashboard(criancaId, { periodo, etapa })
+      .then((resposta) => {
+        // ignora resposta atrasada de outra criança ou de outro filtro
+        // (back-end antigo não devolve os filtros: vale como "desde o início, todas as etapas")
+        const mesmoFiltro = (resposta.periodo ?? 'tudo') === periodo && String(resposta.etapa_id ?? '') === String(etapa);
+        if (resposta.child_id === criancaId && mesmoFiltro) setDados(resposta);
+      })
       .catch(() => setErro(true));
-  }, [criancaId]);
+  }, [criancaId, periodo, etapa]);
 
   useEffect(() => {
     setDados(null); // não mostra dados da criança anterior
