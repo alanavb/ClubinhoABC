@@ -75,7 +75,7 @@ export default function DesafioDaParlenda({ atividadeId, aoConcluir, aoFechar })
     const correta = opcao === parlenda.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (ultima) registrarResultadoPorId(atividadeId, opcao, parlenda.resposta);
+      registrarResultadoPorId(atividadeId, opcao, parlenda.resposta, ultima);
       tocar(opcao, avancar);
     } else {
       tocar(opcao);

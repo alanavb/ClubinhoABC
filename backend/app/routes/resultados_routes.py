@@ -39,6 +39,7 @@ def criar_resultado():
             dados['resposta_enviada'],
             dados['resposta_esperada'],
             responsavel_id=responsavel_id,
+            concluindo_atividade=dados.get('concluindo_atividade', False),
         )
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404

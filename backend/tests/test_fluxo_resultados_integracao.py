@@ -95,6 +95,7 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
                     'atividade_id': self.atividade.id,
                     'resposta_enviada': 'A',
                     'resposta_esperada': 'A',
+                    'concluindo_atividade': True,
                 },
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
@@ -105,6 +106,7 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
                     'atividade_id': segunda_obrigatoria.id,
                     'resposta_enviada': 'B',
                     'resposta_esperada': 'B',
+                    'concluindo_atividade': True,
                 },
                 headers={'Authorization': 'Bearer token-de-teste'},
             )
@@ -135,6 +137,7 @@ class FluxoResultadosIntegracaoTest(unittest.TestCase):
                     'atividade_id': self.atividade.id,
                     'resposta_enviada': 'A',
                     'resposta_esperada': 'A',
+                    'concluindo_atividade': True,
                 },
                 headers={'Authorization': 'Bearer token-de-teste'},
             )

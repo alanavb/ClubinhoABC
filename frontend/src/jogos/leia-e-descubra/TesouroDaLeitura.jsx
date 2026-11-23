@@ -42,7 +42,7 @@ export default function TesouroDaLeitura({ atividadeId, aoConcluir, aoFechar }) 
     const correta = opcao === rodada.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (ultima) registrarResultadoPorId(atividadeId, opcao, rodada.resposta);
+      registrarResultadoPorId(atividadeId, opcao, rodada.resposta, ultima);
       falar(opcao, 1, avancar);
     } else {
       falar(opcao);

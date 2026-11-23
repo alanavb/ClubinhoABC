@@ -16,7 +16,7 @@ export default function FraseECena({ atividadeId, aoConcluir, aoFechar }) {
   const [retorno, setRetorno] = useState('');
   const rodada = rodadas[indice];
   // Validação da cena escolhida
-  const responder = (id, texto) => { if (retorno !== 'correct') { const correta = id === rodada.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === rodadas.length - 1) registrarResultadoPorId(atividadeId, texto, rodada.frase); falar(texto, 1, avancar); } else { falar(texto); registrarResultadoPorId(atividadeId, texto, rodada.frase); } } };
+  const responder = (id, texto) => { if (retorno !== 'correct') { const correta = id === rodada.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { registrarResultadoPorId(atividadeId, texto, rodada.frase, indice === rodadas.length - 1); falar(texto, 1, avancar); } else { falar(texto); registrarResultadoPorId(atividadeId, texto, rodada.frase); } } };
   // Avanço para a próxima cena
   const avancar = () => { if (indice === rodadas.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 

@@ -16,7 +16,7 @@ export default function FrasesSonoras({ atividadeId, aoConcluir, aoFechar }) {
   const [retorno, setRetorno] = useState('');
   const desafio = desafios[indice];
   // Validação da frase escolhida
-  const responder = (frase) => { if (retorno !== 'correct') { const correta = frase === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { if (indice === desafios.length - 1) registrarResultadoPorId(atividadeId, frase, desafio.resposta); falar(frase, 1, avancar); } else { falar(frase); registrarResultadoPorId(atividadeId, frase, desafio.resposta); } } };
+  const responder = (frase) => { if (retorno !== 'correct') { const correta = frase === desafio.resposta; setRetorno(correta ? 'correct' : 'incorrect'); if (correta) { registrarResultadoPorId(atividadeId, frase, desafio.resposta, indice === desafios.length - 1); falar(frase, 1, avancar); } else { falar(frase); registrarResultadoPorId(atividadeId, frase, desafio.resposta); } } };
   // Avanço para a próxima frase
   const avancar = () => { if (indice === desafios.length - 1) { aoConcluir(); return; } setIndice((atual) => atual + 1); setRetorno(''); };
 

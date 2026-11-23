@@ -37,7 +37,7 @@ export default function DesafioBonus({ atividadeId, aoConcluir, aoFechar }) {
     const correta = resposta === desafio.resposta;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (indice === desafios.length - 1 && atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta);
+      if (atividadeId) registrarResultadoPorId(atividadeId, resposta, desafio.resposta, indice === desafios.length - 1);
       falar(resposta, 1, avancar);
     } else {
       falar(resposta);

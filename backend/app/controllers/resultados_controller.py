@@ -7,7 +7,14 @@ from app.models import Atividade, Crianca, Resultado
 
 
 # Registro de uma tentativa da criança
-def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esperada, responsavel_id=None):
+def registrar_resultado(
+    crianca_id,
+    atividade_id,
+    resposta_enviada,
+    resposta_esperada,
+    responsavel_id=None,
+    concluindo_atividade=False,
+):
     crianca = Crianca.query.get(crianca_id)
     if not crianca:
         raise ValueError('Criança não encontrada')
@@ -23,18 +30,20 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
         raise AcessoNegadoError('Esta atividade ainda não foi liberada para a criança')
 
     correta = resposta_enviada == resposta_esperada  # RN2: o sistema verifica a resposta
+    concluindo_atividade = bool(concluindo_atividade) and correta
 
     resultado = Resultado(
         crianca_id=crianca_id,
         atividade_id=atividade_id,
         resposta=resposta_enviada,
         correta=correta,
+        concluindo_atividade=concluindo_atividade,
     )
     db.session.add(resultado)
     db.session.flush()
 
     # RN3: apenas obrigatórias liberam a próxima etapa
-    if correta and getattr(atividade, 'obrigatoria', True) and atividade.etapa_id == crianca.etapa_atual_id:
+    if concluindo_atividade and getattr(atividade, 'obrigatoria', True) and atividade.etapa_id == crianca.etapa_atual_id:
         avancar_etapa_se_concluida(
             crianca_id,
             atividade.etapa_id,
@@ -44,7 +53,7 @@ def registrar_resultado(crianca_id, atividade_id, resposta_enviada, resposta_esp
     db.session.commit()
 
     registrar_log(
-        acao='atividade_realizada' if correta else 'atividade_tentativa',
+        acao='atividade_realizada' if concluindo_atividade else 'atividade_tentativa',
         responsavel_id=responsavel_id,
         crianca_id=crianca_id,
         detalhes=f'atividade={atividade.chave} correta={correta}',

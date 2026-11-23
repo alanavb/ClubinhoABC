@@ -36,7 +36,7 @@ export default function FormeAPalavra({ atividadeId, aoConcluir, aoFechar }) {
     if (resposta === rodada.palavra) {
       setMontada(proxima);
       setRetorno('correct');
-      if (ultima) registrarResultadoPorId(atividadeId, resposta, rodada.palavra);
+      registrarResultadoPorId(atividadeId, resposta, rodada.palavra, ultima);
       falarEmSequencia([silaba, rodada.palavra], 1, avancar);
     } else {
       registrarResultadoPorId(atividadeId, resposta, rodada.palavra);

@@ -23,7 +23,7 @@ export default function Prova({ atividadeId, aoConcluir, aoFechar }) {
     const correta = letra === desafio.letra;
     if (correta) {
       setRetorno('correct');
-      if (rodada === totalRodadas) registrarResultadoPorId(atividadeId, letra, desafio.letra);
+      registrarResultadoPorId(atividadeId, letra, desafio.letra, rodada === totalRodadas);
       falar(letra, 1, avancarRodada);
       return;
     }

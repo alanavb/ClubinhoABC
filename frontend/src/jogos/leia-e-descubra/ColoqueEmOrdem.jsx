@@ -36,7 +36,7 @@ function escolher({ numero, frase }) {
     if (resposta === ordemCerta(rodada)) {
       setEscolhidas(proximas);
       setRetorno('correct');
-      if (ultima) registrarResultadoPorId(atividadeId, resposta, ordemCerta(rodada));
+      registrarResultadoPorId(atividadeId, resposta, ordemCerta(rodada), ultima);
       falar(frase, 1, avancar);
     } else {
       falar(frase);

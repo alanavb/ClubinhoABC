@@ -23,7 +23,7 @@ export default function ContarSilabas({ atividadeId, aoConcluir, aoFechar }) {
     const correta = quantidade === rodada.silabas;
     setRetorno(correta ? 'correct' : 'incorrect');
     if (correta) {
-      if (ultima) registrarResultadoPorId(atividadeId, quantidade, rodada.silabas);
+      registrarResultadoPorId(atividadeId, quantidade, rodada.silabas, ultima);
       falar(quantidade, 1, avancar);
     } else {
       falar(quantidade);

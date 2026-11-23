@@ -35,7 +35,7 @@ function cabecalhosAutenticados(extras = {}) {
 }
 
 // RN2: envio de uma tentativa para o back-end
-export async function registrarResultadoPorId(atividadeId, respostaEnviada, respostaEsperada) {
+export async function registrarResultadoPorId(atividadeId, respostaEnviada, respostaEsperada, concluindoAtividade = false) {
   try {
     const resposta = await fetch(`${API_BASE_URL}/resultados`, {
       method: 'POST',
@@ -45,6 +45,7 @@ export async function registrarResultadoPorId(atividadeId, respostaEnviada, resp
         atividade_id: atividadeId,
         resposta_enviada: respostaEnviada,
         resposta_esperada: respostaEsperada,
+        concluindo_atividade: concluindoAtividade,
       }),
     });
     if (!resposta.ok) {
@@ -54,7 +55,8 @@ export async function registrarResultadoPorId(atividadeId, respostaEnviada, resp
       return null;
     }
     const resultado = await resposta.json();
-    if (resultado.correct) window.dispatchEvent(new Event('progresso-atualizado'));
+    // Atualiza a dashboard após qualquer tentativa, inclusive erro.
+    window.dispatchEvent(new Event('progresso-atualizado'));
     return resultado;
   } catch {
     publicarAviso('Não foi possível conectar para salvar sua resposta. Verifique a conexão e tente novamente.');
