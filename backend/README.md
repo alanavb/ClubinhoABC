@@ -18,6 +18,9 @@ Implementa:
 - **Segurança:** dono da criança conferido em toda rota, sessão única por
   conta, bloqueio de tentativas e limite de requisições por IP, logs de
   auditoria.
+- **Termos e Política versionados:** cada versão fica no banco
+  (`seed_documentos.py`) e o aceite de cada responsável é registrado; versão
+  nova pede novo aceite no próximo acesso.
 
 ## Estrutura (MVC)
 
@@ -109,13 +112,13 @@ Supabase; não acessam o banco real.
 
 ## Endpoints
 
-Todas as rotas exigem `Authorization: Bearer <token>` com um token do
-Supabase. Sem token, ou com token inválido, a resposta é `401`; criança de
+Todas as rotas, exceto `GET /api/documentos`, exigem
+`Authorization: Bearer <token>` com um token do Supabase. Sem token, ou com token inválido, a resposta é `401`; criança de
 outra família dá `403` ou `404`.
 
 | Método | Rota | O que faz |
 |---|---|---|
-| GET | `/api/auth/me` | Perfil do responsável e lista de crianças |
+| GET | `/api/auth/me` | Perfil do responsável, lista de crianças e documentos com aceite pendente |
 | GET | `/api/historias` | Leituras publicadas, ordenadas para a área de histórias |
 | GET | `/api/materiais` | Material em destaque, catálogo, filtros e referência da página de atividades |
 | POST | `/api/auth/completar-cadastro` | Cria o perfil no primeiro login depois de confirmar o e-mail |
@@ -135,6 +138,8 @@ outra família dá `403` ou `404`.
 | POST | `/api/resultados` | Registra uma tentativa (RN2) |
 | GET | `/api/resultados?crianca_id=<id>` | Tentativas registradas |
 | GET | `/api/logs` | Trilha de auditoria da conta |
+| GET | `/api/documentos` | Versão vigente dos Termos e da Política (pública, usada no cadastro) |
+| POST | `/api/aceites` | Aceita as versões novas (corpo: `{"documentos": [id, ...]}`) |
 
 O jeito mais fácil de obter um token para testar é entrar pelo front-end e
 copiá-lo do `localStorage` pelo DevTools. Exemplos:

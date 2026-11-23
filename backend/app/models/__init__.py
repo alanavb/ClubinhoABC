@@ -8,5 +8,6 @@ from .log_auditoria import LogAuditoria
 from .registro_exclusao import RegistroExclusao
 from .historia import Historia
 from .material import Material, ReferenciaMaterial
+from .documento_legal import Aceite, DocumentoLegal
 
-__all__ = ['Responsavel', 'Crianca', 'Etapa', 'Atividade', 'Resultado', 'LogAuditoria', 'RegistroExclusao', 'Historia', 'Material', 'ReferenciaMaterial']
+__all__ = ['Responsavel', 'Crianca', 'Etapa', 'Atividade', 'Resultado', 'LogAuditoria', 'RegistroExclusao', 'Historia', 'Material', 'ReferenciaMaterial', 'DocumentoLegal', 'Aceite']
