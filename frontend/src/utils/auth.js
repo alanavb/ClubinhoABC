@@ -1,7 +1,7 @@
 // Login, cadastro e sessão da família
 
 
-import { API_BASE_URL } from './api';
+import { API_BASE_URL, buscarComNovasTentativas } from './api';
 import { buscarDocumentosVigentes } from './documentos';
 import { supabase, voltouDaConfirmacaoDeEmail } from './supabaseClient';
 
@@ -31,7 +31,7 @@ async function sincronizarPerfil() {
     perfil = null;
     return;
   }
-  const resposta = await fetch(`${API_BASE_URL}/auth/me`, {
+  const resposta = await buscarComNovasTentativas(`${API_BASE_URL}/auth/me`, {
     headers: { Authorization: `Bearer ${sessaoSupabase.access_token}` },
   });
   if (resposta.status === 404) {
@@ -47,7 +47,7 @@ async function sincronizarPerfil() {
 
 // Registro da sessão única no back-end
 async function registrarSessaoAtiva() {
-  await fetch(`${API_BASE_URL}/auth/sessao`, {
+  await buscarComNovasTentativas(`${API_BASE_URL}/auth/sessao`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${sessaoSupabase.access_token}` },
   });
@@ -60,7 +60,7 @@ async function completarCadastroSePendente() {
   const metadata = sessaoSupabase.user?.user_metadata || {};
   if (!metadata.crianca_nome) return; 
 
-  const resposta = await fetch(`${API_BASE_URL}/auth/completar-cadastro`, {
+  const resposta = await buscarComNovasTentativas(`${API_BASE_URL}/auth/completar-cadastro`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

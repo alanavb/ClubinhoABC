@@ -9,6 +9,7 @@ import AtividadesPage from './pages/AtividadesPage';
 import ProgressoPage from './pages/ProgressoPage';
 import HistoriasPage from './pages/HistoriasPage';
 import NovoAceite from './components/NovoAceite';
+import { buscarDocumentosVigentes } from './utils/documentos';
 import { Brand, CampoSenha, CamposCrianca, ConfirmeSeuEmail, Login, RedefinirSenha, Signup } from './components/auth/AuthViews';
 import {
   adicionarCrianca,
@@ -604,6 +605,12 @@ function App() {
 
   useEffect(() => aoMudarSessao(() => setAuthTick((valor) => valor + 1)), []);
 
+  // Acorda o back-end assim que o site abre: ele liga enquanto a pessoa digita
+  // (a resposta, com os termos vigentes, fica guardada para o cadastro)
+  useEffect(() => {
+    buscarDocumentosVigentes().catch(() => {});
+  }, []);
+
   // Restaura a página inicial em sessão ativa
   useEffect(() => {
     if (estaAutenticado() && perfilCompleto() && VIEWS_PRE_LOGIN.includes(view)) {
@@ -640,7 +647,7 @@ function App() {
   } else if (VIEWS_PROTEGIDAS.includes(view) && !perfilCompleto()) {
     conteudo = (
       <main className="page-shell" id="inicio">
-        <p className="form-message" role="status">Carregando sua conta… Se demorar, verifique se o servidor está no ar e entre de novo.</p>
+        <p className="form-message" role="status">Carregando sua conta…</p>
         <button className="text-link" type="button" onClick={async () => { await sair(); setView('login'); }}>Voltar para o login</button>
       </main>
     );
