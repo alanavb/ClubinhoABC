@@ -1,7 +1,8 @@
-from flask import Blueprint, g, jsonify
+from flask import Blueprint, g, jsonify, request
 
 from app.auth_utils import requer_autenticacao
 from app.controllers import auth_controller, dashboard_controller
+from app.controllers.dashboard_controller import FiltroInvalidoError
 from app.controllers.etapas_controller import AcessoNegadoError
 from app.error_responses import MENSAGEM_ACESSO_NEGADO, erro_publico
 
@@ -16,8 +17,15 @@ def dashboard_da_crianca(crianca_id):
     if not responsavel:
         return jsonify({'erro': 'Cadastro ainda não concluído para este usuário.'}), 404
 
+    # Filtros opcionais: ?periodo=7|30|tudo&etapa=<id>
+    periodo = request.args.get('periodo', 'tudo')
+    etapa_id = request.args.get('etapa', type=int)
     try:
-        resumo = dashboard_controller.resumo_dashboard(crianca_id, responsavel_id=responsavel.id)
+        resumo = dashboard_controller.resumo_dashboard(
+            crianca_id, responsavel_id=responsavel.id, periodo=periodo, etapa_id=etapa_id,
+        )
+    except FiltroInvalidoError as erro:
+        return jsonify({'erro': str(erro)}), 400
     except ValueError as erro:
         return jsonify({'erro': str(erro)}), 404
     except AcessoNegadoError:
