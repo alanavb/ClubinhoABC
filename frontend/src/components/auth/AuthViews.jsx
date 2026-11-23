@@ -346,6 +346,7 @@ export function Login({ onCreateAccount, onLogin }) {
               <button className="primary-button" type="submit" disabled={submitting}>
                 {submitting ? 'Entrando…' : <>Entrar e brincar <span>→</span></>}
               </button>
+              {submitting && <p className="form-message" role="status">Estamos preparando sua conta…</p>}
             </form>
           )}
           <div className="divider"><span />ou<span /></div>
